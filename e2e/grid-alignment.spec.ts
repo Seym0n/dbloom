@@ -57,3 +57,44 @@ test('SQL result grid: numbers, dates and text share a baseline', async ({ page 
   await expect(page.locator('[role=gridcell]').first()).toBeVisible()
   expectLevel(await baselines(page, '[role=gridcell]', 3))
 })
+
+/** Baseline of each element's text, relative to the top of the strip that holds them. */
+async function stripBaselines(page: Page, labelText: string, targets: string[]): Promise<number[]> {
+  return page.evaluate(
+    ({ labelText, targets }) => {
+      const label = [...document.querySelectorAll('span')].find((s) => s.textContent === labelText)!
+      const strip = label.parentElement!
+      const top = strip.getBoundingClientRect().top
+      const baseline = (el: Element) => {
+        const probe = document.createElement('span')
+        probe.style.cssText = 'display:inline-block;width:0;height:0'
+        el.appendChild(probe)
+        const y = probe.getBoundingClientRect().bottom - top
+        probe.remove()
+        return Math.round(y * 2) / 2
+      }
+      return [label, ...targets.map((sel) => strip.querySelector(sel)!)].map(baseline)
+    },
+    { labelText, targets },
+  )
+}
+
+test('table view: the "SQL that ran" strip shares one baseline', async ({ page }) => {
+  await signIn(page)
+  await page.getByRole('button', { name: 'e2e_shop', exact: true }).click()
+  await page.getByRole('button', { name: 'orders', exact: true }).click()
+  await expect(page.getByText('SQL that ran')).toBeVisible()
+  const [label, code, button] = await stripBaselines(page, 'SQL that ran', ['code', 'button'])
+  expect([label, code, button], 'label, code, copy button').toEqual([label, label, label])
+})
+
+test('SQL tab: the "SQL that ran" label sits on the statement baseline', async ({ page }) => {
+  await signIn(page)
+  await page.getByRole('button', { name: 'SQL', exact: true }).first().click()
+  await page.locator('.cm-content').first().click()
+  await page.keyboard.type('SELECT id, customer FROM e2e_shop.orders LIMIT 5')
+  await page.keyboard.press('Control+Enter')
+  await expect(page.getByText('SQL that ran')).toBeVisible()
+  const [label, line] = await stripBaselines(page, 'SQL that ran', ['.cm-line'])
+  expect([label, line], 'label, statement').toEqual([label, label])
+})

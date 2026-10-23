@@ -16,14 +16,14 @@ const helper = createColumnHelper<typeof features, Cell[]>()
 function SqlStrip({ sql }: { sql: string }) {
   const [copied, setCopied] = useState(false)
   return (
-    <div className="flex items-start gap-3 border-t border-rule px-6 py-3">
-      <span className="shrink-0 pt-0.5 text-xs text-muted">{t('table.sql')}</span>
+    <div className="flex items-baseline gap-3 border-t border-rule px-6 py-3">
+      <span className="shrink-0 text-xs text-muted">{t('table.sql')}</span>
       <code className="min-w-0 flex-1 truncate font-mono text-xs text-ink" title={sql}>
         {sql}
       </code>
       <Button
         variant="ghost"
-        className="h-6 px-2 text-xs"
+        className="h-6 self-center px-2 text-xs"
         onClick={() => {
           void navigator.clipboard.writeText(sql).then(() => {
             setCopied(true)

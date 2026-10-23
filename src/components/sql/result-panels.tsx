@@ -36,7 +36,8 @@ function QueryStrip({
 }) {
   return (
     <div className="flex items-start gap-3 border-t border-rule pt-2">
-      <span className="shrink-0 pt-1 text-xs text-muted">{t('sql.strip.label')}</span>
+      {/* The statement view has 8px of top padding and a 20px mono line: pt-2.5 puts the label's baseline on the SQL's. */}
+      <span className="shrink-0 pt-2.5 text-xs text-muted">{t('sql.strip.label')}</span>
       <div
         className="max-h-16 min-w-0 flex-1 overflow-auto"
         tabIndex={0}
@@ -44,10 +45,12 @@ function QueryStrip({
       >
         <SqlView text={sql} product={product} />
       </div>
-      <CopyButton text={sql} label={t('sql.strip.copy')} />
-      <Button variant="ghost" className="h-6 px-2 text-xs" onClick={onReveal}>
-        {t('sql.strip.show')}
-      </Button>
+      <div className="flex shrink-0 gap-3 pt-1.5">
+        <CopyButton text={sql} label={t('sql.strip.copy')} />
+        <Button variant="ghost" className="h-6 px-2 text-xs" onClick={onReveal}>
+          {t('sql.strip.show')}
+        </Button>
+      </div>
     </div>
   )
 }
