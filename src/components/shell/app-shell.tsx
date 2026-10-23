@@ -1,13 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
-import { LogOut, Menu, MessageSquare, X } from 'lucide-react'
+import { LogOut, Menu, MessageSquare, Plus, X } from 'lucide-react'
 import { BrandName } from '~/components/brand'
 import { TableView } from '~/components/grid/table-view'
 import { SessionEndedDialog } from '~/components/session-ended-dialog'
+import { SqlTab, type SqlTabMeta } from '~/components/sql/sql-tab'
+import { getSqlLimits } from '~/components/sql/server-api'
 import { StructureDialogs, type StructureAction } from '~/components/structure/db-dialogs'
 import { TableDesigner } from '~/components/structure/table-designer'
 import { Button } from '~/components/ui/button'
+import { Dialog } from '~/components/ui/dialog'
 import { setCsrfToken } from '~/lib/csrf'
 import { cn } from '~/lib/utils'
 import { t } from '~/i18n'
@@ -26,8 +29,13 @@ export type SessionInfo = {
 /** A table grid, the designer of an existing table, or the designer of a table that does not exist yet. */
 type ShellTab = {
   id: string
-  kind: 'table' | 'designer'
+  kind: 'table' | 'designer' | 'sql'
+  /** The database of the tab; for an SQL tab '' means none. */
   db: string
+  /** Running number of an SQL tab, for its title. */
+  seq?: number
+  /** Text an SQL tab starts with (a bookmark or the assistant's statement); never run by itself. */
+  initialText?: string
   /** Absent for a new table. */
   table?: string
 }
@@ -46,11 +54,13 @@ const designTab = (db: string, table: string): ShellTab => ({
   table,
 })
 const tabLabel = (tab: ShellTab) =>
-  tab.kind === 'table'
-    ? (tab.table as string)
-    : tab.table
-      ? t('structure.tab.design', { name: tab.table })
-      : t('structure.tab.new')
+  tab.kind === 'sql'
+    ? t('sql.tab.title', { n: tab.seq ?? 1 })
+    : tab.kind === 'table'
+      ? (tab.table as string)
+      : tab.table
+        ? t('structure.tab.design', { name: tab.table })
+        : t('structure.tab.new')
 const targetLabel = (s: SessionInfo['target']) => `${s.host}:${s.port}`
 
 function AssistantPanel({ onClose }: { onClose: () => void }) {
@@ -93,6 +103,17 @@ export function AppShell({ session }: { session: SessionInfo }) {
   const [assistantOpen, setAssistantOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const newTabs = useRef(0)
+  const sqlSeq = useRef(0)
+  const [sqlMeta, setSqlMeta] = useState<Record<string, SqlTabMeta>>({})
+  const [closing, setClosing] = useState<ShellTab | null>(null)
+  const limits = useQuery({
+    queryKey: ['sql', 'limits'],
+    queryFn: () => getSqlLimits(),
+    staleTime: 5 * 60_000,
+    retry: false,
+  })
+  // The SQL entry is hidden only when the server says the tab is switched off (ST-164).
+  const sqlEnabled = !(limits.error && /sql_disabled/.test(limits.error.message))
   const readOnly = Boolean(session.readOnly)
 
   const active = tabs.find((tab) => tab.id === activeKey)
@@ -111,6 +132,17 @@ export function AppShell({ session }: { session: SessionInfo }) {
     setMenuOpen(false)
   }
 
+  function openSql(db?: string, initialText?: string) {
+    sqlSeq.current += 1
+    open({
+      id: `s${SEP}${sqlSeq.current}`,
+      kind: 'sql',
+      db: db ?? '',
+      seq: sqlSeq.current,
+      ...(initialText ? { initialText } : {}),
+    })
+  }
+
   function openNewTable(db: string) {
     newTabs.current += 1
     open({ id: `n${SEP}${db}${SEP}${newTabs.current}`, kind: 'designer', db })
@@ -127,15 +159,28 @@ export function AppShell({ session }: { session: SessionInfo }) {
     }
   }
 
-  const close = (tab: ShellTab) => closeWhere((c) => c.id === tab.id)
+  /** Unsaved SQL text asks first (FR-SQL-024); everything else closes at once. */
+  const close = (tab: ShellTab) => {
+    if (tab.kind === 'sql' && sqlMeta[tab.id]?.dirty) setClosing(tab)
+    else closeWhere((c) => c.id === tab.id)
+  }
+
+  // Leaving the page with unsaved SQL asks first; the text lives only in this page's memory.
+  const anyDirty = Object.values(sqlMeta).some((m) => m.dirty)
+  useEffect(() => {
+    if (!anyDirty) return
+    const guard = (e: BeforeUnloadEvent) => e.preventDefault()
+    window.addEventListener('beforeunload', guard)
+    return () => window.removeEventListener('beforeunload', guard)
+  }, [anyDirty])
 
   /** Tabs follow a change that ran: dropped tables and databases close, a renamed table is renamed. */
   function structureApplied(input: PreviewInput, result: ExecuteResult) {
     if (!result.ok) return
     if (input.action === 'dropTable') {
-      closeWhere((c) => c.db === input.db && c.table === input.table)
+      closeWhere((c) => c.kind !== 'sql' && c.db === input.db && c.table === input.table)
     } else if (input.action === 'dropDatabase') {
-      closeWhere((c) => c.db === input.name)
+      closeWhere((c) => c.kind !== 'sql' && c.db === input.name)
     } else if (input.action === 'renameTable') {
       if (input.newDb && input.newDb !== input.db) {
         closeWhere((c) => c.db === input.db && c.table === input.table)
@@ -185,9 +230,36 @@ export function AppShell({ session }: { session: SessionInfo }) {
           ) {
             setTabs([])
             setActiveKey(undefined)
+            setSqlMeta({})
           }
         }}
       />
+
+      <Dialog
+        open={closing !== null}
+        onClose={() => setClosing(null)}
+        labelledBy="sql-close-title"
+        className="w-[min(420px,calc(100vw-32px))]"
+      >
+        <div className="flex flex-col gap-4 p-6">
+          <h2 id="sql-close-title" className="text-base font-semibold">
+            {t('sql.close.title')}
+          </h2>
+          <p className="text-sm text-muted">{t('sql.close.body')}</p>
+          <div className="flex justify-end gap-2">
+            <Button onClick={() => setClosing(null)}>{t('sql.close.keep')}</Button>
+            <Button
+              variant="primary"
+              onClick={() => {
+                if (closing) closeWhere((c) => c.id === closing.id)
+                setClosing(null)
+              }}
+            >
+              {t('sql.close.discard')}
+            </Button>
+          </div>
+        </div>
+      </Dialog>
 
       <StructureDialogs
         action={action}
@@ -231,6 +303,7 @@ export function AppShell({ session }: { session: SessionInfo }) {
               onNewTable: openNewTable,
               onDesign: (tab) => open(designTab(tab.db, tab.table)),
             }}
+            sql={sqlEnabled ? { onNew: (db) => openSql(db) } : undefined}
           />
         </div>
         <Button variant="ghost" className="justify-start" onClick={() => void signOut()}>
@@ -252,8 +325,16 @@ export function AppShell({ session }: { session: SessionInfo }) {
         <p className="min-w-0 flex-1 truncate text-sm text-muted">
           {active ? (
             <>
-              {targetLabel(session.target)} / {active.db} /{' '}
-              <span className="text-ink">{active.table ?? t('structure.tab.new')}</span>
+              {targetLabel(session.target)} /{' '}
+              {active.kind === 'sql'
+                ? (sqlMeta[active.id]?.db ?? active.db) || t('sql.status.noDatabase')
+                : active.db}{' '}
+              /{' '}
+              <span className="text-ink">
+                {active.kind === 'sql'
+                  ? t('sql.tab.crumb')
+                  : (active.table ?? t('structure.tab.new'))}
+              </span>
             </>
           ) : (
             targetLabel(session.target)
@@ -290,6 +371,19 @@ export function AppShell({ session }: { session: SessionInfo }) {
                       )}
                     >
                       {tabLabel(tab)}
+                      {tab.kind === 'sql' && (sqlMeta[tab.id]?.db ?? tab.db) && (
+                        <span className="ml-1.5 font-normal text-faint">
+                          {sqlMeta[tab.id]?.db ?? tab.db}
+                        </span>
+                      )}
+                      {tab.kind === 'sql' && sqlMeta[tab.id]?.dirty && (
+                        <span
+                          role="img"
+                          aria-label={t('sql.tab.unsaved')}
+                          title={t('sql.tab.unsaved')}
+                          className="ml-1.5 inline-block h-1.5 w-1.5 rounded-full bg-accent align-middle"
+                        />
+                      )}
                     </button>
                     <button
                       aria-label={t('tab.close', { name: tabLabel(tab) })}
@@ -302,8 +396,37 @@ export function AppShell({ session }: { session: SessionInfo }) {
                   </div>
                 )
               })}
+              {sqlEnabled && (
+                <button
+                  type="button"
+                  aria-label={t('sql.tab.new')}
+                  title={t('sql.tab.new')}
+                  onClick={() => openSql(active?.db || undefined)}
+                  className="press my-auto ml-1 grid h-8 w-8 shrink-0 place-items-center rounded text-muted hover:bg-active hover:text-ink pointer-coarse:h-11 pointer-coarse:w-11"
+                >
+                  <Plus size={14} aria-hidden />
+                </button>
+              )}
             </div>
           )}
+          {/* SQL tabs stay mounted while hidden: typed text, results and undo history live in page memory only. */}
+          {tabs
+            .filter((tab) => tab.kind === 'sql')
+            .map((tab) => (
+              <div
+                key={tab.id}
+                className={cn('min-h-0 flex-1 flex-col', tab.id === activeKey ? 'flex' : 'hidden')}
+              >
+                <SqlTab
+                  tabId={tab.id.replace(/[^A-Za-z0-9_-]/g, '_')}
+                  initialDb={tab.db}
+                  initialText={tab.initialText}
+                  readOnly={readOnly}
+                  active={tab.id === activeKey}
+                  onMeta={(m) => setSqlMeta((cur) => ({ ...cur, [tab.id]: m }))}
+                />
+              </div>
+            ))}
           {/* Designer tabs stay mounted while hidden, so unsaved edits survive a tab switch. */}
           {tabs
             .filter((tab) => tab.kind === 'designer')
@@ -326,6 +449,12 @@ export function AppShell({ session }: { session: SessionInfo }) {
             <div className="px-6 pt-8">
               <h1 className="mb-2 text-[22px] font-semibold leading-7">{t('empty.title')}</h1>
               <p className="max-w-md text-sm text-muted">{t('empty.body')}</p>
+              {sqlEnabled && (
+                <Button className="mt-4" onClick={() => openSql()}>
+                  <Plus size={14} aria-hidden />
+                  {t('sql.tab.new')}
+                </Button>
+              )}
             </div>
           )}
         </div>

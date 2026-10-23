@@ -2,10 +2,17 @@ import { mkdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { DirectAuth } from './auth'
 import { loadConfig, type Config } from './config'
+import { readyClassifier } from './sql/a-deps'
 import { SessionManager } from './sessions'
-import { openSqliteStore } from './store/sqlite-store'
+import { openSqliteStore, type SqliteStore } from './store/sqlite-store'
 
-type Runtime = { config: Config; sessions: SessionManager; auth: DirectAuth }
+export type Runtime = {
+  config: Config
+  sessions: SessionManager
+  auth: DirectAuth
+  /** Holds the SQL history and bookmarks (`store.sql`); see `getSqlState` for the mode choice. */
+  store: SqliteStore
+}
 
 let runtime: Runtime | undefined
 
@@ -19,10 +26,11 @@ export function getRuntime(): Runtime {
     // no .env file (containers pass real variables)
   }
   const config = loadConfig()
+  void readyClassifier() // loads the SQL parser once; a failure leaves the classifier on `parser-off`
   mkdirSync(config.dataDir, { recursive: true })
   const store = openSqliteStore(join(config.dataDir, 'dbloom.db'))
   const sessions = new SessionManager(store, config)
   setInterval(() => void sessions.sweep(), 60_000).unref()
-  runtime = { config, sessions, auth: new DirectAuth(config, sessions) }
+  runtime = { config, sessions, auth: new DirectAuth(config, sessions), store }
   return runtime
 }

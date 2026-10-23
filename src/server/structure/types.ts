@@ -205,6 +205,7 @@ export type StatementKind =
   | 'truncateTable'
   | 'dropTable'
   | 'setForeignKeyChecks'
+  | 'userSql' // SQL typed in the SQL tab (module sql-tab)
 
 export type Statement = {
   sql: string

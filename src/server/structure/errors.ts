@@ -11,7 +11,7 @@ const HINTS: Record<number, string> = {
   1146: 'The table does not exist.',
   1054: 'A column named in the statement does not exist.',
   1062: 'A duplicate value violates a unique key.',
-  1064: 'The server could not parse the statement.',
+  1064: 'The server could not parse the statement. A procedure, trigger or event with several statements needs a DELIMITER command around it.',
   1091: 'The column, key or constraint to drop does not exist.',
   1215: 'The foreign key could not be created; check that the columns and types match and that the referenced columns are indexed.',
   1216: 'A foreign key constraint blocks this change (a referenced row is missing).',
@@ -38,6 +38,11 @@ const HINTS: Record<number, string> = {
   1213: 'The server rolled the statement back because of a deadlock; try again.',
   3024: 'The statement ran longer than the time limit and was stopped.',
   1317: 'The statement was stopped before it finished.',
+  1235: 'This version of the server does not support this statement or option.',
+  1290: 'The server runs with an option (such as read-only) that forbids this statement.',
+  1792: 'The connection is read-only; the statement would change data.',
+  1969: 'The statement ran longer than the time limit and was stopped.',
+  1699: 'The statement needs a privilege or option that this server does not give.',
 }
 
 /** The uniform text for everything that is not a server reply (connection, TLS, driver). */
@@ -74,6 +79,8 @@ export class StructureRefusal extends Error {
   constructor(
     public code: string,
     message: string,
+    /** Offset into the submitted text (lexical refusals of the SQL tab); sent as `code@offset`. */
+    public at?: number,
   ) {
     super(message)
     this.name = 'StructureRefusal'
@@ -82,7 +89,10 @@ export class StructureRefusal extends Error {
 
 /** The plain-Error form the client sees: `code: message`, same style as `session_ended`. */
 export function toClientError(error: unknown): Error {
-  if (error instanceof StructureRefusal) return new Error(`${error.code}: ${error.message}`)
+  if (error instanceof StructureRefusal) {
+    const at = error.at !== undefined ? `@${error.at}` : ''
+    return new Error(`${error.code}${at}: ${error.message}`)
+  }
   if (error instanceof Error && typeof (error as unknown as { code?: unknown }).code === 'string') {
     const { code } = error as unknown as { code: string }
     if (error.name === 'BuildRefusal' || error.name === 'WriteGuardError') {
@@ -90,4 +100,57 @@ export function toClientError(error: unknown): Error {
     }
   }
   return error instanceof Error ? error : new Error('unexpected_error')
+}
+
+/**
+ * Position of a server syntax error in the user's text (FR-SQL-012). The server reports `near '...' at line N`
+ * (MySQL and MariaDB); the result is the absolute line and column in `fullText` (1-based) and the absolute
+ * `offset`, computed from `statementStart`. Without a recognisable position it is the first character of
+ * the statement. The SQL runner converts it with `relativePosition` before it reaches the client.
+ */
+export function positionOf(
+  sqlMessage: string,
+  statementStart: number,
+  fullText: string,
+): { line: number; column: number; offset: number } {
+  const m = /at line (\d+)\s*$/.exec(sqlMessage)
+  const rel = m ? Math.max(1, Number(m[1])) : 1
+  // Offset of the first character of line `rel` of the statement.
+  let offset = statementStart
+  for (let seen = 1; seen < rel; offset++) {
+    if (offset >= fullText.length) break
+    if (fullText[offset] === '\n') seen++
+  }
+  // `near '...'`: the quoted text starts at the error; find it on that line when possible.
+  const near = /near '([\s\S]*?)' at line/.exec(sqlMessage)
+  if (near && near[1]) {
+    const lineEnd = fullText.indexOf('\n', offset)
+    const hay = fullText.slice(offset, lineEnd < 0 ? undefined : lineEnd)
+    const first = near[1].split('\n')[0]!
+    const at = hay.indexOf(first)
+    if (at >= 0) offset += at
+  }
+  let line = 1
+  let lineStart = 0
+  for (let i = 0; i < offset && i < fullText.length; i++) {
+    if (fullText[i] === '\n') {
+      line++
+      lineStart = i + 1
+    }
+  }
+  return { line, column: offset - lineStart + 1, offset }
+}
+
+/** Line and column of `offset` relative to the statement that starts at `statementStart` (both 1-based). */
+export function relativePosition(
+  fullText: string,
+  statementStart: number,
+  offset: number,
+): { line: number; column: number } {
+  const before = fullText.slice(statementStart, Math.max(statementStart, offset))
+  const lastNl = before.lastIndexOf('\n')
+  return {
+    line: before.split('\n').length,
+    column: before.length - (lastNl + 1) + 1,
+  }
 }

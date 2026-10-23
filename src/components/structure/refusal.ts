@@ -20,7 +20,13 @@ const KEYS: Record<string, MessageKey> = {
 /** Refusals after which a fresh preview from the current state is the way forward (FR-STR-012). */
 const NEW_PREVIEW_CODES = new Set(['stale_plan', 'plan_expired', 'token-expired', 'token-used'])
 
-export type Refusal = { code: string | null; message: string; offerNewPreview: boolean }
+export type Refusal = {
+  code: string | null
+  message: string
+  offerNewPreview: boolean
+  /** Offset into the submitted text, from a `code@offset: message` refusal. */
+  at?: number
+}
 
 /**
  * Turns an error from the structure server functions into text for people: a known code gets a
@@ -29,14 +35,15 @@ export type Refusal = { code: string | null; message: string; offerNewPreview: b
  */
 export function describeRefusal(error: unknown): Refusal {
   const raw = error instanceof Error ? error.message : ''
-  const match = /^([a-z][a-z_-]*): ([\s\S]*)$/.exec(raw)
+  const match = /^([a-z][a-z_-]*)(?:@(\d+))?: ([\s\S]*)$/.exec(raw)
   if (!match)
     return { code: null, message: raw || t('structure.error.generic'), offerNewPreview: false }
-  const [, code = '', rest = ''] = match
+  const [, code = '', atRaw, rest = ''] = match
   const key = KEYS[code]
   return {
     code,
     message: key ? t(key) : rest || t('structure.error.generic'),
     offerNewPreview: NEW_PREVIEW_CODES.has(code),
+    ...(atRaw !== undefined ? { at: Number(atRaw) } : {}),
   }
 }

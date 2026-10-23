@@ -13,6 +13,8 @@ export type StoredPlan = {
   fingerprint?: string
   db?: string
   table?: string
+  /** Free payload of other modules (sql-tab keeps the text, range and options here). */
+  payload?: unknown
   createdAt: number
   expiresAt: number
 }

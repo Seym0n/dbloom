@@ -4,6 +4,7 @@ import { createColumnHelper, tableFeatures, useTable } from '@tanstack/react-tab
 import { ArrowDown, ArrowUp, Check, Copy } from 'lucide-react'
 import { getTableRows } from '~/server/browse.functions'
 import type { Cell } from '~/server/db/rows'
+import { CellView, numberFormat as number } from '~/components/grid/cell-view'
 import { Button } from '~/components/ui/button'
 import { cn } from '~/lib/utils'
 import { t } from '~/i18n'
@@ -11,27 +12,6 @@ import { t } from '~/i18n'
 const PAGE_SIZES = [25, 50, 100, 250, 500]
 const features = tableFeatures({})
 const helper = createColumnHelper<typeof features, Cell[]>()
-const number = new Intl.NumberFormat('en-US')
-
-function CellView({ cell }: { cell: Cell }) {
-  if (cell === null) return <span className="text-faint">NULL</span>
-  if (typeof cell === 'string') return <>{cell}</>
-  if ('binary' in cell) {
-    return (
-      <span className="font-mono text-xs text-muted">
-        0x{cell.binary.toUpperCase()}
-        {cell.size > 32 ? '…' : ''}{' '}
-        <span className="text-faint">({number.format(cell.size)} B)</span>
-      </span>
-    )
-  }
-  return (
-    <>
-      {cell.cut}
-      <span className="text-faint">… ({number.format(cell.length)} chars)</span>
-    </>
-  )
-}
 
 function SqlStrip({ sql }: { sql: string }) {
   const [copied, setCopied] = useState(false)

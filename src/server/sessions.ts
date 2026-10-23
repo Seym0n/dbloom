@@ -1,6 +1,8 @@
 import { createHash, randomBytes, timingSafeEqual } from 'node:crypto'
 import type { Config } from './config'
 import type { TargetPool } from './db/target-pool'
+import { runRegistry } from './sql/registry'
+import { memorySqlState } from './sql/state'
 import type { Store } from './store/store'
 import { planStore } from './structure/plans'
 import type { TargetKey } from './target'
@@ -87,6 +89,10 @@ export class SessionManager {
     this.live.delete(idHash)
     this.store.deleteSession(idHash)
     planStore.dropSession(idHash)
+    // Running SQL of this session is stopped while the pool can still send KILL QUERY; the in-memory
+    // history and bookmarks of stateless mode (owner key = session id hash) go with the session.
+    if (runtime) await runRegistry.cancelSession(runtime.pool, idHash).catch(() => undefined)
+    memorySqlState.dropOwner(idHash)
     await runtime?.pool.end().catch(() => undefined)
   }
 

@@ -64,3 +64,57 @@ export async function runWithTimeout(
   )
   throw err
 }
+
+/** Sends `KILL QUERY` for a thread from a second pool connection; never throws. */
+export async function killThreadQuery(pool: Pool, threadId: number): Promise<void> {
+  let killer: PoolConnection | undefined
+  try {
+    killer = await pool.getConnection()
+    await killer.query(`KILL QUERY ${Number(threadId)}`)
+  } catch {
+    // The statement keeps running; the caller sees that the connection does not answer.
+  } finally {
+    killer?.release()
+  }
+}
+
+export type Watchdog = {
+  /** True once the time limit was reached (the kill is sent or in flight). */
+  readonly timedOut: boolean
+  /** Sends `KILL QUERY` now (result cap, cancel). Idempotent; resolves when the kill was processed. */
+  kill(): Promise<void>
+  /** Disarms the timer and waits for a kill in flight. Call it when the statement ended. */
+  stop(): Promise<void>
+}
+
+/**
+ * Armed per statement for the streaming runner (the stream cannot go through `runWithTimeout`, which
+ * buffers). After `timeoutMs` it sends `KILL QUERY`; `timedOut` then tells the caller to report a time
+ * limit even if the statement came back normally (SLEEP-style functions return instead of failing).
+ * Always `await stop()` before sending the next statement, so a late kill cannot hit it.
+ */
+export function startWatchdog(pool: Pool, connection: PoolConnection, timeoutMs: number): Watchdog {
+  if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) {
+    throw new WriteGuardError('invalid-timeout', 'The statement timeout must be greater than zero.')
+  }
+  let killing: Promise<void> | undefined
+  let timedOut = false
+  const kill = (): Promise<void> => {
+    killing ??= killThreadQuery(pool, connection.threadId)
+    return killing
+  }
+  const timer = setTimeout(() => {
+    timedOut = true
+    void kill()
+  }, timeoutMs)
+  return {
+    get timedOut() {
+      return timedOut
+    },
+    kill,
+    async stop() {
+      clearTimeout(timer)
+      if (killing) await killing
+    },
+  }
+}

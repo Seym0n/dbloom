@@ -8,6 +8,7 @@ import {
   PencilLine,
   Plus,
   Table2,
+  Terminal,
   Trash2,
   Wrench,
 } from 'lucide-react'
@@ -20,6 +21,11 @@ import { t } from '~/i18n'
 const SYSTEM_SCHEMAS = new Set(['information_schema', 'mysql', 'performance_schema', 'sys'])
 
 export type OpenTable = { db: string; table: string }
+
+export type SqlHandlers = {
+  /** Opens a new SQL tab, on this database when one is given. */
+  onNew: (db?: string) => void
+}
 
 export type StructureHandlers = {
   /** True when the session cannot change structure: every action is shown disabled with the reason. */
@@ -151,12 +157,14 @@ function DatabaseRow({
   onOpen,
   structure,
   reveal,
+  sql,
 }: {
   name: string
   active: OpenTable | undefined
   onOpen: (t: OpenTable) => void
   structure: StructureHandlers
   reveal: string | undefined
+  sql?: SqlHandlers
 }) {
   const [open, setOpen] = useState(active?.db === name)
   const system = SYSTEM_SCHEMAS.has(name.toLowerCase())
@@ -190,21 +198,34 @@ function DatabaseRow({
     <li>
       <Row
         actions={
-          system ? undefined : (
-            <>
+          <>
+            {sql && (
               <button
                 type="button"
-                aria-label={t('structure.menu.newTableIn', { name })}
-                aria-disabled={structure.readOnly || undefined}
-                title={reason}
-                onClick={() => !structure.readOnly && structure.onNewTable(name)}
+                aria-label={t('sql.menu.newIn', { name })}
+                title={t('sql.menu.newIn', { name })}
+                onClick={() => sql.onNew(name)}
                 className="press grid h-6 w-6 place-items-center rounded text-faint hover:bg-active hover:text-ink pointer-coarse:h-9 pointer-coarse:w-9"
               >
-                <Plus size={14} aria-hidden />
+                <Terminal size={14} aria-hidden />
               </button>
-              <ActionsMenu label={t('structure.menu.database', { name })} items={items} />
-            </>
-          )
+            )}
+            {!system && (
+              <>
+                <button
+                  type="button"
+                  aria-label={t('structure.menu.newTableIn', { name })}
+                  aria-disabled={structure.readOnly || undefined}
+                  title={reason}
+                  onClick={() => !structure.readOnly && structure.onNewTable(name)}
+                  className="press grid h-6 w-6 place-items-center rounded text-faint hover:bg-active hover:text-ink pointer-coarse:h-9 pointer-coarse:w-9"
+                >
+                  <Plus size={14} aria-hidden />
+                </button>
+                <ActionsMenu label={t('structure.menu.database', { name })} items={items} />
+              </>
+            )}
+          </>
         }
       >
         <button
@@ -213,7 +234,7 @@ function DatabaseRow({
           aria-expanded={open}
           className={cn(
             'press flex h-8 w-full items-center gap-1.5 rounded-lg pl-2 text-left text-sm text-ink hover:bg-active/60 pointer-coarse:h-11',
-            system ? 'pr-2' : 'pr-16',
+            system ? (sql ? 'pr-9' : 'pr-2') : sql ? 'pr-24' : 'pr-16',
           )}
         >
           <ChevronRight
@@ -247,11 +268,13 @@ export function SidebarTree({
   onOpen,
   structure,
   reveal,
+  sql,
 }: {
   active: OpenTable | undefined
   onOpen: (t: OpenTable) => void
   structure: StructureHandlers
   reveal?: string
+  sql?: SqlHandlers
 }) {
   const { data, isPending, isError, refetch } = useQuery({
     queryKey: ['databases'],
@@ -283,6 +306,16 @@ export function SidebarTree({
       <div>
         <div className="flex items-center justify-between pr-1">
           <h2 className="px-2 pb-1 text-xs text-faint">{t('nav.databases')}</h2>
+          {sql && (
+            <button
+              type="button"
+              onClick={() => sql.onNew()}
+              className="press -mt-0.5 mr-auto flex h-6 items-center gap-1 rounded px-1.5 text-xs text-muted hover:bg-active hover:text-ink pointer-coarse:h-9"
+            >
+              <Terminal size={12} aria-hidden />
+              {t('sql.menu.new')}
+            </button>
+          )}
           <button
             type="button"
             aria-disabled={structure.readOnly || undefined}
@@ -306,6 +339,7 @@ export function SidebarTree({
               onOpen={onOpen}
               structure={structure}
               reveal={reveal}
+              sql={sql}
             />
           ))}
         </ul>
@@ -322,6 +356,7 @@ export function SidebarTree({
                 onOpen={onOpen}
                 structure={structure}
                 reveal={reveal}
+                sql={sql}
               />
             ))}
           </ul>
