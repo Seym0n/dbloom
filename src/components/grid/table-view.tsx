@@ -179,7 +179,7 @@ export function TableView({ db, table }: { db: string; table: string }) {
                     <td
                       key={cell.id}
                       className={cn(
-                        'max-w-[420px] truncate border-b border-rule px-3 py-0 first:pl-6 last:pr-6',
+                        'max-w-[420px] truncate border-b border-rule px-3 pt-2.5 pb-0 align-baseline leading-5 first:pl-6 last:pr-6',
                         data?.kinds[index] === 'number' && 'text-right font-mono text-[13px]',
                         data?.kinds[index] === 'temporal' && 'font-mono text-[13px]',
                       )}

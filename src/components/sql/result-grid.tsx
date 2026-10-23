@@ -107,8 +107,11 @@ export function ResultGrid({ columns, rows }: { columns: SqlColumnMeta[]; rows: 
                     key={c}
                     role="gridcell"
                     className={cn(
-                      'min-w-0 truncate px-3 text-sm leading-8',
-                      isNumericColumn(col.type) && 'text-right font-mono text-[13px]',
+                      'min-w-0 truncate px-3 text-sm',
+                      // pt-px: Plex Mono 13px sits 1px above Plex Sans 14px in the same line; this puts the baselines level.
+                      isNumericColumn(col.type) && 'pt-px text-right font-mono text-[13px]',
+                      // Last: a font-size class merged after it would drop the line height (tailwind-merge).
+                      'leading-8',
                     )}
                   >
                     <CellView cell={row[c] ?? null} />

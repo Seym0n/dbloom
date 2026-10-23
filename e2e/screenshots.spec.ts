@@ -36,9 +36,9 @@ for (const scheme of ['light', 'dark'] as const) {
       await shot('2-empty')
       const phone = size.width < 768
       if (phone) await page.getByRole('button', { name: 'Databases' }).first().click()
-      await page.getByRole('button', { name: 'e2e_shop' }).click()
+      await page.getByRole('button', { name: 'e2e_shop', exact: true }).click()
       if (phone) await shot('2b-menu')
-      await page.getByRole('button', { name: 'orders' }).click()
+      await page.getByRole('button', { name: 'orders', exact: true }).click()
       await page.getByText('Rows 1–50').waitFor()
       await shot('3-table')
       if (!phone) {
