@@ -11,6 +11,9 @@ Ideas that were discussed and deliberately postponed. They are **not requirement
 | FU-005 | Shared connection profiles (option C) with a server-managed master key | CF-010, SEC-TGT-025, SEC-TGT-027 | Implementation of the shared-profile master key is not part of the first release (owner decision) |
 | FU-006 | Plugin system for third-party extensions | SEC-TGT-113 | First release uses a closed, built-in registry (owner statement, to be confirmed) |
 | FU-007 | Multiple DBLoom instances (scaling and high availability) | DEP-TGT-150 | Single instance per deployment (owner decision) |
+| FU-008 | Further target databases (PostgreSQL, MongoDB) | `OPEN.md` item 2 | First release supports MySQL and MariaDB only (owner decision) |
+| FU-009 | Features requested in open LegacyAdmin issues, deferred | `16-issue-requirements.md` | Not needed for the first release; proposed by the issue review, to be confirmed |
+| FU-010 | Legacy LegacyAdmin features postponed: replication UI, tracking, designer, GIS editor, single sign-on, charts | `18-scope-triage.md` | Owner decision of 2026-10-23: not in the first release |
 
 ---
 
@@ -102,3 +105,38 @@ Ideas that were discussed and deliberately postponed. They are **not requirement
 **Why deferred:** The owner decided that a deployment has a single instance (DEP-TGT-150). Multi-instance operation would need shared session and rate-limit state, a consistent view of `.env` settings across instances, key and secret distribution, and coordination of store migrations.
 
 **Related:** DEP-TGT-150, SEC-TGT-017 and SEC-TGT-131 (rate limiting), `OPEN.md` item 2.
+
+---
+
+## FU-008 — Further target databases (PostgreSQL, MongoDB)
+**Idea:** Let DBLoom connect to and manage PostgreSQL and MongoDB in addition to MySQL and MariaDB.
+
+**Why deferred:** The first release supports MySQL and MariaDB only (owner decision), which matches the legacy scope. Each further database needs its own Node.js driver and its own handling of statement timeouts and multi-statement control. MongoDB is not relational, so the table, row, SQL and structure screens do not carry over and need a separate design. The target-database layer is built behind an adapter interface (ARCH-TGT-001) so this stays possible without changing existing code.
+
+**Related:** `OPEN.md` item 2, ARCH-TGT-001 in `11-target-security.md` (database-adapter interface), `reviews/wave4-settings-targets-data.md` (driver-dependent items).
+
+---
+
+## FU-009 — Features requested in open LegacyAdmin issues, deferred
+**Idea:** Capabilities that users of LegacyAdmin asked for repeatedly (issue numbers in brackets): choose tables before importing a dump (#6022); generate random test data that respects constraints (#6267); drag a column to another table (#6317); pop-out SQL window (#11983); choose the columns shown in the designer (#12340); visual editor for relations and views (#13082); Excel (XLSX) import and export (#19962); confirm before inserting on Enter (#15467); deep links from status variables to the right manual anchor (#19069).
+
+**Why deferred:** Each is a feature on top of the legacy scope, and the scope decision (`OPEN.md` item 1) is still open. The designer items depend on whether the designer is kept at all.
+
+**Status:** Proposed by the review in `16-issue-requirements.md`; not confirmed by the owner.
+
+**Related:** `15-open-issues-triage.md`, `OPEN.md` item 21.
+
+---
+
+## FU-010 — Legacy features postponed beyond the first release
+**Idea:** Six features of LegacyAdmin that DBLoom does not offer at first (owner decision, 2026-10-23, on the proposal of `18-scope-triage.md`):
+- **Replication UI:** set up and control primary/replica replication from the web page (FR-SRV-004, 024 to 028, 076, 077, CPT-SRV-003, SEC-SRV-003, DATA-SRV-009).
+- **Tracking:** version tracking of structure and data changes of a table (FR-DTB-110 to 114, 150, 151, CPT-DTB-002, DATA-DTB-004).
+- **Designer:** visual diagram of tables and relations, with internal relations and schema diagram export (FR-DTB-066, 101, 120 to 124, DATA-DTB-005, FR-PLG-013, DATA-PLG-005, FR-UIX-063). Together with the designer items of FU-009.
+- **GIS editor and visualisation:** edit and show spatial data (FR-IOX-067, 068, 098, 099).
+- **Single sign-on:** another application logs the user in (FR-SAU-013, 016, 018). Needs a design first; a standard protocol such as OpenID Connect is the likely shape (not decided).
+- **Charts:** chart of result data (FR-UIX-059).
+
+**Why deferred:** Large or niche features, not needed to replace the daily work of LegacyAdmin; each needs its own design. Several overlap with ideas for the AI sidebar (`OPEN.md` item 19).
+
+**Related:** `18-scope-triage.md` section 3, FU-009.

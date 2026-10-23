@@ -89,7 +89,7 @@ The reports contain 34 (network), about 75 (auth), 41 (targets/data) and 45 (app
 
 | ID | Setting | Verdict | Decisive what-if | F / D / C | Dep | Related requirements | Src |
 |---|---|---|---|---|---|---|---|
-| ST-050 | Login mode (account / direct) | ENV-only | Decides whether a UI exists; stolen session must not open direct mode (no 2FA, no audit identity). Store records the mode; start refuses a mismatch unless a migration command is run (PROPOSED). | D account | OWN | SEC-TGT-019, 018 | AS-01 |
+| ST-050 | Login mode (account / direct) | ENV-only after setup; optional `.env` value preselects the mode in the first-run wizard, which may change it (UI-TGT-002, owner 2026-10-23) | Decides whether a UI exists; stolen session must not open direct mode (no 2FA, no audit identity). Store records the mode; start refuses a mismatch unless a migration command is run (PROPOSED). | D account | OWN | SEC-TGT-019, 018 | AS-01 |
 | ST-051 | Setup token (supply or generate) and validity | ENV-only (optional supply) | Pre-store; must not stay in log storage (C-06). | F 5 min / D 60 min / C 24 h; ≥ 128 bit | OWN | DEP-TGT-100, 123 | AS-02, APP-06 |
 | ST-052 | Application master secret and key ring (MAC keys, CSRF, signed state, encryption of reversible fields such as TOTP seeds) | ENV-only (secret, `_FILE` variant) | Must not sit in the store it protects; wrong key makes TOTP seeds unreadable, so key ring plus startup canary check. | min 32 bytes (256 bit), refuse placeholder | STACK | SEC-TGT-081, 082, 118 | AS-03, APP-03 |
 | ST-053 | "Session secret" | Fixed in code: no such setting (server-side sessions need none) | Legacy `blowfish_secret` has no counterpart. | | | SEC-TGT-040, 081 | APP-04 |
@@ -120,9 +120,9 @@ The reports contain 34 (network), about 75 (auth), 41 (targets/data) and 45 (app
 | ST-078 | Failures per effective client address in window | UI within ENV bounds (direct mode: ENV) | Behind a wrong trusted-proxy setting all users share one address. | F 10 / D 20 per 15 min / C 100 | | SEC-TGT-017, 127, 131 | N-17, AS-62 |
 | ST-079 | Hard account lock vs delay only | Fixed in code: delay only, no permanent lock; the last administrator is never locked out of the CLI | A hard lock lets an attacker lock out the administrator. | | OWN | SEC-TGT-017 | AS-63 |
 | ST-080 | Direct-mode per-target throttle (key includes normalised target host) | ENV-only | Otherwise DBLoom is a password-spraying proxy against third-party servers (C-08). | | KEY | SEC-TGT-017, 018, 030 | AS-64 |
-| ST-081 | Invite link lifetime | UI within ENV bounds (administrator may choose a shorter value per invite) | Stolen session mints long-lived links. | F 15 min / D 7 d / C 14 d | | FR-TGT-104 | AS-70 |
+| ST-081 | Invite link lifetime | UI within ENV bounds (administrator may choose a shorter value per invite) | Stolen session mints long-lived links. | F 15 min / D 7 d / C 7 d (owner, 2026-10-23: 7 days) | | FR-TGT-104 | AS-70 |
 | ST-082 | Invite and recovery token strength, hash-only storage, single use, URL fragment | Fixed in code | Bearer secret. | 256-bit (spec: ≥ 128) | STACK (fragment routing) | FR-TGT-104, SEC-TGT-023 | AS-71 |
-| ST-083 | Binding an invite to an email address | Dropped (no email is sent; adds little) | | | OWN | FR-TGT-104 | AS-72 |
+| ST-083 | Binding an invite to an email address | Dropped (owner, 2026-10-23: no email binding; no email is sent) | | | OWN | FR-TGT-104 | AS-72 |
 | ST-084 | Recovery link lifetime | UI within ENV bounds | Recovery grants takeover; shorter than invites. | F 15 min / D 24 h / C 72 h | | FR-TGT-105 | AS-73 |
 | ST-085 | What recovery resets | Fixed in code: password reset, all passkeys/TOTP revoked, re-enrolment forced, sessions revoked, vault untouched, in-app notice (C-07) | Otherwise a hijacked administrator takes over any account with one link. | | OWN | FR-TGT-105, SEC-TGT-026 | AS-74 |
 | ST-086 | Vault Argon2id parameters | ENV-only with code minimums (stored per vault) | Weakening future vaults; target is an offline attack. | min m 64 MiB, t 3, p 1 / D m 128 MiB if runtime allows | STACK | SEC-TGT-026 | AS-80 |
@@ -215,6 +215,9 @@ The reports contain 34 (network), about 75 (auth), 41 (targets/data) and 45 (app
 | ST-220 | Settings export / import | export UI; import UI within ENV bounds (each key validated, same limits, one audit entry per key, secrets masked, versioned JSON) | Import must not bypass limits or step-up. | | OWN (UI or CLI only) | | APP-33 |
 | ST-221 | Backup and restore of the whole store | ENV-only (schedule, destination) plus CLI; no UI download | Download gives a stolen session hashes, vaults, seeds and audit. Keys kept separately. | | STORE | NFR-TGT-090 | APP-34 |
 | ST-222 | Master key for shared profiles | Dropped (deferred, FU-005) | | | | SEC-TGT-027 | APP-05 |
+| ST-223 | AI endpoint base URL | ENV-only (PROPOSED) | Decides where target-derived data is sent; changing it from the UI would let a stolen session redirect it. | empty = assistant off | OWN | FR-TGT-251 | |
+| ST-224 | AI API key | ENV-only (secret, `_FILE` variant) (PROPOSED) | A secret; must not be shown or logged. | | OWN | FR-TGT-251, SEC-TGT-081 | |
+| ST-225 | AI model name; assistant on/off | UI within ENV bounds (PROPOSED) | Switching it off is always safe; the model name only changes which model of the configured service is used. | off until an endpoint is set | OWN | FR-TGT-251 | |
 
 ## 4. Reconciliations
 

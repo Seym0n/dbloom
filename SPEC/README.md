@@ -37,6 +37,8 @@ Subsystem codes (one per specification file):
 | PLG | 06-plugins.md | Plugin framework |
 | UIX | 07-frontend.md | Frontend |
 | DEP | 08-deployment-docs.md | Deployment, documentation, dependencies |
+| UPD | 14-upstream-changes.md | Upstream changes after 5.2.3 |
+| ISS | 16-issue-requirements.md, 17-issue-requirements-batch2.md | Requirements derived from open upstream issues |
 
 Special cases:
 - **Former subsystem-less IDs in 08**: `DEP-090` .. `DEP-094`, `DEP-096`, `DEP-100`, `DEP-102`, `DEP-103`, `DEP-162` were renamed in review wave 2 to `DEP-DEP-090` ... `DEP-DEP-162` (type DEP, subsystem DEP); the mapping is in the header of `08-deployment-docs.md`. No other file referenced the old IDs. Every ID now has the form `TYPE-SUBSYS-NNN`.
@@ -63,6 +65,14 @@ Special cases:
 | OPEN.md | Open gaps in the SPEC that may block development (scope, DBLoom definition, scenarios, defect decisions, ...) |
 | 11-target-security.md | Proposed DBLoom security requirements (`*-TGT-nnn`), traced to the legacy gaps they replace; not a description of LegacyAdmin |
 | 12-settings.md | Proposed classification of all DBLoom settings (ENV / UI within bounds / user preference / fixed / dropped), precedence rule, reconciliations and proposed edits to 11; not approved |
+| 13-new-features.md | Proposed DBLoom requirements (`*-TGT-2nn`) for features of current MySQL and MariaDB that the legacy SPEC lacks (CHECK constraints, explain/analyse, system versioning, ...); not approved |
+| 14-upstream-changes.md | Behaviour, data handling and UI changes in LegacyAdmin after 5.2.3 (5.2.x branch and the unreleased 6.0 changelog), subsystem code UPD; draft, from upstream change lists, not from the source tree |
+| 15-open-issues-triage.md | Machine triage (Haiku subagents) of the open LegacyAdmin issues against the SPEC; draft, register in `reviews/wave6-open-issues-triage.tsv` |
+| 16-issue-requirements.md | Proposed requirements (`*-ISS-nnn`) from the 132 priority candidates of the open-issue triage, with a disposition for every issue; not approved |
+| 17-issue-requirements-batch2.md | Second review of the open-issue gap rows (347 rows, full issue text): 145 further proposed requirements (`*-ISS-1nn`) after a duplicate and conflict review, merges into file 16, and a disposition for every row; machine drafted, not approved |
+| 18-scope-triage.md | Proposed scope triage of the 946 legacy requirements of files 00 to 08 (keep, adapt, superseded, drop, defer, owner decision) given the decided stack; the 23 features are decided by the owner; the other decisions are proposals |
+| 19-scenarios.md | First draft of 11 end-to-end scenarios (first-run setup, login in both modes, connect and switch target, open a table, edit a row, SQL tab, export, session expiry, logout, assistant sketch) with acceptance criteria, and 10 gaps the scenarios exposed (G1 to G10) |
+| 20-adapted-requirements.md | Machine-drafted DBLoom wording for the 343 ADAPT rows of the scope triage (45 marked UNSURE); not reviewed |
 | reviews/ | Review logs of wave 1 and wave 2 |
 
 ## Method
