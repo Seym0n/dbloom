@@ -1,0 +1,134 @@
+id	source	status	module	note
+ST-102	12	partial	skeleton	Env allow/deny done; UI subset and preview not
+ST-103	12	partial	skeleton	Env gate done; UI restriction not
+ST-104	12	planned	hardening	
+ST-105	12	planned	hardening	
+ST-106	12	planned	hardening	
+ST-107	12	planned	hardening	
+ST-108	12	planned	hardening	
+ST-109	12	planned	hardening	
+ST-110	12	planned	sql-tab	
+ST-111	12	planned	io	
+ST-112	12	planned	hardening	
+ST-113	12	partial	skeleton	Page size in grid exists; pref and admin cap not
+ST-114	12	planned	sql-tab	
+ST-115	12	planned	sql-tab	
+ST-116	12	planned	hardening	ENV-only
+ST-117	12	planned	browse-edit	
+ST-118	12	planned	browse-edit	
+ST-119	12	planned	sql-tab	Read-only guard
+ST-120	12	planned	sql-tab	
+ST-121	12	planned	sql-tab	
+ST-122	12	planned	hardening	Driver option fixed in code
+ST-123	12	planned	auth-account	
+ST-124	12	planned	auth-account	
+ST-125	12	planned	hardening	
+ST-126	12	planned	hardening	
+ST-127	12	planned	hardening	
+ST-128	12	planned	sql-tab	History/audit redaction
+ST-150	12	planned	io	
+ST-151	12	planned	io	
+ST-152	12	planned	io	
+ST-153	12	planned	io	
+ST-154	12	dropped	-	Download only
+ST-155	12	planned	io	
+ST-156	12	planned	io	
+ST-157	12	planned	io	
+ST-158	12	planned	io	
+ST-159	12	planned	hardening	
+ST-160	12	planned	io	
+ST-161	12	planned	sql-tab	
+ST-162	12	planned	sql-tab	Own state export
+ST-163	12	planned	sql-tab	Shortcuts and console options
+ST-164	12	planned	sql-tab	
+ST-200	12	done	skeleton	Store location is ENV-only in skeleton
+ST-201	12	planned	hardening	
+ST-202	12	planned	hardening	ENV-only per D-20
+ST-203	12	planned	hardening	
+ST-204	12	planned	admin	
+ST-205	12	planned	admin	
+ST-206	12	planned	hardening	
+ST-207	12	planned	admin	
+ST-208	12	dropped	-	Row text says dropped
+ST-209	12	planned	hardening	
+ST-210	12	dropped	-	Row text says dropped (no feature)
+ST-211	12	planned	hardening	
+ST-212	12	partial	skeleton	i18n scaffold; setting not
+ST-213	12	planned	hardening	i18n content
+ST-214	12	partial	skeleton	Light/dark done; default setting not
+ST-215	12	planned	hardening	
+ST-216	12	planned	admin	
+ST-217	12	planned	hardening	Logo ENV-only; custom CSS/JS dropped
+ST-218	12	planned	admin	
+ST-219	12	planned	admin	
+ST-220	12	planned	admin	
+ST-221	12	planned	hardening	ENV and CLI only
+ST-222	12	deferred	-	FU-005 in FUTURE.md
+ST-223	12	planned	assistant	
+ST-224	12	planned	assistant	
+ST-225	12	planned	assistant	
+UI-ISS-001	16	planned	io	Progress for long jobs
+UI-ISS-002	16	planned	sql-tab	
+UI-ISS-003	16	planned	hardening	Accessibility
+UI-ISS-004	16	planned	browse-edit	Navigation extension; sidebar exists
+UI-ISS-005	16	planned	browse-edit	
+UI-ISS-006	16	planned	hardening	Responsive layout
+UI-ISS-007	16	planned	hardening	General UI consistency
+UI-ISS-101	17	planned	browse-edit	
+UI-ISS-102	17	planned	sql-tab	
+UI-ISS-103	17	planned	browse-edit	
+UI-ISS-104	17	planned	browse-edit	
+UI-ISS-105	17	planned	browse-edit	
+UI-ISS-106	17	planned	structure	
+UI-ISS-107	17	planned	structure	
+UI-ISS-108	17	planned	structure	Confirmation dialogs
+UI-ISS-109	17	planned	browse-edit	Recent items in shell
+UI-ISS-110	17	planned	browse-edit	
+UI-ISS-111	17	planned	structure	
+UI-ISS-112	17	planned	browse-edit	
+UI-ISS-113	17	planned	browse-edit	
+UI-ISS-114	17	planned	browse-edit	
+UI-ISS-115	17	planned	browse-edit	
+UI-ISS-116	17	planned	browse-edit	GIS visualisation
+UI-ISS-117	17	planned	browse-edit	Navigation reload
+UI-ISS-118	17	planned	browse-edit	Navigation hide tables
+UI-ISS-119	17	planned	structure	
+UI-ISS-120	17	planned	structure	
+UI-ISS-121	17	planned	browse-edit	Navigation paging
+UI-ISS-122	17	planned	structure	Routine editor
+UI-ISS-123	17	planned	sql-tab	
+UI-ISS-124	17	planned	structure	
+UI-ISS-125	17	planned	browse-edit	
+UI-ISS-126	17	planned	sql-tab	
+UI-ISS-127	17	planned	browse-edit	Navigation filter; also export page
+UI-ISS-128	17	planned	browse-edit	
+UI-ISS-129	17	planned	structure	
+UI-ISS-130	17	planned	server	Charts on monitor
+UI-ISS-131	17	planned	hardening	
+UI-ISS-132	17	planned	sql-tab	
+UI-ISS-133	17	planned	auth-account	Login form server pick
+UI-ISS-134	17	planned	auth-account	
+UI-ISS-135	17	planned	sql-tab	
+UI-ISS-136	17	planned	browse-edit	
+UI-ISS-137	17	partial	skeleton	Grid shows range; 1-based and CALL rule to check
+UI-ISS-138	17	planned	sql-tab	
+UI-ISS-139	17	planned	browse-edit	Table list screen
+UI-ISS-140	17	planned	browse-edit	
+UI-TGT-001	11	done	skeleton	Shell layout built
+UI-TGT-002	11	partial	skeleton	Shell done; setup wizard steps not
+UI-TGT-003	11	done	skeleton	React/TanStack Start in place
+UI-UPD-001	14	planned	sql-tab	Explain refresh; export overlay in io
+UI-UPD-002	14	planned	browse-edit	
+UI-UPD-003	14	planned	sql-tab	
+UI-UPD-004	14	planned	hardening	i18n content
+UI-UPD-005	14	done	skeleton	Light/dark toggle exists
+UI-UPD-006	14	planned	auth-account	Account menu in shell
+UI-UPD-007	14	planned	auth-account	Password and index dialogs
+UI-UPD-008	14	planned	hardening	
+UI-UPD-009	14	planned	server	Privileges pages
+UI-UPD-010	14	planned	sql-tab	
+UI-UPD-011	14	planned	io	
+UI-UPD-012	14	planned	browse-edit	
+UI-UPD-013	14	planned	browse-edit	Host name on main page
+UI-UPD-014	14	planned	hardening	Charts lib and tooltips
+UI-UPD-015	14	planned	hardening	

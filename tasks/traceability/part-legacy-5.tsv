@@ -1,0 +1,92 @@
+id	source	status	module	note
+SEC-PLG-002	18	planned	io	
+SEC-PLG-003	18	planned	io	
+SEC-PLG-007	18	planned	browse-edit	
+SEC-PLG-008	18	planned	browse-edit	
+CPT-UIX-040	18	partial	skeleton	sidebar tree exists; settings not
+DATA-UIX-041	18	partial	skeleton	sidebar exists; resize/persist not
+DATA-UIX-106	18	planned	auth-account	server-side per-account preferences
+FR-UIX-001	18	partial	skeleton	shell done
+FR-UIX-002	18	partial	skeleton	i18n scaffold
+FR-UIX-003	18	partial	skeleton	meta/headers partly
+FR-UIX-004	18	partial	skeleton	print hiding not verified
+FR-UIX-005	18	partial	skeleton	header links partly
+FR-UIX-006	18	planned	auth-account	profile switcher in account mode
+FR-UIX-007	18	partial	skeleton	tree error state
+FR-UIX-008	18	partial	skeleton	tabs exist; small-screen collapse open
+FR-UIX-011	18	planned	server	home dashboard
+FR-UIX-018	18	planned	hardening	
+FR-UIX-020	18	planned	hardening	
+FR-UIX-021	18	planned	sql-tab	covers all forms; SQL editor content main case
+FR-UIX-022	18	partial	skeleton	session-ended dialog; re-login in place open
+FR-UIX-025	18	planned	hardening	
+FR-UIX-026	18	planned	hardening	
+FR-UIX-027	18	planned	hardening	
+FR-UIX-028	18	planned	structure	first used by destructive DDL
+FR-UIX-032	18	planned	hardening	
+FR-UIX-033	18	planned	hardening	Ctrl+K palette
+FR-UIX-034	18	planned	browse-edit	
+FR-UIX-035	18	planned	browse-edit	
+FR-UIX-036	18	planned	browse-edit	
+FR-UIX-037	18	partial	skeleton	lazy tree basics; persisted state open
+FR-UIX-038	18	planned	browse-edit	tree filter
+FR-UIX-039	18	partial	skeleton	current db/table highlight
+FR-UIX-042	18	planned	browse-edit	owner decision: hidden nav items
+FR-UIX-043	18	planned	hardening	
+FR-UIX-044	18	planned	hardening	
+FR-UIX-047	18	planned	sql-tab	history/bookmarks in editor, no console
+FR-UIX-049	18	planned	sql-tab	
+FR-UIX-052	18	planned	browse-edit	
+FR-UIX-053	18	planned	browse-edit	
+FR-UIX-054	18	planned	browse-edit	
+FR-UIX-055	18	planned	browse-edit	
+FR-UIX-058	18	partial	skeleton	grid styling
+FR-UIX-065	18	planned	sql-tab	
+FR-UIX-066	18	planned	sql-tab	
+FR-UIX-067	18	planned	sql-tab	
+FR-UIX-068	18	planned	sql-tab	
+FR-UIX-069	18	planned	sql-tab	
+FR-UIX-073	18	planned	browse-edit	
+FR-UIX-074	18	planned	browse-edit	
+FR-UIX-075	18	planned	io	
+FR-UIX-076	18	planned	io	
+FR-UIX-077	18	planned	io	
+FR-UIX-078	18	planned	admin	
+FR-UIX-080	18	planned	auth-account	
+FR-UIX-089	18	planned	hardening	
+FR-UIX-090	18	planned	hardening	
+FR-UIX-097	18	planned	server	
+FR-UIX-111	18	planned	hardening	Ctrl+K palette
+FR-UIX-113	18	partial	hardening	i18n scaffold done; languages content open
+FR-UIX-118	18	planned	hardening	
+NFR-UIX-046	18	planned	hardening	
+NFR-UIX-102	18	planned	hardening	
+NFR-UIX-104	18	planned	hardening	
+NFR-UIX-116	18	planned	hardening	
+SEC-UIX-093	18	planned	hardening	
+SEC-UIX-094	18	planned	hardening	
+SEC-UIX-095	18	planned	hardening	
+SEC-UIX-109	18	planned	auth-account	
+UI-UIX-114	18	planned	hardening	
+CON-DEP-111	18	planned	hardening	
+CPT-DEP-120	18	planned	hardening	
+DATA-DEP-061	18	partial	skeleton	SQLite store exists; feature tables later
+DATA-DEP-066	18	planned	browse-edit	owner decision on scope
+DATA-DEP-075	18	partial	skeleton	store exists; migration tool coverage unverified
+FR-DEP-002	18	planned	hardening	
+FR-DEP-020	18	planned	hardening	
+FR-DEP-023	18	planned	server	
+FR-DEP-033	18	planned	hardening	
+FR-DEP-045	18	planned	auth-account	
+FR-DEP-070	18	planned	hardening	
+FR-DEP-071	18	planned	hardening	
+INT-DEP-025	18	planned	hardening	
+INT-DEP-047	18	partial	hardening	Docker done; Windows/Linux docs open
+INT-DEP-080	18	planned	hardening	
+NFR-DEP-161	18	planned	hardening	
+SEC-DEP-031	18	planned	hardening	
+SEC-DEP-032	18	planned	hardening	
+SEC-DEP-041	18	planned	hardening	
+SEC-DEP-142	18	planned	hardening	
+SEC-DEP-144	18	planned	admin	
+SEC-DEP-146	18	done	skeleton	CSRF and session regeneration in skeleton

@@ -1,0 +1,480 @@
+id	source	status	module	note
+CON-CC-006	18	superseded	-	Replaced by CON-TGT-001 (permissive licence) (owner decision 2026-10-23).
+CON-CC-019	18	dropped	-	PHP defaults mirror and unit test; internal detail.
+CPT-CC-020	18	dropped	-	PHP/jQuery/Bootstrap baseline and old MySQL minimum; DBLoom has its own stack and server minimums.
+NFR-CC-001	18	dropped	-	PHP version gate.
+NFR-CC-003	18	dropped	-	Yarn/Composer build specifics; DBLoom has its own Node build.
+NFR-CC-011	18	dropped	-	PHP extension checks.
+NFR-CC-012	18	dropped	-	PHP ini and timezone normalisation.
+SEC-CC-002	18	dropped	-	PHP direct-include protection.
+SEC-CC-008	18	superseded	-	Replaced by DBLoom CSRF/request protection design in 11-target-security.md (SEC-TGT-*).
+SEC-CC-009	18	superseded	-	PHP session ini; DBLoom session and cookie hardening specified in 11-target-security.md.
+SEC-CC-010	18	superseded	-	Session fixation protection covered by DBLoom session design in 11-target-security.md.
+SEC-CC-018	18	superseded	-	Cookie credential encryption replaced by DBLoom connection profile vault in 11-target-security.md.
+CON-CFG-020	18	superseded	-	Replaced by personal connection profiles; no multi-server config array or md5 verbose matching.
+CON-CFG-024	18	superseded	-	auth_type config/http/signon/cookie replaced by DBLoom own accounts and security design.
+CON-CFG-072	18	dropped	-	ZeroConf pmadb auto-detection; DBLoom has its own application store.
+CON-CFG-106	18	dropped	-	config.default.php mirror and parity test.
+CON-CFG-107	18	dropped	-	Settings class source of defaults; PHP structure. Settings design is in 12-settings.md.
+CON-CFG-111	18	dropped	-	config.inc.php write behaviour; no such file.
+CPT-CFG-071	18	dropped	-	pmadb probing and adoption of la_ tables; DBLoom does not use LegacyAdmin storage.
+DATA-CFG-022	18	dropped	-	PHP Settings class internals.
+DATA-CFG-025	18	dropped	-	la_ table-name directives.
+DATA-CFG-026	18	deferred	future	Signon cookie parameters belong to single sign-on, which is deferred. (consistency pass 2026-10-23, was DROP)
+DATA-CFG-028	18	dropped	-	config.values.php overrides and validators; PHP mechanism.
+DATA-CFG-029	18	dropped	-	Descriptions module for config forms; PHP detail.
+DATA-CFG-090	18	dropped	-	PHP-era runtime directives, warnings, AuthLog, blowfish_secret.
+DATA-CFG-091	18	superseded	-	Cookie, CAPTCHA and URL-encryption directives replaced by DBLoom security design in 11-target-security.md.
+DATA-CFG-108	18	dropped	-	LegacyAdmin configuration storage DB and create_tables.sql; DBLoom has its own store.
+DEP-CFG-085	18	dropped	-	vendor_config.php packaging.
+DEP-CFG-086	18	dropped	-	Composer autoloader check.
+DEP-CFG-087	18	dropped	-	config.sample.inc.php template; DBLoom uses .env and settings (12-settings.md).
+DEP-CFG-109	18	dropped	-	Manual pmadb setup steps and config keys.
+FR-CFG-001	18	superseded	-	Layered config replaced by precedence rule in 12-settings.md (.env and settings).
+FR-CFG-002	18	dropped	-	baseSettings snapshot and PHP runtime facts.
+FR-CFG-003	18	dropped	-	Config object constructor and include.
+FR-CFG-004	18	dropped	-	Evaluating config as PHP include.
+FR-CFG-005	18	dropped	-	Slash-key quirk of flattened paths.
+FR-CFG-006	18	dropped	-	Config mtime for session preference cache.
+FR-CFG-007	18	dropped	-	PHP fatal handler during include.
+FR-CFG-008	18	dropped	-	CIFS readability probe for PHP config.
+FR-CFG-010	18	dropped	-	PHP vendor_config.php and deployment constants; DBLoom uses .env/settings (12-settings.md).
+FR-CFG-011	18	superseded	-	No config.inc.php; secrets/settings file handling covered by 11-target-security.md and 12-settings.md.
+FR-CFG-012	18	dropped	-	PHP session cache and array_replace_recursive mechanics; internal detail.
+FR-CFG-015	18	dropped	-	Cookie versus persistent preference lookup is legacy; preferences live server-side per user.
+FR-CFG-019	18	dropped	-	PHP login cookie validity cache; DBLoom session design in 11-target-security.md.
+FR-CFG-021	18	dropped	-	Servers array normalization; DBLoom uses connection profiles, single instance.
+FR-CFG-030	18	dropped	-	Session-held ConfigFile model of the PHP setup wizard.
+FR-CFG-031	18	dropped	-	ConfigFile set() path canonicalization is PHP setup internals.
+FR-CFG-032	18	dropped	-	Persist keys for generated config.inc.php; no generated PHP file.
+FR-CFG-034	18	dropped	-	Server bookkeeping of config file; replaced by connection profiles.
+FR-CFG-035	18	dropped	-	PHP form type derivation from config.values.php.
+FR-CFG-037	18	dropped	-	Allocating server index in config file; profiles use own IDs.
+FR-CFG-038	18	dropped	-	Legacy TrustedProxies line format; proxy trust handled by 11-target-security.md/12-settings.md.
+FR-CFG-039	18	dropped	-	UserprefsDisallow flags in setup; no setup wizard.
+FR-CFG-040	18	dropped	-	PHP Validator class dispatch mechanics.
+FR-CFG-043	18	dropped	-	pmadb controluser validation; DBLoom keeps its own app storage.
+FR-CFG-044	18	dropped	-	setup/validate.php AJAX endpoint.
+FR-CFG-045	18	dropped	-	PHP version and bootstrap requirements for setup front controller.
+FR-CFG-046	18	dropped	-	Setup disabled when config exists; no setup wizard in DBLoom.
+FR-CFG-047	18	dropped	-	Setup page dispatch and formsets.
+FR-CFG-048	18	dropped	-	Setup server add/edit flow; replaced by connection profile management.
+FR-CFG-049	18	dropped	-	Setup server removal; replaced by profile deletion.
+FR-CFG-050	18	dropped	-	Setup form processing redirects and error template.
+FR-CFG-051	18	dropped	-	Setup server form tabs for config.inc.php and pmadb.
+FR-CFG-052	18	dropped	-	Generating and downloading config.inc.php.
+FR-CFG-053	18	dropped	-	PHP config file generator.
+FR-CFG-054	18	superseded	-	blowfish_secret replaced by DBLoom secret/vault key handling in 11-target-security.md.
+FR-CFG-055	18	dropped	-	Line endings of generated PHP config.
+FR-CFG-056	18	dropped	-	Setup home page checks, version check, server list.
+FR-CFG-068	18	dropped	-	pmadb feature table probing; DBLoom uses its own storage, not LegacyAdmin tables.
+FR-CFG-070	18	dropped	-	PHP session relation cache keyed by version.
+FR-CFG-075	18	dropped	-	LEGACYADMIN constant guard is PHP-specific.
+FR-CFG-076	18	dropped	-	PHP version enforcement; DBLoom checks Node runtime instead if needed.
+FR-CFG-077	18	dropped	-	PHP OS, IIS, GD, browser sniffing; obsolete.
+FR-CFG-080	18	dropped	-	PHP ini environment defaults.
+FR-CFG-081	18	dropped	-	PHP_SELF PATH_INFO sanitizing.
+FR-CFG-088	18	dropped	-	Describes PHP Common::run() startup order.
+FR-CFG-098	18	dropped	-	Config class get/set internals.
+FR-CFG-099	18	dropped	-	Setup wizard flow; replaced by first-run setup in 12-settings.md and profiles.
+FR-CFG-101	18	dropped	-	LegacyAdmin project update check against legacyadmin.net; not applicable to DBLoom.
+FR-CFG-110	18	superseded	-	DBLoom uses its own application storage, not LegacyAdmin la_ tables; see 12-settings and 11-target-security.
+FR-CFG-112	18	superseded	-	Storage database discovery/ZeroConf is a pmadb mechanism; DBLoom has own app storage.
+FR-CFG-115	18	superseded	-	Per-user preferences are stored with DBLoom user accounts, no PHP session fallback.
+INT-CFG-083	18	dropped	-	localStorage import banner is a legacy PHP session-prefs mechanism.
+INT-CFG-084	18	dropped	-	Describes PHP entry-point bootstrapping and DI container.
+INT-CFG-102	18	dropped	-	Only used for version check; no outbound HTTP planned. PHP cURL/stream details irrelevant.
+INT-CFG-113	18	superseded	-	No pmadb control connection; DBLoom storage is separate from target database access.
+INT-CFG-116	18	dropped	-	Legacy prefs import/export through localStorage and config.js.
+NFR-CFG-082	18	dropped	-	PHP session cache of prefs and relations; DBLoom has own caching design.
+NFR-CFG-117	18	dropped	-	Per-table degradation without pmadb is irrelevant with DBLoom own storage.
+SEC-CFG-058	18	superseded	-	blowfish_secret/sodium key replaced by DBLoom secret handling in 11-target-security and 12-settings.
+SEC-CFG-059	18	superseded	-	Arbitrary server login replaced by connection profiles and vault.
+SEC-CFG-061	18	superseded	-	Session validity handled by DBLoom own session design, not PHP gc_maxlifetime.
+SEC-CFG-062	18	dropped	-	PHP SaveDir/TempDir setup notice.
+SEC-CFG-063	18	dropped	-	Checks PHP zip/gzip/bzip functions; Node has own libraries.
+SEC-CFG-064	18	dropped	-	PHP config file error display page.
+SEC-CFG-065	18	superseded	-	Cookie flags and naming defined by DBLoom own session/cookie security design.
+SEC-CFG-067	18	dropped	-	PHP include files; not in closed registry design.
+SEC-CFG-104	18	superseded	-	PHP sodium/blowfish key fallback replaced by DBLoom secret management.
+SEC-CFG-114	18	superseded	-	Default-off arbitrary server field replaced by connection profiles.
+UI-CFG-057	18	dropped	-	Session-backed message buckets are a PHP implementation detail.
+UI-CFG-100	18	dropped	-	Setup form tab definitions for PHP setup script.
+CPT-SRV-002	18	dropped	-	Web host OS load/memory probing is unrelated to database server; platform-specific PHP code.
+CPT-SRV-003	18	deferred	future	Replication role detection and multi-primary selection is a feature-scope choice. (owner decision 2026-10-23, feature: replication ui)
+DATA-SRV-009	18	deferred	future	Replication status display is part of the replication feature decision. (owner decision 2026-10-23, feature: replication ui)
+DEP-SRV-001	18	deferred	future	Replication version branching belongs purely to the deferred replication UI. (consistency pass 2026-10-23, was ADAPT)
+DEP-SRV-002	18	dropped	-	Depends on pma configurable menus table; obsolete.
+DEP-SRV-003	18	dropped	-	Internal PHP call-order dependency.
+FR-SRV-004	18	deferred	future	Replication status display is a whole feature; owner decides scope. (owner decision 2026-10-23, feature: replication ui)
+FR-SRV-009	18	deferred	future	Second review (Haiku, 10 reviewers, 2026-10-23): real-time monitor charts are deferred with charts (FU-010); the reduced monitor keeps status variables and proc
+FR-SRV-023	18	dropped	-	Internal AJAX getter endpoint with HTML response; implementation detail.
+FR-SRV-024	18	deferred	future	Replication page (primary/replica config) is a whole feature. (owner decision 2026-10-23, feature: replication ui)
+FR-SRV-025	18	deferred	future	Add replication user dialog; part of replication feature. (owner decision 2026-10-23, feature: replication ui)
+FR-SRV-026	18	deferred	future	Change primary workflow; part of replication feature (session credential storage must not be copied). (owner decision 2026-10-23, feature: replication ui)
+FR-SRV-027	18	deferred	future	Replica thread controls; only modern syntax needed if kept. (owner decision 2026-10-23, feature: replication ui)
+FR-SRV-028	18	deferred	future	MariaDB multi-source replica status; part of replication feature. (owner decision 2026-10-23, feature: replication ui)
+FR-SRV-044	18	dropped	-	ConfigurableMenus and configuration storage are LegacyAdmin specific; DBLoom has own user management.
+FR-SRV-049	18	dropped	-	LegacyAdmin menu user groups; replaced by DBLoom own accounts and roles.
+FR-SRV-050	18	dropped	-	Edit-form endpoint for LegacyAdmin menu user groups; not needed.
+FR-SRV-056	18	superseded	-	Single instance with personal connection profiles and vault replaces configured server list.
+FR-SRV-057	18	dropped	-	Legacy route table; PHP route structure, DBLoom defines its own routes.
+FR-SRV-062	18	dropped	-	Advisor rule engine is a whole feature; owner must decide (possibly overlaps AI sidebar). (owner decision 2026-10-23, feature: server advisor)
+FR-SRV-063	18	dropped	-	Advisor rule set loading; query-cache rules for MySQL < 8.0.3 are obsolete anyway. Decide with advisor feature. (owner decision 2026-10-23, feature: server advi
+FR-SRV-068	18	superseded	-	Single instance with personal connection profiles and vault; no config servers list (see 11-target-security, FUTURE shared profiles).
+FR-SRV-076	18	deferred	future	Replication role detection is part of the replication UI feature; owner decides scope. (owner decision 2026-10-23, feature: replication ui)
+FR-SRV-077	18	deferred	future	Change-primary flow belongs to replication UI feature; owner decides. Arbitrary-server connection also conflicts with security design. (owner decision 2026-10-2
+INT-SRV-001	18	dropped	-	Describes read-only PHP object with magic setter.
+INT-SRV-007	18	dropped	-	DBLoom edits via GRANT/CREATE USER, so manual grant-table edit and flush warning is obsolete.
+INT-SRV-008	18	dropped	-	Advisor expression language only exists with the advisor feature; decide with it. (owner decision 2026-10-23, feature: server advisor)
+NFR-SRV-004	18	dropped	-	Legacy getExtraDataForAjaxBehavior mechanism; DBLoom uses typed API responses.
+NFR-SRV-005	18	dropped	-	Selecting mysql database at request start is a legacy side effect; qualify mysql.* explicitly.
+NFR-SRV-006	18	dropped	-	__() usage is PHP specific; DBLoom i18n and number formatting decided elsewhere.
+NFR-SRV-007	18	superseded	-	DBLoom own authorization design (SEC-TGT-*) replaces per-route superuser checks; server privileges enforce database actions.
+SEC-SRV-001	18	superseded	-	AJAX-only gating is a PHP request convention; DBLoom API auth and CSRF in 11-target-security.
+SEC-SRV-002	18	deferred	future	Changing replication primary via GUI is replication UI, deferred. (consistency pass 2026-10-23, was SUPERSEDED)
+SEC-SRV-003	18	deferred	future	Replication control with superuser check and POST action; decide with replication UI feature. (owner decision 2026-10-23, feature: replication ui)
+SEC-SRV-005	18	dropped	-	old_passwords and mysql_old_password/sha256 switching are obsolete on MySQL 8.4/MariaDB 10.11.
+SEC-SRV-008	18	dropped	-	setPostAsGlobal is PHP specific; use typed input schema.
+SEC-SRV-010	18	dropped	-	Advisor result link rewriting; decide with advisor feature. (owner decision 2026-10-23, feature: server advisor)
+UI-SRV-006	18	dropped	-	Sub-navigation active-state tracking is a template detail; DBLoom routing handles it.
+CON-DTB-002	18	dropped	-	Reserved column names exist only for LegacyAdmin config-storage tables; DBLoom has its own storage.
+CPT-DTB-002	18	deferred	future	Schema/data change tracking with auto-create is a whole feature the owner must decide. (owner decision 2026-10-23, feature: tracking)
+DATA-DTB-002	18	dropped	-	Central column dictionary is a standalone feature; owner decides once. (owner decision 2026-10-23, feature: central columns)
+DATA-DTB-003	18	dropped	-	LegacyAdmin la_ config-storage table list; DBLoom uses its own storage design.
+DATA-DTB-004	18	deferred	future	Tracking data model only matters if tracking is adopted. (owner decision 2026-10-23, feature: tracking)
+DATA-DTB-005	18	deferred	future	Designer page storage only matters if the designer is adopted. (owner decision 2026-10-23, feature: designer)
+DEP-DTB-002	18	dropped	-	Events exist on all supported servers; version 5.1 check is obsolete.
+FR-DTB-020	18	dropped	-	POST/GET sql_query sources and signed GET are PHP request mechanics; bookmark source handled elsewhere.
+FR-DTB-024	18	dropped	-	PHP session locking does not exist in Node.
+FR-DTB-034	18	dropped	-	Database comment stored in LegacyAdmin relation config storage; MySQL has no native database comment.
+FR-DTB-066	18	deferred	future	Virtual relations in config storage; product-scope choice, DBLoom has own storage. (owner decision 2026-10-23, feature: designer)
+FR-DTB-092	18	dropped	-	Scatter-plot zoom search is a separate feature; legacy has injection defect SEC-DTB-005. (owner decision 2026-10-23, feature: zoom search)
+FR-DTB-094	18	dropped	-	QBE multi-table query builder is a separate feature. (owner decision 2026-10-23, feature: query by example)
+FR-DTB-095	18	dropped	-	QBE form and saved searches. (owner decision 2026-10-23, feature: query by example)
+FR-DTB-101	18	deferred	future	Integrity check only for config-storage relations; depends on virtual relations decision. (owner decision 2026-10-23, feature: designer)
+FR-DTB-110	18	deferred	future	Tracking versions feature. (owner decision 2026-10-23, feature: tracking)
+FR-DTB-111	18	deferred	future	Tracking statement set. (owner decision 2026-10-23, feature: tracking)
+FR-DTB-112	18	deferred	future	Tracking state management. (owner decision 2026-10-23, feature: tracking)
+FR-DTB-113	18	deferred	future	Tracking report and export. (owner decision 2026-10-23, feature: tracking)
+FR-DTB-114	18	deferred	future	Tracking toggle in UI. (owner decision 2026-10-23, feature: tracking)
+FR-DTB-120	18	deferred	future	Designer pages. (owner decision 2026-10-23, feature: designer)
+FR-DTB-121	18	deferred	future	Designer relation creation. (owner decision 2026-10-23, feature: designer)
+FR-DTB-122	18	deferred	future	Designer FK support inspection. (owner decision 2026-10-23, feature: designer)
+FR-DTB-123	18	deferred	future	Designer settings persistence. (owner decision 2026-10-23, feature: designer)
+FR-DTB-124	18	deferred	future	Schema export from designer. (owner decision 2026-10-23, feature: designer)
+FR-DTB-140	18	dropped	-	Normalization wizard is a separate feature. (owner decision 2026-10-23, feature: normalization wizard)
+FR-DTB-150	18	deferred	future	Tracking capture hook. (owner decision 2026-10-23, feature: tracking)
+FR-DTB-151	18	deferred	future	Tracking statement classification. (owner decision 2026-10-23, feature: tracking)
+FR-DTB-158	18	dropped	-	QBE form parameters. (owner decision 2026-10-23, feature: query by example)
+FR-DTB-159	18	dropped	-	Saved QBE searches. (owner decision 2026-10-23, feature: query by example)
+INT-DTB-001	18	superseded	-	Replaced by ARCH-TGT-001 Adapter; mysqli DbiExtension is PHP specific.
+SEC-DTB-005	18	dropped	-	Zoom search is dropped; its maxPlotLimit defect goes with it. (consistency pass 2026-10-23, was ADAPT)
+UI-DTB-001	18	dropped	-	PHP-array code view of queries is PHP-specific; DBLoom may offer copy-as-code differently if wanted.
+CPT-IOX-014	18	dropped	-	Legacy stub C# output; obsolete.
+FR-IOX-003	18	dropped	-	PHP class-name factory and securePath mechanics; DBLoom uses a closed built-in registry.
+FR-IOX-004	18	dropped	-	PHP property-tree rendering; DBLoom defines options in its own registry and UI.
+FR-IOX-011	18	dropped	-	Second review (Haiku, 10 reviewers, 2026-10-23): XML export dropped (owner decision 2026-10-23).
+FR-IOX-012	18	dropped	-	Second review (Haiku, 10 reviewers, 2026-10-23): LaTeX, ODT, HTML, MediaWiki, Texy, PHP array, YAML, ODS and PDF export dropped; only SQL, CSV and JSON stay.
+FR-IOX-024	18	dropped	-	Internal PHP buffering/echo/escape structure; DBLoom should stream exports via Node streams.
+FR-IOX-029	18	dropped	-	PHP max_execution_time workaround; Node streaming has no such timeout endpoint.
+FR-IOX-039	18	dropped	-	PHP class/factory/global promotion mechanics; replaced by closed built-in importer registry.
+FR-IOX-043	18	dropped	-	Second review (Haiku, 10 reviewers, 2026-10-23): ODS import dropped (owner decision 2026-10-23).
+FR-IOX-044	18	dropped	-	Second review (Haiku, 10 reviewers, 2026-10-23): XML import dropped with XML export (owner decision 2026-10-23).
+FR-IOX-045	18	dropped	-	Niche format; rarely needed for DB administration.
+FR-IOX-047	18	dropped	-	Niche format depending on PHP dbase extension; obsolete for first release.
+FR-IOX-060	18	dropped	-	PECL uploadprogress/PHP session backends are PHP specific; DBLoom uses its own upload progress.
+FR-IOX-064	18	deferred	future	Visualisation fetching spatial columns as WKT belongs to deferred GIS visualisation. (consistency pass 2026-10-23, was ADAPT)
+FR-IOX-066	18	deferred	future	Visualisation canvas size belongs to deferred GIS visualisation. (consistency pass 2026-10-23, was DROP)
+FR-IOX-067	18	deferred	future	Spatial data editor with live preview is a feature-scope choice. (owner decision 2026-10-23, feature: gis editor)
+FR-IOX-068	18	deferred	future	Visualize GIS data action and spatial cell editing depend on the GIS feature decision. (owner decision 2026-10-23, feature: gis editor)
+FR-IOX-069	18	dropped	-	PHP plugin property-tree structure; closed built-in registry replaces it.
+FR-IOX-076	18	dropped	-	Format dropped: only SQL, CSV and JSON stay (owner decision 2026-10-23): XML export.
+FR-IOX-077	18	dropped	-	Format dropped: only SQL, CSV and JSON stay (owner decision 2026-10-23): YAML export.
+FR-IOX-078	18	dropped	-	PHP array export is PHP specific.
+FR-IOX-079	18	dropped	-	Format dropped: only SQL, CSV and JSON stay (owner decision 2026-10-23): LaTeX export.
+FR-IOX-080	18	dropped	-	Format dropped: only SQL, CSV and JSON stay (owner decision 2026-10-23): ODS export.
+FR-IOX-081	18	dropped	-	Format dropped: only SQL, CSV and JSON stay (owner decision 2026-10-23): Word, Texy and MediaWiki export.
+FR-IOX-082	18	dropped	-	Format dropped: only SQL, CSV and JSON stay (owner decision 2026-10-23): PDF export.
+FR-IOX-090	18	dropped	-	Format dropped: only SQL, CSV and JSON stay (owner decision 2026-10-23): MediaWiki import.
+FR-IOX-091	18	dropped	-	Format dropped: only SQL, CSV and JSON stay (owner decision 2026-10-23): ODS import.
+FR-IOX-097	18	dropped	-	Format dropped: only SQL, CSV and JSON stay (owner decision 2026-10-23): schema export.
+FR-IOX-098	18	deferred	future	GIS editor geometry types and SRID follow the GIS feature decision. (owner decision 2026-10-23, feature: gis editor)
+FR-IOX-099	18	deferred	future	GIS visualization output formats follow the GIS feature decision; GD/PDF are PHP specific. (owner decision 2026-10-23, feature: gis editor)
+INT-IOX-002	18	dropped	-	PHP plugin class contract; internal registry design replaces it.
+INT-IOX-062	18	deferred	future	Geometry factory is part of the deferred GIS layer. (consistency pass 2026-10-23, was DROP)
+INT-IOX-063	18	deferred	future	Per-geometry rendering and WKT methods belong to deferred GIS editor/visualisation. (consistency pass 2026-10-23, was DROP)
+INT-IOX-065	18	deferred	future	GisVisualization rendering is the deferred GIS visualisation feature. (consistency pass 2026-10-23, was DROP)
+NFR-IOX-027	18	dropped	-	Derived from PHP memory_limit; Node uses streaming.
+NFR-IOX-028	18	dropped	-	PHP execution time and session error stamp are PHP specific.
+NFR-IOX-053	18	dropped	-	read_limit derived from PHP memory_limit.
+NFR-IOX-054	18	dropped	-	max_execution_time based timeout handling is PHP specific.
+NFR-IOX-059	18	dropped	-	PHP time and memory limits do not apply.
+NFR-IOX-093	18	dropped	-	Second review (Haiku, 10 reviewers, 2026-10-23): buffering rule for the XML and ODS importers, both dropped.
+CON-SAU-087	18	dropped	-	PHP version branches irrelevant to Node stack.
+CPT-SAU-090	18	dropped	-	PHP version and session-extension checks do not apply.
+DATA-SAU-047	18	superseded	-	2FA data storage is covered by SEC-TGT-011/012; la_ tables never used. (consistency pass 2026-10-23, was ADAPT)
+DATA-SAU-083	18	superseded	-	PHP session keys replaced by DBLoom key ring, CSRF and session design (SEC-TGT-081/082).
+DEP-SAU-079	18	dropped	-	PHP header() mechanics; DBLoom sets security and no-cache headers in its own server layer.
+DEP-SAU-084	18	dropped	-	Blowfish secret is PHP config; replaced by master secret (ST-052, SEC-TGT-081).
+DEP-SAU-091	18	dropped	-	Composer packages irrelevant; TypeScript libraries chosen separately.
+FR-SAU-001	18	superseded	-	DBLoom uses own accounts plus connection profiles (SEC-TGT-018/019), no auth_type plugins.
+FR-SAU-002	18	dropped	-	Plugin class lookup error is a PHP mechanic.
+FR-SAU-007	18	superseded	-	Config-file credentials replaced by profiles with vault or account login (SEC-TGT-018/019).
+FR-SAU-008	18	dropped	-	Config-auth connection failure page; DBLoom shows its own connection error UI.
+FR-SAU-009	18	dropped	-	HTTP auth type not offered; reverse-proxy auth not in scope.
+FR-SAU-010	18	dropped	-	PHP server variable fallback chain for HTTP auth.
+FR-SAU-012	18	dropped	-	HTTP auth logout trick not needed.
+FR-SAU-013	18	deferred	future	Signon via shared PHP session; whether DBLoom offers SSO/OIDC is an owner scope choice. (owner decision 2026-10-23, feature: single sign-on)
+FR-SAU-014	18	dropped	-	PHP session HMAC secret handling for signon.
+FR-SAU-015	18	dropped	-	PHP session cookie parameter defaults for signon session.
+FR-SAU-016	18	deferred	future	Signon application switching rule depends on whether SSO is offered. (owner decision 2026-10-23, feature: single sign-on)
+FR-SAU-017	18	dropped	-	Including arbitrary PHP script is incompatible with closed registry and no plugin loading.
+FR-SAU-018	18	deferred	future	Signon error echo and redirect depends on SSO decision. (owner decision 2026-10-23, feature: single sign-on)
+FR-SAU-019	18	superseded	-	Encrypted credential cookies replaced by DBLoom sessions and vault (SEC-TGT-*).
+FR-SAU-021	18	dropped	-	Cookie encryption key derivation from blowfish_secret; replaced by key ring.
+FR-SAU-022	18	dropped	-	Per-session sodium key in PHP session.
+FR-SAU-023	18	superseded	-	Password cookie payload not used; DB passwords held in vault or server-side session.
+FR-SAU-028	18	superseded	-	Free host entry replaced by connection profiles; ad-hoc connection per profile design.
+FR-SAU-032	18	dropped	-	PHP session bootstrap and cookie naming; DBLoom has own session design.
+FR-SAU-035	18	dropped	-	Per-window access time in PHP session; replaced by server-side session activity tracking.
+FR-SAU-043	18	dropped	-	Token in every URL is a PHP pattern; DBLoom uses header or cookie based CSRF.
+FR-SAU-044	18	dropped	-	PHP session cookie warning; replaced by DBLoom HTTPS and origin checks (ST-006).
+FR-SAU-045	18	superseded	-	2FA login gate is specified by SEC-TGT-011..014. (consistency pass 2026-10-23, was ADAPT)
+FR-SAU-046	18	superseded	-	2FA configuration storage is covered by SEC-TGT-011..014. (consistency pass 2026-10-23, was ADAPT)
+FR-SAU-048	18	superseded	-	2FA backends replaced by passkeys and TOTP per SEC-TGT-011..014. (consistency pass 2026-10-23, was ADAPT)
+FR-SAU-049	18	superseded	-	Fail-closed 2FA is covered by the target security requirements. (consistency pass 2026-10-23, was KEEP)
+FR-SAU-051	18	superseded	-	Passkey and TOTP enrolment are specified in SEC-TGT-011 to 014. Changed from ADAPT after the sample review.
+FR-SAU-052	18	superseded	-	2FA enrolment flow is covered by SEC-TGT-011..014. (consistency pass 2026-10-23, was KEEP)
+FR-SAU-054	18	superseded	-	TOTP enrolment and QR code are specified in SEC-TGT-012. Changed from KEEP after the sample review.
+FR-SAU-055	18	superseded	-	U2F is covered by passkeys and TOTP in SEC-TGT-011..014. (consistency pass 2026-10-23, was DROP)
+FR-SAU-058	18	superseded	-	Authenticator selection is fully decided by the DBLoom passkey spec SEC-TGT-011. (consistency pass 2026-10-23, was ADAPT)
+FR-SAU-059	18	superseded	-	Assertion validation is covered by SEC-TGT-011 passkey spec. (consistency pass 2026-10-23, was KEEP)
+FR-SAU-060	18	superseded	-	Registration handling is covered by SEC-TGT-011 passkey spec. (consistency pass 2026-10-23, was ADAPT)
+FR-SAU-062	18	superseded	-	Credential storage is defined by the new passkey spec. (consistency pass 2026-10-23, was ADAPT)
+FR-SAU-063	18	superseded	-	Passkey user handle and enrolment screens are defined by SEC-TGT-011. (consistency pass 2026-10-23, was ADAPT)
+FR-SAU-064	18	superseded	-	2FA failure messaging belongs to the new passkey and TOTP spec. (consistency pass 2026-10-23, was ADAPT)
+FR-SAU-065	18	superseded	-	RP id and TOTP issuer are defined by SEC-TGT-011/012. (consistency pass 2026-10-23, was ADAPT)
+FR-SAU-066	18	dropped	-	PHP sodium/session key mechanism; DBLoom keeps state server-side instead (SEC-TGT-114).
+FR-SAU-082	18	superseded	-	WebAuthn request handling is covered by the new passkey spec. (consistency pass 2026-10-23, was DROP)
+FR-SAU-200	18	superseded	-	Idle timeout and absolute lifetime configurable per SEC-TGT-041; client expiry handling shows re-login.
+FR-SAU-203	18	superseded	-	Replaced by allow/deny lists in inbound exposure requirements (DEP-TGT-122 context, SEC-TGT section 13); fixes CIDR defect.
+FR-SAU-204	18	dropped	-	HTTP basic auth mode not in DBLoom; own login per SEC-TGT-010.
+FR-SAU-209	18	superseded	-	Replaced by SEC-TGT-012/013/014 with administrator enforcement policy.
+FR-SAU-210	18	superseded	-	No unverified fallback; DEP-TGT-091 requires failing startup, full signature verification.
+INT-SAU-003	18	dropped	-	PHP class structure; DBLoom has own auth design in SEC-TGT-010.
+INT-SAU-038	18	dropped	-	PHP front-controller detail.
+INT-SAU-057	18	superseded	-	WebAuthn server interface is part of the superseded 2FA design; SEC-TGT-011 specifies passkeys. (consistency pass 2026-10-23, was DROP)
+INT-SAU-080	18	dropped	-	PHP library selection detail.
+INT-SAU-081	18	dropped	-	PHP superglobal handling; public origin comes from settings and trusted proxy config.
+NFR-SAU-086	18	dropped	-	PHP TESTSUITE constant detail; testability handled by normal test design.
+SEC-SAU-011	18	dropped	-	PHP phpinfo and superglobal specific.
+SEC-SAU-031	18	dropped	-	Optional captcha on login is a product-scope choice; rate limiting exists in SEC-TGT-017. (owner decision 2026-10-23, feature: login captcha)
+SEC-SAU-033	18	superseded	-	Replaced by SEC-TGT-040 (HttpOnly, Secure, SameSite, __Host- prefix).
+SEC-SAU-034	18	superseded	-	Session regenerated at login and privilege change per SEC-TGT-040.
+SEC-SAU-040	18	superseded	-	Replaced by SEC-TGT-042 CSRF protection for all state-changing requests.
+SEC-SAU-041	18	superseded	-	SEC-TGT-042 covers every method; fixes POST-only defect.
+SEC-SAU-068	18	dropped	-	PHP include guards; not applicable.
+SEC-SAU-069	18	dropped	-	PHP front-controller path inflation; router handles paths.
+SEC-SAU-075	18	dropped	-	Local-infile PHP define; local infile handling decided by import design and adapter settings.
+SEC-SAU-076	18	superseded	-	SEC-TGT-043 frame protection headers; framing opt-out via settings.
+SEC-SAU-077	18	superseded	-	SEC-TGT-043 header set (Referrer-Policy, nosniff, no-store); X-XSS-Protection obsolete.
+SEC-SAU-078	18	superseded	-	SEC-TGT-043 strict nonce-based CSP, no inline or eval; legacy CSP variants dropped.
+SEC-SAU-201	18	superseded	-	SEC-TGT-040 session cookie rules; only session cookie plus optional prefs, no 30-day username cookies.
+SEC-SAU-205	18	dropped	-	PHP include of signon script; external SSO handled by OIDC/other auth decisions, not PHP scripts.
+SEC-SAU-206	18	superseded	-	Replaced by SEC-TGT-017 rate limiting with backoff and logging; defect not carried over.
+SEC-SAU-207	18	dropped	-	PHP sodium/blowfish_secret detail; DBLoom uses own secret handling in .env/settings.
+SEC-SAU-208	18	dropped	-	Known PHP defect; not to be preserved.
+SEC-SAU-300	18	dropped	-	Replaced by server-side state and opaque identifiers (SEC-TGT-114).
+SEC-SAU-302	18	superseded	-	Replaced by inbound allow/deny lists in SEC-TGT section 13.3; see SEC-SAU-203.
+SEC-SAU-303	18	superseded	-	Defect not carried over; use verified CIDR library (NFR-TGT-122).
+SEC-SAU-306	18	superseded	-	U2F backend replaced by passkeys; single-use challenges covered in SEC-TGT-011. (consistency pass 2026-10-23, was DROP)
+SEC-SAU-309	18	dropped	-	PHP serialization specific; DBLoom stores JSON.
+SEC-SAU-310	18	dropped	-	PHP session HMAC mechanism; DBLoom does not pass SQL text through URLs, uses its own session and CSRF design.
+SEC-SAU-312	18	superseded	-	Cookie attributes (Secure, HttpOnly, SameSite) covered by DBLoom session design in 11-target-security.md (SEC-TGT-*).
+SEC-SAU-315	18	dropped	-	Sends reports to LegacyAdmin project server; irrelevant. Any DBLoom diagnostics would be separate.
+SEC-SAU-317	18	dropped	-	PHP $_REQUEST/$_GET handling; DBLoom validates input with typed schemas.
+SEC-SAU-321	18	superseded	-	Legacy has no route authorization; DBLoom defines authn/authz for all routes in 11-target-security.md (SEC-TGT-*).
+SEC-SAU-324	18	superseded	-	DBLoom CSRF design in 11-target-security.md; state changes must never happen via GET.
+SEC-SAU-325	18	superseded	-	Whether DBLoom offers TOTP 2FA is a product choice; if yes, narrow window and add replay and attempt limits. (owner decision 2026-10-23, feature: two-factor aut
+UI-SAU-053	18	superseded	-	Applies only if 2FA is offered; confirmation screen with backend-specific submit button. (owner decision 2026-10-23, feature: two-factor auth)
+UI-SAU-056	18	superseded	-	U2F screens replaced by WebAuthn passkeys. (consistency pass 2026-10-23, was DROP)
+CON-PLG-001	18	dropped	-	Authoring recipe for PHP plugin classes; DBLoom has a closed built-in registry (FU-006).
+CON-PLG-002	18	dropped	-	PHP transformation class authoring contract; no third-party plugin system.
+CPT-PLG-001	18	dropped	-	Describes PHP directory and base class structure of plugin families.
+CPT-PLG-002	18	dropped	-	PHP interface describing plugin internals.
+CPT-PLG-003	18	dropped	-	PHP property object internals; DBLoom uses its own typed registry.
+CPT-PLG-004	18	dropped	-	PHP options tree class model; internal structure only.
+CPT-PLG-005	18	dropped	-	PHP file-name naming convention for transformation classes; internal detail.
+DATA-PLG-005	18	deferred	future	Relational schema export (Dia/EPS/PDF/SVG) is part of the designer/schema feature choice. (owner decision 2026-10-23, feature: designer)
+DATA-PLG-006	18	superseded	-	Auth and 2FA plugins replaced by DBLoom own accounts and auth design in 11-target-security.md.
+DATA-PLG-007	18	dropped	-	PHP property class API; internal detail.
+DEP-PLG-001	18	dropped	-	TCPDF and curl PHP dependencies; PDF export tooling would be chosen separately.
+DEP-PLG-002	18	dropped	-	Depends on LegacyAdmin configuration storage; DBLoom has own app storage.
+DEP-PLG-003	18	dropped	-	PHP uploadprogress extension backends; browser provides upload progress natively.
+FR-PLG-001	18	dropped	-	PHP class-name convention instantiation.
+FR-PLG-002	18	dropped	-	PHP global $plugin_param context injection.
+FR-PLG-003	18	dropped	-	Directory scan discovery; DBLoom uses a closed registry.
+FR-PLG-004	18	dropped	-	PHP class and subclass admittance check.
+FR-PLG-007	18	dropped	-	PHP manager entry points.
+FR-PLG-008	18	dropped	-	PHP DI container and constructor lifecycle.
+FR-PLG-009	18	dropped	-	Abstract PHP method list; implementation structure only.
+FR-PLG-010	18	dropped	-	PHP optional method defaults; implementation structure only.
+FR-PLG-013	18	deferred	future	Schema export contract belongs to the designer/schema export feature decision. (owner decision 2026-10-23, feature: designer)
+FR-PLG-015	18	dropped	-	PHP POST key naming and global read-back; DBLoom uses typed form state.
+FR-PLG-017	18	dropped	-	PHP checkbox state resolution via request globals.
+FR-PLG-018	18	dropped	-	PHP chooser data structure; UI format selector built from typed registry.
+FR-PLG-022	18	dropped	-	Recursive PHP property-tree HTML rendering; DBLoom uses typed React option schemas.
+FR-PLG-027	18	dropped	-	Maps stored pseudo-path to PHP class names; PHP-specific.
+FR-PLG-029	18	dropped	-	Directory scan of PHP files for discovery; DBLoom uses closed built-in registry.
+FR-PLG-033	18	dropped	-	Legacy MIME name case fixup for old stored names; no legacy data in new app.
+FR-PLG-040	18	dropped	-	Runs external programs on server; unsafe and disabled by default in legacy. Not carried over.
+FR-PLG-055	18	dropped	-	Table mapping PHP class names to MIME/name; PHP class naming detail.
+FR-PLG-058	18	dropped	-	Stored-name case round trip quirk of legacy lowercase storage; defect-like, not needed.
+NFR-PLG-001	18	dropped	-	File-name convention for auto-enumerated PHP transformation files.
+NFR-PLG-002	18	dropped	-	Per-request static cache of directory scan; no scan in DBLoom.
+NFR-PLG-003	18	dropped	-	Static PHP availability methods; internal code structure.
+SEC-PLG-004	18	dropped	-	Physical file existence check before instantiating PHP class; closed registry replaces it.
+SEC-PLG-005	18	dropped	-	External-program transformation not carried over; no server-side command execution from stored options.
+SEC-PLG-006	18	superseded	-	PHP class-name dispatch; DBLoom uses own account/vault authentication design in 11-target-security.md (SEC-TGT-*).
+UI-PLG-001	18	dropped	-	PHP form-element id naming for plugin options; DBLoom builds forms in its own components.
+UI-PLG-002	18	deferred	future	Schema plugin options are used by the Designer export dialog, which is deferred. (consistency pass 2026-10-23, was DROP)
+UI-PLG-003	18	dropped	-	Legacy widget rendering details including known defects; not carried over.
+CON-UIX-051	18	dropped	-	Second review (Haiku, 10 reviewers, 2026-10-23): persistent bottom console in every page header dropped; one SQL editor (owner decision 2026-10-23).
+CON-UIX-064	18	dropped	-	Selflink rewrite for AJAX responses is a legacy page-loading mechanism; SPA routing gives re-enterable URLs.
+CON-UIX-092	18	dropped	-	SCSS RTL transform is a legacy build detail; RTL handled by the new frontend styling.
+CON-UIX-103	18	dropped	-	IE/Opera legacy branch; old browsers unsupported.
+CPT-UIX-105	18	dropped	-	Observation about third-party library internals; no requirement.
+DATA-UIX-086	18	dropped	-	Legacy SCSS variable and partial list; DBLoom styling defined by its own design system.
+DEP-UIX-070	18	dropped	-	Bundling CodeMirror in the page head is a build detail; SQL editor need covered elsewhere.
+DEP-UIX-084	18	dropped	-	Whether DBLoom offers selectable themes is an owner product choice; directory/theme.json format is legacy. (owner decision 2026-10-23, feature: themes)
+DEP-UIX-088	18	dropped	-	Per-theme icon/text footer settings tied to legacy TabsMode and new-window selflink.
+DEP-UIX-112	18	dropped	-	Same theme feature decision; legacy theme.json and version-series validation would not carry over. (owner decision 2026-10-23, feature: themes)
+FR-UIX-009	18	dropped	-	Page-lock icon, cog and goto-top cluster is legacy chrome; unsaved-change guard covered by FR-UIX-021.
+FR-UIX-010	18	dropped	-	Self-link opening a new LegacyAdmin window and PHP error container are legacy; browser handles new tabs.
+FR-UIX-012	18	dropped	-	Theme chooser depends on the theme feature decision. (owner decision 2026-10-23, feature: themes)
+FR-UIX-013	18	superseded	-	DBLoom has own account login and vault design in 11-target-security.md; keep autocomplete hints as implementation detail there.
+FR-UIX-014	18	dropped	-	Noscript and framing-hide trick are legacy; app requires JavaScript and sets framing policy via headers.
+FR-UIX-015	18	dropped	-	Describes legacy is_ajax flag; DBLoom is a JavaScript-dependent app by design.
+FR-UIX-016	18	dropped	-	Generic link/form interception is replaced by client-side routing of TanStack Start.
+FR-UIX-017	18	dropped	-	Exceptions to AJAX interception; router handles native link behaviour (modifier clicks, targets) natively.
+FR-UIX-019	18	dropped	-	Script teardown, body purging and page_content swap are legacy page-swap mechanics.
+FR-UIX-023	18	dropped	-	Custom script loader with cache and onload events replaced by bundler code splitting.
+FR-UIX-024	18	dropped	-	Legacy script lifecycle registration; framework components handle lifecycle.
+FR-UIX-029	18	dropped	-	Describes Twig include placement of messages and errors; covered by notifications and error display.
+FR-UIX-030	18	dropped	-	Retired reserved gap, no requirement.
+FR-UIX-031	18	dropped	-	Retired reserved gap, no requirement.
+FR-UIX-048	18	dropped	-	Hidden form POST to /import is a PHP/jQuery implementation detail.
+FR-UIX-050	18	dropped	-	Singleton and AJAX purging are internals of the legacy page lifecycle.
+FR-UIX-056	18	dropped	-	jQuery sortable-table plugin is implementation detail.
+FR-UIX-057	18	dropped	-	Tooltip hint configuration is a legacy detail; sort indication handled by the new grid.
+FR-UIX-059	18	deferred	future	Charting of result data is a feature choice; owner decides. (owner decision 2026-10-23, feature: charts)
+FR-UIX-060	18	dropped	-	Zoom search scatter plot is a distinct feature; owner decides. (owner decision 2026-10-23, feature: zoom search)
+FR-UIX-061	18	dropped	-	jqPlot byte-formatter plugin is a library detail.
+FR-UIX-062	18	dropped	-	QBE interface is a distinct feature; owner decides. (owner decision 2026-10-23, feature: query by example)
+FR-UIX-063	18	deferred	future	Visual designer feature; legacy IE workarounds dropped regardless. (owner decision 2026-10-23, feature: designer)
+FR-UIX-071	18	dropped	-	jQuery-UI tooltip helper is implementation detail.
+FR-UIX-072	18	dropped	-	Hint on/off switch tied to jQuery tooltips; not needed.
+FR-UIX-079	18	dropped	-	jQuery-Validate extension and PHP-injected validators are implementation detail.
+FR-UIX-081	18	dropped	-	PHP max_input_vars guard does not apply to Node.
+FR-UIX-082	18	dropped	-	Reporting to LegacyAdmin project via TraceKit is project infrastructure; no telemetry.
+FR-UIX-083	18	dropped	-	PHP error report ignore/send flow is PHP specific.
+FR-UIX-085	18	dropped	-	Theme switching and per-server themes; owner decides themes scope. (owner decision 2026-10-23, feature: themes)
+FR-UIX-087	18	dropped	-	Theme CSS paths and jQuery-UI CSS are legacy asset mechanics.
+FR-UIX-091	18	dropped	-	Direction-specific icon image files are legacy assets; use mirrored icons via CSS.
+FR-UIX-096	18	dropped	-	url.php redirector is PHP-specific; use rel=noreferrer on external links.
+FR-UIX-098	18	dropped	-	AJAX onload/teardown re-init is legacy page lifecycle; features decided separately.
+FR-UIX-107	18	dropped	-	PHP ajax_request protocol is replaced by TanStack Start server functions and routing.
+FR-UIX-108	18	dropped	-	Legacy JSON response envelope is replaced by typed server functions.
+FR-UIX-110	18	dropped	-	DBLoom is a JS-required SPA/SSR app; no no-JS support claimed.
+NFR-UIX-099	18	dropped	-	Legacy script handler cache; bundler code-splitting handles per-route loading.
+NFR-UIX-100	18	dropped	-	PHP messages.php and version query strings; build tooling uses content-hashed assets.
+NFR-UIX-101	18	dropped	-	Legacy jQuery navigation resize handler detail.
+NFR-UIX-115	18	dropped	-	Babel ES5 downlevel and legacy feature list; modern browsers assumed.
+NFR-UIX-117	18	dropped	-	Twig environment and compiled cache are PHP-specific.
+UI-UIX-045	18	dropped	-	Fixed menubar padding sync via MutationObserver is legacy layout detail; CSS layout handles it.
+CON-DEP-054	18	superseded	-	DBLoom has own accounts and personal connection profiles with vault; no config-file credentials. See 11-target-security.md.
+CON-DEP-110	18	superseded	-	DBLoom is released under a permissive licence, proposed Apache-2.0 (CON-TGT-001); GPL-2.0-only obligations do not apply to a new implementation (owner decision 
+CON-DEP-112	18	dropped	-	Composer vendor and vendor_config redistribution details are PHP-specific.
+CON-DEP-113	18	superseded	-	Replaced by CON-TGT-001 (permissive licence, no copied LegacyAdmin material) (owner decision 2026-10-23).
+CON-DEP-167	18	dropped	-	Describes the analysed legacy snapshot, not a product requirement.
+CPT-DEP-001	18	dropped	-	LegacyAdmin identity and package name.
+CPT-DEP-003	18	dropped	-	LegacyAdmin release kit script.
+CPT-DEP-004	18	dropped	-	LegacyAdmin changelog housekeeping.
+CPT-DEP-024	18	superseded	-	Replaced by personal connection profiles with vault; single instance, no server chooser from config array.
+CPT-DEP-073	18	dropped	-	Retired; Sphinx annotations.
+CPT-DEP-074	18	dropped	-	Y2K38 docs note; documentation upkeep, not product.
+CPT-DEP-105	18	dropped	-	Vendor sync script for legacy JS libraries.
+CPT-DEP-114	18	dropped	-	LegacyAdmin support and security channels.
+CPT-DEP-121	18	dropped	-	Route-table scope listing; scope decided per feature elsewhere.
+CPT-DEP-122	18	dropped	-	PHP and extension consistency checks.
+CPT-DEP-123	18	dropped	-	Four-place config directive definition; see 12-settings.md.
+CPT-DEP-124	18	dropped	-	Retired installation manual structure.
+CPT-DEP-125	18	dropped	-	Retired; security policy text moved elsewhere.
+CPT-DEP-126	18	dropped	-	Retired glossary.
+CPT-DEP-127	18	dropped	-	LegacyAdmin README requirements.
+CPT-DEP-128	18	dropped	-	FAQ link rewriting in changelog viewer.
+CPT-DEP-129	18	dropped	-	Retired manual structure.
+CPT-DEP-130	18	dropped	-	Retired known issues list.
+CPT-DEP-131	18	dropped	-	Example PHP signon and openid scripts; DBLoom has own auth design.
+DATA-DEP-022	18	dropped	-	Legacy utf8 MySQL 5 DDL syntax; DBLoom uses its own app storage.
+DATA-DEP-050	18	superseded	-	config.inc.php replaced by .env and settings per 12-settings.md.
+DATA-DEP-057	18	dropped	-	show_config_errors.php PHP script.
+DATA-DEP-062	18	dropped	-	Controluser grant comment in SQL script; no pma controluser.
+DATA-DEP-064	18	dropped	-	Controluser and control connection concept; DBLoom uses its own app store and profile connections.
+DEP-DEP-090	18	dropped	-	PHP Composer dependency baseline.
+DEP-DEP-091	18	dropped	-	Composer repositories and branch alias.
+DEP-DEP-092	18	dropped	-	PHP dev toolchain.
+DEP-DEP-093	18	dropped	-	Composer plugin allowlist.
+DEP-DEP-094	18	dropped	-	Composer autoload classmap settings.
+DEP-DEP-096	18	dropped	-	Bundled Composer vendor licences in kits.
+DEP-DEP-100	18	dropped	-	Node 12 and Yarn classic build for legacy JS; DBLoom has its own toolchain.
+DEP-DEP-102	18	dropped	-	Pinned jQuery/Bootstrap/OpenLayers legacy front-end dependency list; DBLoom has its own TypeScript stack and lockfile.
+DEP-DEP-103	18	dropped	-	jest/eslint/stylelint versions for LegacyAdmin JS tree; DBLoom chooses its own tooling.
+DEP-DEP-162	18	dropped	-	PHP vendor_config.php packager mechanism; irrelevant to Node app.
+FR-DEP-010	18	dropped	-	PHP version requirement; DBLoom runs on Node.js.
+FR-DEP-011	18	dropped	-	PHP extension requirements do not apply to Node.
+FR-DEP-012	18	dropped	-	PHP extension suggestions; compression handled by Node libraries if import/export needs them.
+FR-DEP-021	18	dropped	-	mysqli/mysqlnd specific; DBLoom uses a Node driver behind the Adapter (ARCH-TGT-001).
+FR-DEP-030	18	dropped	-	PHP front controller and file entry points; TanStack Start routing replaces them.
+FR-DEP-040	18	dropped	-	LegacyAdmin release archives and config.inc.php setup; DBLoom deployment is defined in DEP-TGT.
+FR-DEP-042	18	dropped	-	Composer packaging is PHP specific.
+FR-DEP-043	18	dropped	-	Git/Composer/Yarn install pipeline specific to LegacyAdmin.
+FR-DEP-044	18	dropped	-	Composer autoloader failure message is PHP specific.
+FR-DEP-051	18	superseded	-	Replaced by .env/settings design and secret handling in 12-settings.md and SEC-TGT; no blowfish_secret or config.inc.php.
+FR-DEP-055	18	superseded	-	DBLoom has its own session/cookie design in 11-target-security.md; sodium cookies and PHP directives not carried.
+FR-DEP-056	18	dropped	-	Opt-in client error reporting to a vendor/project; owner decides whether DBLoom has any telemetry or error reports. (owner decision 2026-10-23, feature: error r
+FR-DEP-060	18	dropped	-	Per-feature la_ storage tables; DBLoom stores own state in its own store. Owner decides which features (bookmarks, tracking, central columns) exist. (owner de
+FR-DEP-063	18	dropped	-	19 config.inc.php table directives for la_ tables; DBLoom uses its own internal store.
+FR-DEP-072	18	dropped	-	create_tables.sql parsing and la_column_info upgrade are LegacyAdmin storage internals.
+FR-DEP-095	18	dropped	-	Composer phpcs/phpstan/psalm workflow; PHP tooling.
+FR-DEP-101	18	dropped	-	SassDart, rtlcss, Babel build of LegacyAdmin themes; DBLoom has its own build.
+FR-DEP-104	18	dropped	-	Prebuilt js/dist and theme CSS in PHP tree; DBLoom ships its own build output or image.
+FR-DEP-150	18	dropped	-	phpunit configuration is PHP specific.
+FR-DEP-151	18	dropped	-	PHP test bootstrap settings.
+FR-DEP-152	18	dropped	-	Describes LegacyAdmin test layout; DBLoom defines its own tests.
+FR-DEP-153	18	dropped	-	LegacyAdmin Selenium env vars; DBLoom picks its own E2E tooling.
+FR-DEP-155	18	dropped	-	LegacyAdmin PHP/JS lint and test gates; DBLoom defines own CI.
+FR-DEP-157	18	dropped	-	LegacyAdmin release engineering and translation scripts; project housekeeping.
+FR-DEP-160	18	dropped	-	PHP version and extension gate at entry points; not applicable to Node.
+FR-DEP-163	18	dropped	-	LegacyAdmin yarn/jest build and test commands.
+FR-DEP-164	18	dropped	-	po/mo translation build with msgfmt; DBLoom has its own i18n approach.
+FR-DEP-165	18	dropped	-	LegacyAdmin Composer/Yarn release packaging steps.
+FR-DEP-166	18	dropped	-	PHP test bootstrap and fixtures.
+INT-DEP-013	18	dropped	-	reCAPTCHA on login is a product choice; DBLoom login hardening may instead use rate limiting (SEC-TGT). Owner decides on CAPTCHA. (owner decision 2026-10-23, fe
+INT-DEP-014	18	superseded	-	DBLoom own accounts and 2FA design are in 11-target-security.md; PHP packages not carried. TOTP/WebAuthn need stays.
+INT-DEP-015	18	dropped	-	Format dropped: only SQL, CSV and JSON stay (owner decision 2026-10-23): PDF output library.
+INT-DEP-058	18	superseded	-	Config/cookie/http/signon auth types replaced by DBLoom accounts and connection profiles with vault (11-target-security.md).
+INT-DEP-065	18	dropped	-	Auto-probing for la_ control storage; DBLoom has its own store.
+INT-DEP-081	18	superseded	-	Retired legacy item; DBLoom defines its own env contract in 12-settings.md.
+INT-DEP-082	18	superseded	-	Retired legacy item; DBLoom deployment defined in DEP-TGT and 12-settings.md.
+NFR-DEP-016	18	dropped	-	ext-xml dependency; DBLoom XML handling uses Node libraries if XML import/export is kept.
+NFR-DEP-156	18	dropped	-	phpcs standard, stubs and baselines are PHP specific.
+SEC-DEP-046	18	dropped	-	PHP-specific packager path relocation via vendor_config.php; no equivalent in a Node deployment.
+SEC-DEP-052	18	superseded	-	Legacy PHP sodium cookie encryption replaced by DBLoom's own session and vault credential protection in 11-target-security.md.
+SEC-DEP-053	18	dropped	-	PHP-specific URL query encryption option; not needed in DBLoom's routing design.
+SEC-DEP-140	18	dropped	-	LegacyAdmin setup script generating config.inc.php; DBLoom uses .env/settings instead.
+SEC-DEP-141	18	superseded	-	DBLoom has own user accounts and connection profiles; no auth_type=config open-access mode.
+SEC-DEP-143	18	dropped	-	Third-party captcha on login not needed; DBLoom has its own account and login protection.
+SEC-DEP-145	18	dropped	-	PHP session_save_path and save_handler setting; Node session storage is DBLoom-specific.
+SEC-DEP-154	18	dropped	-	PHP test/ directory .htaccess note; project housekeeping, not applicable.

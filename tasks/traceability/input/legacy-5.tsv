@@ -1,0 +1,92 @@
+id	source	decision	area	text
+SEC-PLG-002	18	ADAPT	import file safety	Server-side import file selection must be confined to a configured directory without traversal or symlink escape; see FR-IOX-048.
+SEC-PLG-003	18	ADAPT	export option allowlist	Only declared registry options accepted from requests; validate against schema instead of PHP POST allow-list.
+SEC-PLG-007	18	ADAPT	column transformations	Need to HTML-escape transformed values stays; realise via framework escaping, and render raw HTML only in a sandboxed iframe.
+SEC-PLG-008	18	ADAPT	column transformations	Keep signed row addressing, clamped image sizes, sanitized links with noopener; implement in Node endpoint, not PHP wrapper controller.
+CPT-UIX-040	18	ADAPT	navigation tree	Keep user-controlled tree behaviours (sync with page, highlight, auto-expand) as settings; no CSS-class mechanism required.
+DATA-UIX-041	18	ADAPT	navigation tree	Keep resizable and collapsible navigation panel with persisted width, RTL-aware; store in user preferences.
+DATA-UIX-106	18	ADAPT	user preferences	Preferences persist per account on server; browser storage only for per-viewer conveniences, no import/delete detection UI.
+FR-UIX-001	18	ADAPT	page shell	Keep consistent shell with navigation, top bar, content area and sidebar; built with React layout, not Twig.
+FR-UIX-002	18	ADAPT	page shell	Keep lang and dir set from active interface language; set by app root.
+FR-UIX-003	18	ADAPT	page shell	Keep viewport, noindex, same-origin referrer policy and cache-busted assets; jQuery-UI and CodeMirror CSS dropped.
+FR-UIX-004	18	ADAPT	navigation tree	Keep navigation excluded from print and persisted width; mechanism is frontend state.
+FR-UIX-005	18	ADAPT	navigation header	Keep home, logout, docs links (MySQL vs MariaDB aware) and reload tree; LegacyAdmin logo/docs and config-auth wording dropped.
+FR-UIX-006	18	ADAPT	connection switcher	Show connection/profile switcher based on available connection profiles rather than configured server list.
+FR-UIX-007	18	ADAPT	navigation tree	Keep a visible error state with retry when tree fails to load.
+FR-UIX-008	18	ADAPT	top menu	Keep tabbed top menu with active marker and accessible collapse on small screens; Bootstrap 5 not mandated.
+FR-UIX-011	18	ADAPT	home screen	Keep a home dashboard with connection, server status and general settings; demo notice, themes list and collation select as decided.
+FR-UIX-018	18	ADAPT	request handling	Keep cancelling superseded navigation requests and preventing duplicate form submissions with a progress indicator.
+FR-UIX-020	18	ADAPT	error display	Keep clear error display and highlighting of the offending field; server redirects handled by router.
+FR-UIX-021	18	ADAPT	unsaved changes guard	Keep warning before leaving a form with unsaved changes, including SQL editor content; implement via router blocker.
+FR-UIX-022	18	ADAPT	session expiry	Keep re-login in place without losing work when session expires; token handling per DBLoom security design.
+FR-UIX-025	18	ADAPT	browser history	Keep working back/forward and deep-linkable URLs via router; no manual popstate handling.
+FR-UIX-026	18	ADAPT	error display	Keep readable error with status and connection hint for network or server failures.
+FR-UIX-027	18	ADAPT	notifications	Keep toast/notification system with loading, success, error types and auto-dismiss; exact timeouts and jQuery API not required.
+FR-UIX-028	18	KEEP	destructive confirmation	Confirmation dialog before ruinous operations remains; use accessible modal, not jQuery-UI dialog.
+FR-UIX-032	18	ADAPT	page settings	Keep per-page settings dialog with apply and cancel restoring state; dimensions free.
+FR-UIX-033	18	ADAPT	keyboard shortcuts	Keep keyboard shortcuts with input-field suppression rules; Ctrl+K command palette is the primary entry point.
+FR-UIX-034	18	KEEP	grid keyboard navigation	Ctrl+Arrow movement between fields in insert and column grids is useful productivity behaviour.
+FR-UIX-035	18	KEEP	result sorting	Modifier-click to remove or add columns in multi-column ORDER BY stays.
+FR-UIX-036	18	KEEP	row selection	Shift-click range selection of rows stays.
+FR-UIX-037	18	ADAPT	navigation tree	Keep lazy-loaded tree with persisted expand/filter state, but via TanStack server functions and client storage, not /navigation POST and PHP token keys.
+FR-UIX-038	18	KEEP	navigation tree	Per-database and per-table live substring filter in the tree is useful.
+FR-UIX-039	18	ADAPT	navigation tree	Keep collapse-all, reload, and highlighting current db/table; drop jQuery/CommonParams mechanics.
+FR-UIX-042	18	KEEP	hidden nav items	Hiding tree items and an unhide dialog is a feature choice; owner decides. (owner decision 2026-10-23, feature: hidden nav items)
+FR-UIX-043	18	ADAPT	responsive layout	Keep top navigation overflowing into a menu on narrow widths using modern CSS/React, not menuResizer plugin.
+FR-UIX-044	18	ADAPT	responsive layout	Keep usable mobile layout for the tree; reimplement without jQuery breakpoints code.
+FR-UIX-047	18	ADAPT	query console	Second review (Haiku, 10 reviewers, 2026-10-23): no separate console; history and bookmarks move into the SQL editor (UI-TGT-001).
+FR-UIX-049	18	ADAPT	query console	If console exists, options go through DBLoom settings/user preferences, not config get via JS.
+FR-UIX-052	18	KEEP	result grid	Resizable, reorderable, hideable result columns are useful.
+FR-UIX-053	18	ADAPT	result grid	Keep column reorder and in-place cell editing; reimplement in React, no copy/pointer DOM hacks.
+FR-UIX-054	18	KEEP	bulk row selection	Check-all, per-group select, indeterminate state and row highlighting are needed for bulk operations.
+FR-UIX-055	18	KEEP	list filtering	Client-side row filtering with live match count is useful.
+FR-UIX-058	18	ADAPT	result grid	Row hover/selection highlight stays via design tokens and CSS, not theme SCSS variables.
+FR-UIX-065	18	ADAPT	SQL editor	Keep SQL editor with autocomplete and linting using a modern editor component, not CodeMirror 5 jQuery wiring.
+FR-UIX-066	18	KEEP	SQL editor	Syntax highlighting of displayed queries is needed.
+FR-UIX-067	18	ADAPT	SQL editor	Keep schema-aware table/column autocomplete; fetch via server functions with caching.
+FR-UIX-068	18	ADAPT	documentation links	Keep links from keywords to MySQL/MariaDB docs, chosen per product and version via Strategy.
+FR-UIX-069	18	KEEP	SQL editor	Auto-saving unsent query drafts is useful.
+FR-UIX-073	18	ADAPT	localization	Date and time pickers stay locale-aware via browser Intl/modern components, not server-injected jQuery config.
+FR-UIX-074	18	ADAPT	value editors	Keep enum/set editor for cell edits as normal React dialog, not pre-rendered modals.
+FR-UIX-075	18	ADAPT	drag-drop import	Keep drag and drop file import with upload status panel, rebuilt in React.
+FR-UIX-076	18	ADAPT	drag-drop import	Keep async upload with progress; accepted types follow DBLoom import formats, not the legacy list.
+FR-UIX-077	18	KEEP	drag-drop import	Cancelling in-flight uploads with status feedback is needed.
+FR-UIX-078	18	ADAPT	settings forms	Keep client-side validation of settings forms, using schema validation per 12-settings.md.
+FR-UIX-080	18	ADAPT	password strength	Keep strength meter on password forms for DBLoom accounts and MySQL users; reimplement.
+FR-UIX-089	18	ADAPT	RTL support	Keep correct text direction per locale if RTL languages are shipped; implement with CSS logical properties.
+FR-UIX-090	18	ADAPT	RTL support	Direction-aware layout stays, derived from document dir, using CSS logical properties.
+FR-UIX-097	18	ADAPT	MySQL user management	Keep no-password toggle, password generation, confirmations in DBLoom user management UI.
+FR-UIX-111	18	ADAPT	keyboard shortcuts	Keep keyboard shortcuts but centered on Ctrl+K palette; drop key-code handling and console toggles.
+FR-UIX-113	18	ADAPT	UI languages	Keep selectable UI languages with browser-language fallback; no gettext .mo files or LegacyAdmin language table.
+FR-UIX-118	18	ADAPT	documentation links	Keep contextual help links to DBLoom and MySQL/MariaDB docs; no url.php or local LegacyAdmin manual.
+NFR-UIX-046	18	ADAPT	responsive layout	Keep responsive behaviour and print hiding; implemented with modern CSS, not Bootstrap 5 classes.
+NFR-UIX-102	18	ADAPT	browser support	Support current evergreen browsers; define the matrix explicitly; no Bootstrap 5.3.8 or cookie requirement as such.
+NFR-UIX-104	18	ADAPT	print styling	Keep a simple print stylesheet hiding chrome for result and structure views; no SCSS partial.
+NFR-UIX-116	18	ADAPT	accessibility	Keep ARIA and keyboard accessibility; set explicit WCAG target and automated checks instead of open decision.
+SEC-UIX-093	18	ADAPT	clickjacking protection	Use CSP frame-ancestors and X-Frame-Options headers, not JS frame busting.
+SEC-UIX-094	18	KEEP	external links	Use noopener noreferrer on external links.
+SEC-UIX-095	18	KEEP	robots meta	Suppress indexing with noindex and X-Robots-Tag; translation metas optional.
+SEC-UIX-109	18	ADAPT	session timeout	Keep idle-timeout warning and expiry handling in UI, driven by DBLoom session settings; no PHP gc or cookie validity.
+UI-UIX-114	18	ADAPT	RTL languages	Keep RTL support, derive direction from locale script so regional codes like ar_LY work.
+CON-DEP-111	18	ADAPT	licensing	Show own licence and third-party notices in an About page; no /license or /changelog routes.
+CPT-DEP-120	18	ADAPT	doc links	Keep contextual links to MySQL and MariaDB manuals for supported versions; no local doc/html or url.php redirect.
+DATA-DEP-061	18	ADAPT	config storage DB	DBLoom keeps its own app store; per-feature tables (bookmarks, history etc.) follow feature decisions, not the legacyadmin database.
+DATA-DEP-066	18	ADAPT	column transformations	Column transformations feature scope is an owner decision; plugin generator scripts dropped. (owner decision 2026-10-23, feature: column transformations)
+DATA-DEP-075	18	ADAPT	storage migrations	Keep idempotent, forward-only schema migrations for DBLoom's own store, via migration tool not SQL scripts.
+FR-DEP-002	18	ADAPT	version identity	Keep a single authoritative app version surfaced in UI; PHP Version class, ChangeLog and script mechanics dropped.
+FR-DEP-020	18	ADAPT	server minimum version	Enforce minimum MySQL 8.4 / MariaDB 10.11 (proposed) instead of 5.5; refuse older servers with clear error.
+FR-DEP-023	18	ADAPT	auth plugin descriptions	Show only plugins valid on minimum servers (caching_sha2, sha256, unix_socket, ed25519 etc.); drop mysql_old_password and native-only assumptions.
+FR-DEP-033	18	ADAPT	browser requirements	Require a current evergreen browser with JavaScript; no cookie-only or Bootstrap 5.3.8 pin.
+FR-DEP-045	18	ADAPT	setup wizard	First-run setup in DBLoom via settings/.env (12-settings.md); no config.inc.php generator or download-and-upload flow.
+FR-DEP-070	18	ADAPT	upgrade and version check	Keep upgrade path and optional update notification (owner may disable for air-gapped); PHP file replacement mechanics dropped.
+FR-DEP-071	18	ADAPT	asset cache busting	Hashed build assets invalidate stale client state automatically; version query strings and PHP shims dropped.
+INT-DEP-025	18	KEEP	TLS to database	TLS connections to the DB server with CA, cert, key, verify options remain required; adapt to Node driver options.
+INT-DEP-047	18	ADAPT	OS support	Run on Linux and Windows (and containers) via Node; PMA_IS_WINDOWS and PHP permission checks dropped.
+INT-DEP-080	18	ADAPT	reverse proxy support	Keep base URL override, X-Forwarded-Proto and trusted-proxy client IP handling as settings in 12-settings.md.
+NFR-DEP-161	18	ADAPT	file permissions	Keep restrictive permissions on secrets/settings and writable data dir; PHP config.inc.php check and TempDir mechanics dropped.
+SEC-DEP-031	18	ADAPT	protect internal files	Ensure no source, settings or temp files are web-served; handled by app architecture and container, not .htaccess.
+SEC-DEP-032	18	KEEP	robots exclusion	Serve robots.txt disallowing all crawlers; trivial for a self-hosted admin tool.
+SEC-DEP-041	18	ADAPT	release signing	Publish checksums and signed releases/images for DBLoom artifacts; GPG details and LegacyAdmin keys dropped.
+SEC-DEP-142	18	ADAPT	auth event logging	Keep logging of login success/denial with user and IP for fail2ban-style use; emit via Node logger/stdout, configured in settings.
+SEC-DEP-144	18	ADAPT	login access control	Keep optional IP allow/deny and rejecting root/empty-password logins as DBLoom settings, not AllowDeny config arrays.
+SEC-DEP-146	18	ADAPT	CSRF protection	Keep CSRF defence for state-changing requests, using TanStack Start/Node mechanisms (SameSite, origin check, token), regenerate session at login.

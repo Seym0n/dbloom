@@ -1,0 +1,95 @@
+id	source	decision	area	text
+UI-IOX-021	18	ADAPT	export UI	Save-as-file/view-as-text, charset, compression, filename template, separate files, size filter stay; drop kanji and server-save unless decided.
+FR-SAU-004	18	ADAPT	login restrictions	Keep ability to deny root and empty-password DB logins as settings; drop AllowDeny host rules mechanism.
+FR-SAU-005	18	ADAPT	login errors	Keep friendly failure messages and idle-timeout notice; escape output via framework, no cfg names.
+FR-SAU-006	18	ADAPT	login audit	Failed logins go to DBLoom audit log with username and reason code.
+FR-SAU-026	18	ADAPT	login failure	Keep no-store caching headers on failed login and discarding any session credentials; no cookie.
+FR-SAU-027	18	ADAPT	logout	Logout destroys server session and credentials; per-server cookie deletion dropped.
+FR-SAU-029	18	ADAPT	password change	After changing own DB or account password, refresh stored session or vault credential.
+FR-SAU-036	18	ADAPT	idle timeout	Keep inactivity logout and clearing cached privileges; use DBLoom session idle timeout setting.
+FR-SAU-037	18	ADAPT	idle timeout	Idle timeout may be configurable within environment bounds, not per-user cfg override.
+FR-SAU-039	18	KEEP	logout	Logout must be POST with CSRF protection.
+FR-SAU-042	18	ADAPT	session expiry relogin	Re-login after expiry without losing page state; CSRF token refresh handled by framework.
+FR-SAU-050	18	ADAPT	two-factor auth	Caching of a successful second-factor check for the session is not yet in SEC-TGT-011 to 014; rewrite for DBLoom sessions. (consistency pass 2026-10-23)
+FR-SAU-061	18	ADAPT	WebAuthn passkeys	Single-use passkey challenges are not yet stated in SEC-TGT-011; rewrite for DBLoom. (consistency pass 2026-10-23)
+FR-SAU-072	18	ADAPT	external links	Keep Referer-leak protection for external links via Referrer-Policy/noreferrer; no url.php redirector needed. See SEC-TGT-043.
+FR-SAU-073	18	ADAPT	SQL file import	Keep import format allow-list and server-side file handling; drop PHP upload variable mechanics.
+FR-SAU-074	18	ADAPT	upload limit message	Show clear error when upload exceeds configured size limit; no PHP empty-request heuristic or session message.
+FR-SAU-088	18	ADAPT	language and theme prefs	Persist language/theme per user profile or browser; no pma_lang cookie naming.
+FR-SAU-089	18	ADAPT	client IP trusted proxies	Client IP resolved only via configured trusted proxies, validated; CIDR support. See DEP-TGT-122 and .env settings.
+NFR-SAU-085	18	ADAPT	error disclosure	Keep: login failures never leak internals, DB error text escaped, server paths not shown.
+NFR-SAU-318	18	ADAPT	CSPRNG tokens	Keep CSPRNG for tokens, challenges and secrets via Node crypto; drop printable-ASCII masking.
+SEC-SAU-020	18	ADAPT	encrypted cookie payload	Keep authenticated encryption for any stored secrets (vault, session); use AEAD in Node, no cookie-held credentials. See SEC-TGT-020.
+SEC-SAU-024	18	ADAPT	password length limit	Keep a maximum password length against DoS; value chosen by DBLoom, applied to all login forms, reasonable limit with hashing.
+SEC-SAU-025	18	ADAPT	username host sanitising	Keep NUL stripping and target host validation against allowed target list (SSRF); no p: prefix or regex setting.
+SEC-SAU-067	18	ADAPT	decryption failure handling	Keep: any failed decrypt or verify yields invalid input, never throws to user; applies to vault and tokens.
+SEC-SAU-070	18	ADAPT	redirect target validation	Keep: goto/back/return targets validated against internal route allow-list to prevent open redirects.
+SEC-SAU-071	18	ADAPT	external redirect allow-list	External links open with noreferrer to https allow-listed docs hosts at most; no url.php redirector needed.
+SEC-SAU-202	18	ADAPT	login failure messages	Keep generic denial messages not revealing rules and idle-logout notice; drop AllowNoPassword wording.
+SEC-SAU-301	18	ADAPT	message sanitising	Keep safe rendering of messages: escape by default, no raw HTML; limited formatting and safe links only.
+SEC-SAU-304	18	ADAPT	path traversal protection	Keep: user-influenced file names never reach filesystem unsanitised; use identifiers and resolved-path containment instead of dot replacing.
+SEC-SAU-305	18	ADAPT	import file security	Keep upload validation, symlink rejection, readability checks, server-dir containment; drop PHP is_uploaded_file mechanics.
+SEC-SAU-307	18	ADAPT	download headers	Keep sanitised filename, Content-Disposition attachment, correct type, no-cache for downloads; drop obsolete headers.
+SEC-SAU-308	18	ADAPT	JS output encoding	Keep context-aware output encoding; React escapes by default, JSON embedding must escape script-breaking sequences.
+SEC-SAU-311	18	ADAPT	identifier escaping	Keep backtick quoting with doubled backticks; drop MSSQL compat mode. Implement in the MySQL/MariaDB adapter.
+SEC-SAU-313	18	ADAPT	routing	Keep 404 for unknown route and 405 for wrong method semantics; implemented by TanStack Start router, no PHP route table.
+SEC-SAU-314	18	KEEP	outbound HTTP TLS	Outbound requests (updates, AI provider calls) must verify TLS certificates and hostnames.
+SEC-SAU-316	18	ADAPT	redirect hygiene	Redirect only to internal targets, never user-supplied external URLs; PHP session close and IIS details dropped.
+SEC-SAU-319	18	ADAPT	binlog viewer	Defect: raw log name concatenated. Validate log name against SHOW BINARY LOGS list and bind/quote it; cast position to integer.
+SEC-SAU-320	18	ADAPT	input validation	Defect: unvalidated LIMIT. Parse limits as non-negative integers server-side and never append raw text to generated SQL.
+SEC-SAU-322	18	ADAPT	privilege detection	Defect: mysql.user readability is not SUPER. Determine capabilities via SHOW GRANTS or per-feature probes, with cache invalidation.
+SEC-SAU-323	18	ADAPT	process list	Defect: unvalidated sort direction. Allow only ASC/DESC and a whitelist of columns.
+UI-SAU-030	18	ADAPT	login form	Login with connection profile selection and session-expired re-login modal; no reCAPTCHA, PHP session id field or server selector.
+CPT-PLG-006	18	ADAPT	column transformations	MIME Type/Subtype naming only matters if browser transformations are offered; file-name part is PHP specific. (owner decision 2026-10-23, feature: column transformations)
+DATA-PLG-001	18	ADAPT	export import defaults	Per-format option defaults remain useful but live in DBLoom settings (12-settings.md), not config.inc.php sections.
+DATA-PLG-002	18	ADAPT	column transformations	Bundled transformation set depends on whether the transformations feature is adopted. (owner decision 2026-10-23, feature: column transformations)
+DATA-PLG-003	18	ADAPT	export formats	Export formats list stays a product scope decision per format; closed built-in registry, no PHP classes; drop PHP array/Excel legacy as needed.
+DATA-PLG-004	18	ADAPT	import formats	Bundled import formats via closed registry; SHP, LDI and upload-progress plugin variants are scope decisions, no PHP upload backends.
+DATA-PLG-008	18	ADAPT	column transformations	Per-column MIME/transformation persistence belongs to the transformations feature; would need DBLoom own storage, not LegacyAdmin column_info. (owner decision 2026-10-23, feature: column transformations)
+FR-PLG-005	18	ADAPT	export import availability	Keep scope rules: XML export only for db/table scope, LDI-style import only in table scope; no TCPDF/curl checks.
+FR-PLG-006	18	ADAPT	export import formats	Format lists shown in UI sorted by localized label; trivial UI ordering.
+FR-PLG-011	18	ADAPT	export aliases	User need to rename db/table/column in exports stays if aliases are kept; relation string helper is internal.
+FR-PLG-012	18	ADAPT	import formats	Keep: when a database is already selected, import must not emit CREATE DATABASE; PHP doImport contract dropped.
+FR-PLG-014	18	ADAPT	export option validation	Accept only known, typed export options via server-side schema validation instead of copying POST keys into globals.
+FR-PLG-016	18	ADAPT	export import defaults	Keep defaults precedence idea (saved settings, repopulate after timeout) using 12-settings.md; drop str* placeholder substitution.
+FR-PLG-019	18	ADAPT	export format default	Default export format preselected (SQL), overridable by request parameter; stored as DBLoom setting rather than PHP config key.
+FR-PLG-020	18	ADAPT	import format default	Default import format SQL, overridable per page; setting via DBLoom settings, not cfg Import format.
+FR-PLG-021	18	ADAPT	format options UI	Per-format options panel stays, rendered by React components from a registry; no Twig div ids; empty-options message kept.
+FR-PLG-023	18	ADAPT	format options UI	Option types (bool, text, number, select, radio, hidden) map to form widgets; implemented via schema-driven React form.
+FR-PLG-024	18	ADAPT	format options UI	Inline help links per option kept as tooltips/doc links; no PHP doc array formats.
+FR-PLG-025	18	ADAPT	column transformations	Display/input transformations on columns is a whole feature (needs config storage); owner decides once. (owner decision 2026-10-23, feature: column transformations)
+FR-PLG-026	18	ADAPT	column transformations	Input transformation state contract; part of the transformations feature decision. (owner decision 2026-10-23, feature: column transformations)
+FR-PLG-028	18	ADAPT	column transformations	Transformation options string parsing; relevant only if transformations feature is adopted (would use structured JSON). (owner decision 2026-10-23, feature: column transformations)
+FR-PLG-030	18	ADAPT	column transformations	Per-column transformation persistence read from column_info; depends on transformations feature decision. (owner decision 2026-10-23, feature: column transformations)
+FR-PLG-031	18	ADAPT	column transformations	Per-column transformation persistence write; depends on transformations feature decision. (owner decision 2026-10-23, feature: column transformations)
+FR-PLG-032	18	ADAPT	column transformations	Cascade cleanup of stored transformations on drop; depends on transformations feature decision. (owner decision 2026-10-23, feature: column transformations)
+FR-PLG-034	18	ADAPT	column transformations	Apply transformations to browse cells; depends on transformations feature decision. (owner decision 2026-10-23, feature: column transformations)
+FR-PLG-035	18	ADAPT	column transformations	Input transformation and validation on row save; depends on transformations feature decision. (owner decision 2026-10-23, feature: column transformations)
+FR-PLG-036	18	ADAPT	column transformations	Per-family default transformation options; depends on transformations feature decision. (owner decision 2026-10-23, feature: column transformations)
+FR-PLG-037	18	ADAPT	column transformations	Bool2Text display transformation; depends on transformations feature decision. (owner decision 2026-10-23, feature: column transformations)
+FR-PLG-038	18	ADAPT	column transformations	DateFormat display transformation; depends on transformations feature decision. (owner decision 2026-10-23, feature: column transformations)
+FR-PLG-039	18	ADAPT	column transformations	Download display transformation; depends on transformations feature decision. (owner decision 2026-10-23, feature: column transformations)
+FR-PLG-041	18	ADAPT	column transformations	Formatted HTML in sandboxed iframe transformation; depends on transformations feature decision. (owner decision 2026-10-23, feature: column transformations)
+FR-PLG-042	18	ADAPT	column transformations	Hex display transformation; depends on transformations feature decision. (owner decision 2026-10-23, feature: column transformations)
+FR-PLG-043	18	ADAPT	column transformations	Image BLOB link transformation; depends on transformations feature decision. (owner decision 2026-10-23, feature: column transformations)
+FR-PLG-044	18	ADAPT	column transformations	Inline image thumbnail transformation; depends on transformations feature decision (GD check droppable). (owner decision 2026-10-23, feature: column transformations)
+FR-PLG-045	18	ADAPT	column transformations	IP address conversion transformations; depends on transformations feature decision. (owner decision 2026-10-23, feature: column transformations)
+FR-PLG-046	18	ADAPT	column transformations	PreApPend display transformation; depends on transformations feature decision. (owner decision 2026-10-23, feature: column transformations)
+FR-PLG-047	18	ADAPT	column transformations	Substring display transformation; depends on transformations feature decision. (owner decision 2026-10-23, feature: column transformations)
+FR-PLG-048	18	ADAPT	column transformations	Image link transformation; depends on transformations feature decision. (owner decision 2026-10-23, feature: column transformations)
+FR-PLG-049	18	ADAPT	column transformations	Text link transformation; depends on transformations feature decision. (owner decision 2026-10-23, feature: column transformations)
+FR-PLG-050	18	ADAPT	column transformations	SQL highlighting transformation; depends on transformations feature decision. (owner decision 2026-10-23, feature: column transformations)
+FR-PLG-051	18	ADAPT	column transformations	JSON/XML pretty display transformation; depends on transformations feature decision. (owner decision 2026-10-23, feature: column transformations)
+FR-PLG-052	18	ADAPT	column transformations	Regex validation input transformation; depends on transformations feature decision. (owner decision 2026-10-23, feature: column transformations)
+FR-PLG-053	18	ADAPT	column transformations	Code editor input transformations; depends on transformations feature decision. (owner decision 2026-10-23, feature: column transformations)
+FR-PLG-054	18	ADAPT	column transformations	File and image upload input widgets; depends on transformations feature decision. (owner decision 2026-10-23, feature: column transformations)
+FR-PLG-056	18	ADAPT	column transformations	Wrapper route serving binary/derived content with signed where clause; depends on transformations feature decision. (owner decision 2026-10-23, feature: column transformations)
+FR-PLG-057	18	ADAPT	format availability	Format availability rules by scope kept (XML needs a database, LDI at table scope); drop TCPDF/PDF and legacy schema formats.
+INT-PLG-001	18	ADAPT	export option page	Export page composes format chooser and options for server/db/table scopes; implemented in React/server functions.
+INT-PLG-002	18	ADAPT	format binding	Server re-resolves the chosen format from registry and rejects unknown formats with an error; no PHP includes.
+INT-PLG-003	18	ADAPT	format binding	Import resolves importer from closed registry by validated format; unknown format gives clear error.
+INT-PLG-004	18	ADAPT	format binding	Query box, SQL file and saved query runs force SQL format; otherwise posted format used.
+INT-PLG-005	18	ADAPT	format binding	Format options vary by scope (server/database/table, export type); keep scope context in registry typing.
+INT-PLG-006	18	ADAPT	format options UI	Shared option panels for export, import pages; option names namespaced per format. Designer dialog depends on designer decision.
+NFR-PLG-004	18	ADAPT	column transformations	Bound requested thumbnail size (2000px clamp) if image preview exists; apply to any image resize endpoint.
+SEC-PLG-001	18	ADAPT	format binding	Validate format keys against closed registry allowlist; no path sanitization needed since no dynamic includes.

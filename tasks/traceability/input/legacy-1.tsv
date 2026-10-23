@@ -1,0 +1,95 @@
+id	source	decision	area	text
+DEP-CC-013	18	ADAPT	control connection	No controluser; DBLoom uses its own app store. Keep clear error and denial handling when the user's server connection fails.
+DEP-CC-014	18	ADAPT	auth logging	Keep loggable login outcomes with optional success logging, written to stdout or structured log instead of syslog/PHP error_log.
+INT-CC-004	18	ADAPT	server version support	Minimums become MySQL 8.4 and MariaDB 10.11; detect product via Adapter/Strategy; refuse older servers with clear message.
+INT-CC-021	18	ADAPT	export format availability	Keep conditional format availability and Excel-CSV clarity; no TCPDF/curl dependency; PDF only if owner wants it.
+NFR-CC-007	18	ADAPT	user preferences	Persist per-user preferences in DBLoom own store tied to user accounts; no session-only fallback or la_userconfig.
+NFR-CC-015	18	ADAPT	routing errors	Keep deterministic 404/405 responses with escaped output; PHP route cache is irrelevant.
+NFR-CC-016	18	ADAPT	import memory bound	Keep bounded memory on import via streaming and chunking; not tied to PHP memory_limit.
+SEC-CC-017	18	ADAPT	privilege capability check	Keep a capability check for privilege-table access rather than SUPER; use it to gate drop-database and admin features.
+UI-CC-005	18	ADAPT	UI translation	Keep translatable UI and RTL support via TS i18n, not gettext/po; language set is an open choice.
+CON-CFG-027	18	ADAPT	enumerated settings	Keep constrained allowed-value validation for settings, defined in TS schema per 12-settings.md; legacy option set differs.
+DATA-CFG-023	18	ADAPT	connection profile defaults	Keep sensible connection defaults (host, port, socket, SSL verify on, compress) in profiles; drop config.inc.php keys and control* fields.
+DATA-CFG-069	18	ADAPT	app storage features	Feature-to-table mapping becomes DBLoom own storage schema; which features exist is decided per feature elsewhere.
+DATA-CFG-092	18	ADAPT	navigation tree settings	Keep tree grouping, separators and item limits as user settings with new defaults; drop logo-link options.
+DATA-CFG-093	18	ADAPT	browse display settings	Keep rows per page, ordering, binary protection, grid editing as settings; drop PHP-specific and obsolete directives.
+DATA-CFG-094	18	ADAPT	language and theme settings	Keep default language, connection collation and title templates as settings; PHP charset recoding and ThemeManager dropped.
+FR-CFG-009	18	ADAPT	config load errors	Keep clear startup error when settings or env are invalid or unreadable; no PHP include semantics.
+FR-CFG-013	18	ADAPT	user preferences storage	Preferences stored per DBLoom user account in its own store; no session-only fallback tier.
+FR-CFG-014	18	ADAPT	user preferences storage	Set a single preference at runtime and persist per user; drop cookie write and default-removal quirks.
+FR-CFG-016	18	ADAPT	user preferences storage	Per-user allow-list of settable prefs (theme, language, hidden DBs); 2fa handled in account security.
+FR-CFG-017	18	ADAPT	user preferences storage	Theme and language persist per user and apply on login; no cookie reconciliation needed.
+FR-CFG-018	18	ADAPT	user preferences storage	Per-user/profile default connection collation applied on connect, via Adapter.
+FR-CFG-033	18	ADAPT	per-page settings	Per-page settings dialogs (browse, export, import, SQL) saved to user preferences; no ConfigFile classes.
+FR-CFG-036	18	ADAPT	settings form validation	Typed settings form validation with clear errors; implement with TypeScript schema validation.
+FR-CFG-041	18	ADAPT	settings form validation	Keep numeric, port, regex bound checks as schema validation in settings; drop PHP validator naming.
+FR-CFG-042	18	ADAPT	connection profile test	Test connection when saving a profile, with clear error; no auth_type/signon fields; uses Adapter.
+FR-CFG-073	18	ADAPT	table UI preferences	Cap on stored per-table UI prefs (column order, hidden columns) with pruning; limit configurable.
+FR-CFG-074	18	ADAPT	SQL history	Capped per-user SQL history, newest first; stored in DBLoom storage, max configurable.
+FR-CFG-078	18	ADAPT	base URL path	Support deployment under a sub-path/reverse proxy via configured base URL setting.
+FR-CFG-079	18	ADAPT	temp directories	Configurable temp/upload directory created on demand with restrictive permissions; Node tmp fallback.
+FR-CFG-095	18	ADAPT	user preferences storage	Preferences persisted in DBLoom store per user as JSON with timestamp; no session fallback.
+FR-CFG-096	18	ADAPT	preferences pages	Preference pages per category (features, SQL, navigation, export, import, security); drop ConfigFile/form mechanics.
+FR-CFG-097	18	ADAPT	preferences import export	Export/import preferences as JSON with merge option; drop PHP snippet export and hardened upload via validated schema.
+FR-CFG-118	18	ADAPT	ui state persistence	Persist layout and UI choices per DBLoom user in own storage instead of la_ tables.
+INT-CFG-089	18	ADAPT	connection parameters	Connection profiles carry host, port, socket, TLS options; no controluser/control_ key mapping.
+NFR-CFG-105	18	ADAPT	config error handling	Invalid settings must fail startup with clear message; PHP include/shutdown mechanics dropped.
+SEC-CFG-060	18	ADAPT	setup warnings	Keep advisories for missing TLS and insecure DB connections as settings/health hints; no setup script.
+SEC-CFG-066	18	ADAPT	HTTPS detection	Need reliable HTTPS detection behind reverse proxy via explicit setting and trusted proxy headers.
+SEC-CFG-103	18	ADAPT	trusted proxies	Keep trusted-proxy client IP resolution for audit/rate limiting; configure via settings, not PHP array.
+CON-SRV-001	18	KEEP	variable access	Read server variables robustly under ANSI_QUOTES sql_mode; use single-quoted literals.
+CPT-SRV-001	18	KEEP	server pages	Server-level pages operate against the currently selected server.
+CPT-SRV-004	18	ADAPT	server version branching	Support MySQL 8.4+/MariaDB 10.11+ only; drop thresholds below those and use Strategy.
+DATA-SRV-001	18	KEEP	server status	Load global status and variables; show error state if status fails.
+DATA-SRV-002	18	KEEP	server status	Derived key/thread cache indicators; deprecated duplicates stripped.
+DATA-SRV-003	18	KEEP	server status	Group status variables into sections with Com usage list.
+DATA-SRV-004	18	KEEP	server status	Section dictionary for grouping all status variables.
+DATA-SRV-005	18	KEEP	server status	Truncate long log entries for display.
+DATA-SRV-006	18	KEEP	process list	Process row fields including MariaDB progress.
+DATA-SRV-007	18	KEEP	server variables	Distinguish static from editable variables.
+DATA-SRV-008	18	KEEP	server variables	Accept byte units for byte-typed variables; escape other values.
+DATA-SRV-010	18	ADAPT	databases list	Keep name, collation, statistics, totals; drop pmadb flag; replication flags follow replication decision.
+DATA-SRV-011	18	ADAPT	DB user accounts	Users overview of MySQL/MariaDB accounts from grant tables; only 8.4/10.11 layouts, no legacy password column.
+DATA-SRV-012	18	ADAPT	DB user accounts	Parse grants into privilege lists with ALL PRIVILEGES/USAGE; use modern grant sources.
+DATA-SRV-013	18	ADAPT	DB user accounts	Translate auth plugin names; drop Old MySQL-4.0 authentication.
+DATA-SRV-014	18	KEEP	status alerts	Status variable alert thresholds.
+DATA-SRV-015	18	KEEP	server status	Same derived indicator formulas.
+DATA-SRV-016	18	KEEP	process list	MariaDB progress computation and normalised keys.
+FR-SRV-001	18	KEEP	server status	Overview with traffic, uptime, start time.
+FR-SRV-002	18	KEEP	server status	Traffic rows with absolute and per-hour values.
+FR-SRV-003	18	ADAPT	server status	Keep connection statistics; drop legacy formatting quirks ('---' columns), use consistent locale-aware formatting.
+FR-SRV-005	18	ADAPT	server status	Keep useful quick links; drop query cache flush (removed in 8.x); actions via normal authenticated requests, not data-post script.
+FR-SRV-006	18	KEEP	server status	Status variable list with sections, descriptions and doc links.
+FR-SRV-007	18	ADAPT	server status	Keep threshold alerts and alert filter; drop query-cache based rules, make thresholds data-driven.
+FR-SRV-008	18	ADAPT	server status	Keep flush allowlist but drop QUERY CACHE (removed in MySQL 8.0, MariaDB differs); require confirmation and privilege.
+FR-SRV-010	18	ADAPT	server monitor	Slow log analysis within monitor; owner decides feature scope. (owner decision 2026-10-23, feature: server monitor)
+FR-SRV-011	18	ADAPT	server monitor	General log analysis within monitor; owner decides feature scope. (owner decision 2026-10-23, feature: server monitor)
+FR-SRV-012	18	ADAPT	server monitor	Monitor log settings; if kept, restrict to allowlisted variables (legacy accepts any name). (owner decision 2026-10-23, feature: server monitor)
+FR-SRV-013	18	ADAPT	server monitor	Query analyzer in monitor executes arbitrary statements; owner decides scope, EXPLAIN-only would be safer. (owner decision 2026-10-23, feature: server monitor)
+FR-SRV-014	18	KEEP	query statistics	Com_* statistics with rates and percentages.
+FR-SRV-015	18	KEEP	process list	Show process list with full query option.
+FR-SRV-016	18	ADAPT	process list	Keep active-only filter; implement via Adapter, not legacy SHOW/IS branching.
+FR-SRV-017	18	ADAPT	process list	Keep sortable columns; allowlist columns and ASC/DESC, never concatenate user input (legacy defect).
+FR-SRV-018	18	ADAPT	process list	Keep refresh preserving filters; implement as client polling/refetch, not AJAX-only route.
+FR-SRV-019	18	ADAPT	process list	Keep kill thread with confirmation; check DBLoom permission, parameterised id, drop RDS special case unless needed.
+FR-SRV-020	18	KEEP	server variables	Global variables list with session override and doc links.
+FR-SRV-021	18	ADAPT	server variables	Keep editing global variables; validate name against known variable list, require privilege and confirmation.
+FR-SRV-022	18	ADAPT	server variables	Re-read and show effective value after set; use parameterised query, no ANSI_QUOTES defect, escape on render.
+FR-SRV-029	18	ADAPT	binary log	Keep binlog list and event browsing with pagination; page size from DBLoom settings, not cfg MaxRows.
+FR-SRV-030	18	KEEP	database list	Database list with statistics and allowlisted sorting.
+FR-SRV-031	18	ADAPT	database list	Keep batch drop with privilege check and confirmation; drop LegacyAdmin config storage cleanup and AllowUserDropDatabase setting.
+FR-SRV-032	18	ADAPT	database list	Keep create database with collation; report unknown charset/collation as error instead of silently ignoring.
+FR-SRV-033	18	ADAPT	user accounts	Keep account list and graceful errors; use authentication_string only, no old Password column or mysql_upgrade advice.
+FR-SRV-034	18	ADAPT	user accounts	Keep privilege gate for user administration, based on DBLoom role plus MySQL grants.
+FR-SRV-035	18	KEEP	user accounts	Filter accounts by initial letter and show-all behaviour.
+FR-SRV-036	18	ADAPT	user accounts	Keep FLUSH PRIVILEGES action when needed; hint only relevant for direct grant-table edits.
+FR-SRV-037	18	KEEP	user accounts	Privilege checkboxes at global, db, table, column and routine level.
+FR-SRV-038	18	ADAPT	user accounts	Keep add user with auth plugin choice and strength meter; modern CREATE USER only, no PASSWORD() branches.
+FR-SRV-039	18	ADAPT	user accounts	Keep change password via ALTER USER only; drop legacy version branches and direct mysql.user updates.
+FR-SRV-040	18	KEEP	user accounts	Edit privileges per scope via GRANT/REVOKE.
+FR-SRV-041	18	KEEP	user accounts	Revoke all privileges with displayed queries.
+FR-SRV-042	18	ADAPT	user accounts	Keep delete users and optional drop of same-named database; drop configuration-storage cleanup, FLUSH not needed after DROP USER.
+FR-SRV-043	18	ADAPT	user accounts	Keep copy user and rename; use SHOW GRANTS rather than reading grant tables directly.
+FR-SRV-045	18	KEEP	user accounts	Lock and unlock account supported on MySQL 8.4 and MariaDB 10.11.
+FR-SRV-046	18	KEEP	user accounts	Export GRANT statements for selected users.
+FR-SRV-047	18	KEEP	user accounts	Offer add user only to users with CREATE USER privilege.

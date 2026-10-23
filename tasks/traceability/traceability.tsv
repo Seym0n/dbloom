@@ -1,0 +1,1482 @@
+id	source	status	module	note
+CON-CC-006	18	superseded	-	Replaced by CON-TGT-001 (permissive licence) (owner decision 2026-10-23).
+CON-CC-019	18	dropped	-	PHP defaults mirror and unit test; internal detail.
+CON-CFG-020	18	superseded	-	Replaced by personal connection profiles; no multi-server config array or md5 verbose matching.
+CON-CFG-024	18	superseded	-	auth_type config/http/signon/cookie replaced by DBLoom own accounts and security design.
+CON-CFG-072	18	dropped	-	ZeroConf pmadb auto-detection; DBLoom has its own application store.
+CON-CFG-106	18	dropped	-	config.default.php mirror and parity test.
+CON-CFG-107	18	dropped	-	Settings class source of defaults; PHP structure. Settings design is in 12-settings.md.
+CON-CFG-111	18	dropped	-	config.inc.php write behaviour; no such file.
+CON-DEP-054	18	superseded	-	DBLoom has own accounts and personal connection profiles with vault; no config-file credentials. See 11-target-security.md.
+CON-DEP-110	18	superseded	-	DBLoom is released under a permissive licence, proposed Apache-2.0 (CON-TGT-001); GPL-2.0-only obligations do not apply to a new implementation (owner decision 
+CON-DEP-112	18	dropped	-	Composer vendor and vendor_config redistribution details are PHP-specific.
+CON-DEP-113	18	superseded	-	Replaced by CON-TGT-001 (permissive licence, no copied LegacyAdmin material) (owner decision 2026-10-23).
+CON-DEP-167	18	dropped	-	Describes the analysed legacy snapshot, not a product requirement.
+CON-DTB-002	18	dropped	-	Reserved column names exist only for LegacyAdmin config-storage tables; DBLoom has its own storage.
+CON-PLG-001	18	dropped	-	Authoring recipe for PHP plugin classes; DBLoom has a closed built-in registry (FU-006).
+CON-PLG-002	18	dropped	-	PHP transformation class authoring contract; no third-party plugin system.
+CON-SAU-087	18	dropped	-	PHP version branches irrelevant to Node stack.
+CON-UIX-051	18	dropped	-	Second review (Haiku, 10 reviewers, 2026-10-23): persistent bottom console in every page header dropped; one SQL editor (owner decision 2026-10-23).
+CON-UIX-064	18	dropped	-	Selflink rewrite for AJAX responses is a legacy page-loading mechanism; SPA routing gives re-enterable URLs.
+CON-UIX-092	18	dropped	-	SCSS RTL transform is a legacy build detail; RTL handled by the new frontend styling.
+CON-UIX-103	18	dropped	-	IE/Opera legacy branch; old browsers unsupported.
+CPT-CC-020	18	dropped	-	PHP/jQuery/Bootstrap baseline and old MySQL minimum; DBLoom has its own stack and server minimums.
+CPT-CFG-071	18	dropped	-	pmadb probing and adoption of la_ tables; DBLoom does not use LegacyAdmin storage.
+CPT-DEP-001	18	dropped	-	LegacyAdmin identity and package name.
+CPT-DEP-003	18	dropped	-	LegacyAdmin release kit script.
+CPT-DEP-004	18	dropped	-	LegacyAdmin changelog housekeeping.
+CPT-DEP-024	18	superseded	-	Replaced by personal connection profiles with vault; single instance, no server chooser from config array.
+CPT-DEP-073	18	dropped	-	Retired; Sphinx annotations.
+CPT-DEP-074	18	dropped	-	Y2K38 docs note; documentation upkeep, not product.
+CPT-DEP-105	18	dropped	-	Vendor sync script for legacy JS libraries.
+CPT-DEP-114	18	dropped	-	LegacyAdmin support and security channels.
+CPT-DEP-121	18	dropped	-	Route-table scope listing; scope decided per feature elsewhere.
+CPT-DEP-122	18	dropped	-	PHP and extension consistency checks.
+CPT-DEP-123	18	dropped	-	Four-place config directive definition; see 12-settings.md.
+CPT-DEP-124	18	dropped	-	Retired installation manual structure.
+CPT-DEP-125	18	dropped	-	Retired; security policy text moved elsewhere.
+CPT-DEP-126	18	dropped	-	Retired glossary.
+CPT-DEP-127	18	dropped	-	LegacyAdmin README requirements.
+CPT-DEP-128	18	dropped	-	FAQ link rewriting in changelog viewer.
+CPT-DEP-129	18	dropped	-	Retired manual structure.
+CPT-DEP-130	18	dropped	-	Retired known issues list.
+CPT-DEP-131	18	dropped	-	Example PHP signon and openid scripts; DBLoom has own auth design.
+CPT-IOX-014	18	dropped	-	Legacy stub C# output; obsolete.
+CPT-PLG-001	18	dropped	-	Describes PHP directory and base class structure of plugin families.
+CPT-PLG-002	18	dropped	-	PHP interface describing plugin internals.
+CPT-PLG-003	18	dropped	-	PHP property object internals; DBLoom uses its own typed registry.
+CPT-PLG-004	18	dropped	-	PHP options tree class model; internal structure only.
+CPT-PLG-005	18	dropped	-	PHP file-name naming convention for transformation classes; internal detail.
+CPT-SAU-090	18	dropped	-	PHP version and session-extension checks do not apply.
+CPT-SRV-002	18	dropped	-	Web host OS load/memory probing is unrelated to database server; platform-specific PHP code.
+CPT-UIX-105	18	dropped	-	Observation about third-party library internals; no requirement.
+DATA-CFG-022	18	dropped	-	PHP Settings class internals.
+DATA-CFG-025	18	dropped	-	la_ table-name directives.
+DATA-CFG-028	18	dropped	-	config.values.php overrides and validators; PHP mechanism.
+DATA-CFG-029	18	dropped	-	Descriptions module for config forms; PHP detail.
+DATA-CFG-090	18	dropped	-	PHP-era runtime directives, warnings, AuthLog, blowfish_secret.
+DATA-CFG-091	18	superseded	-	Cookie, CAPTCHA and URL-encryption directives replaced by DBLoom security design in 11-target-security.md.
+DATA-CFG-108	18	dropped	-	LegacyAdmin configuration storage DB and create_tables.sql; DBLoom has its own store.
+DATA-DEP-022	18	dropped	-	Legacy utf8 MySQL 5 DDL syntax; DBLoom uses its own app storage.
+DATA-DEP-050	18	superseded	-	config.inc.php replaced by .env and settings per 12-settings.md.
+DATA-DEP-057	18	dropped	-	show_config_errors.php PHP script.
+DATA-DEP-062	18	dropped	-	Controluser grant comment in SQL script; no pma controluser.
+DATA-DEP-064	18	dropped	-	Controluser and control connection concept; DBLoom uses its own app store and profile connections.
+DATA-DTB-002	18	dropped	-	Central column dictionary is a standalone feature; owner decides once. (owner decision 2026-10-23, feature: central columns)
+DATA-DTB-003	18	dropped	-	LegacyAdmin la_ config-storage table list; DBLoom uses its own storage design.
+DATA-PLG-006	18	superseded	-	Auth and 2FA plugins replaced by DBLoom own accounts and auth design in 11-target-security.md.
+DATA-PLG-007	18	dropped	-	PHP property class API; internal detail.
+DATA-SAU-047	18	superseded	-	2FA data storage is covered by SEC-TGT-011/012; la_ tables never used. (consistency pass 2026-10-23, was ADAPT)
+DATA-SAU-083	18	superseded	-	PHP session keys replaced by DBLoom key ring, CSRF and session design (SEC-TGT-081/082).
+DATA-UIX-086	18	dropped	-	Legacy SCSS variable and partial list; DBLoom styling defined by its own design system.
+DEP-CFG-085	18	dropped	-	vendor_config.php packaging.
+DEP-CFG-086	18	dropped	-	Composer autoloader check.
+DEP-CFG-087	18	dropped	-	config.sample.inc.php template; DBLoom uses .env and settings (12-settings.md).
+DEP-CFG-109	18	dropped	-	Manual pmadb setup steps and config keys.
+DEP-DEP-090	18	dropped	-	PHP Composer dependency baseline.
+DEP-DEP-091	18	dropped	-	Composer repositories and branch alias.
+DEP-DEP-092	18	dropped	-	PHP dev toolchain.
+DEP-DEP-093	18	dropped	-	Composer plugin allowlist.
+DEP-DEP-094	18	dropped	-	Composer autoload classmap settings.
+DEP-DEP-096	18	dropped	-	Bundled Composer vendor licences in kits.
+DEP-DEP-100	18	dropped	-	Node 12 and Yarn classic build for legacy JS; DBLoom has its own toolchain.
+DEP-DEP-102	18	dropped	-	Pinned jQuery/Bootstrap/OpenLayers legacy front-end dependency list; DBLoom has its own TypeScript stack and lockfile.
+DEP-DEP-103	18	dropped	-	jest/eslint/stylelint versions for LegacyAdmin JS tree; DBLoom chooses its own tooling.
+DEP-DEP-162	18	dropped	-	PHP vendor_config.php packager mechanism; irrelevant to Node app.
+DEP-DTB-002	18	dropped	-	Events exist on all supported servers; version 5.1 check is obsolete.
+DEP-PLG-001	18	dropped	-	TCPDF and curl PHP dependencies; PDF export tooling would be chosen separately.
+DEP-PLG-002	18	dropped	-	Depends on LegacyAdmin configuration storage; DBLoom has own app storage.
+DEP-PLG-003	18	dropped	-	PHP uploadprogress extension backends; browser provides upload progress natively.
+DEP-SAU-079	18	dropped	-	PHP header() mechanics; DBLoom sets security and no-cache headers in its own server layer.
+DEP-SAU-084	18	dropped	-	Blowfish secret is PHP config; replaced by master secret (ST-052, SEC-TGT-081).
+DEP-SAU-091	18	dropped	-	Composer packages irrelevant; TypeScript libraries chosen separately.
+DEP-SRV-002	18	dropped	-	Depends on pma configurable menus table; obsolete.
+DEP-SRV-003	18	dropped	-	Internal PHP call-order dependency.
+DEP-UIX-070	18	dropped	-	Bundling CodeMirror in the page head is a build detail; SQL editor need covered elsewhere.
+DEP-UIX-084	18	dropped	-	Whether DBLoom offers selectable themes is an owner product choice; directory/theme.json format is legacy. (owner decision 2026-10-23, feature: themes)
+DEP-UIX-088	18	dropped	-	Per-theme icon/text footer settings tied to legacy TabsMode and new-window selflink.
+DEP-UIX-112	18	dropped	-	Same theme feature decision; legacy theme.json and version-series validation would not carry over. (owner decision 2026-10-23, feature: themes)
+FR-CFG-001	18	superseded	-	Layered config replaced by precedence rule in 12-settings.md (.env and settings).
+FR-CFG-002	18	dropped	-	baseSettings snapshot and PHP runtime facts.
+FR-CFG-003	18	dropped	-	Config object constructor and include.
+FR-CFG-004	18	dropped	-	Evaluating config as PHP include.
+FR-CFG-005	18	dropped	-	Slash-key quirk of flattened paths.
+FR-CFG-006	18	dropped	-	Config mtime for session preference cache.
+FR-CFG-007	18	dropped	-	PHP fatal handler during include.
+FR-CFG-008	18	dropped	-	CIFS readability probe for PHP config.
+FR-CFG-010	18	dropped	-	PHP vendor_config.php and deployment constants; DBLoom uses .env/settings (12-settings.md).
+FR-CFG-011	18	superseded	-	No config.inc.php; secrets/settings file handling covered by 11-target-security.md and 12-settings.md.
+FR-CFG-012	18	dropped	-	PHP session cache and array_replace_recursive mechanics; internal detail.
+FR-CFG-015	18	dropped	-	Cookie versus persistent preference lookup is legacy; preferences live server-side per user.
+FR-CFG-019	18	dropped	-	PHP login cookie validity cache; DBLoom session design in 11-target-security.md.
+FR-CFG-021	18	dropped	-	Servers array normalization; DBLoom uses connection profiles, single instance.
+FR-CFG-030	18	dropped	-	Session-held ConfigFile model of the PHP setup wizard.
+FR-CFG-031	18	dropped	-	ConfigFile set() path canonicalization is PHP setup internals.
+FR-CFG-032	18	dropped	-	Persist keys for generated config.inc.php; no generated PHP file.
+FR-CFG-034	18	dropped	-	Server bookkeeping of config file; replaced by connection profiles.
+FR-CFG-035	18	dropped	-	PHP form type derivation from config.values.php.
+FR-CFG-037	18	dropped	-	Allocating server index in config file; profiles use own IDs.
+FR-CFG-038	18	dropped	-	Legacy TrustedProxies line format; proxy trust handled by 11-target-security.md/12-settings.md.
+FR-CFG-039	18	dropped	-	UserprefsDisallow flags in setup; no setup wizard.
+FR-CFG-040	18	dropped	-	PHP Validator class dispatch mechanics.
+FR-CFG-043	18	dropped	-	pmadb controluser validation; DBLoom keeps its own app storage.
+FR-CFG-044	18	dropped	-	setup/validate.php AJAX endpoint.
+FR-CFG-045	18	dropped	-	PHP version and bootstrap requirements for setup front controller.
+FR-CFG-046	18	dropped	-	Setup disabled when config exists; no setup wizard in DBLoom.
+FR-CFG-047	18	dropped	-	Setup page dispatch and formsets.
+FR-CFG-048	18	dropped	-	Setup server add/edit flow; replaced by connection profile management.
+FR-CFG-049	18	dropped	-	Setup server removal; replaced by profile deletion.
+FR-CFG-050	18	dropped	-	Setup form processing redirects and error template.
+FR-CFG-051	18	dropped	-	Setup server form tabs for config.inc.php and pmadb.
+FR-CFG-052	18	dropped	-	Generating and downloading config.inc.php.
+FR-CFG-053	18	dropped	-	PHP config file generator.
+FR-CFG-054	18	superseded	-	blowfish_secret replaced by DBLoom secret/vault key handling in 11-target-security.md.
+FR-CFG-055	18	dropped	-	Line endings of generated PHP config.
+FR-CFG-056	18	dropped	-	Setup home page checks, version check, server list.
+FR-CFG-068	18	dropped	-	pmadb feature table probing; DBLoom uses its own storage, not LegacyAdmin tables.
+FR-CFG-070	18	dropped	-	PHP session relation cache keyed by version.
+FR-CFG-075	18	dropped	-	LEGACYADMIN constant guard is PHP-specific.
+FR-CFG-076	18	dropped	-	PHP version enforcement; DBLoom checks Node runtime instead if needed.
+FR-CFG-077	18	dropped	-	PHP OS, IIS, GD, browser sniffing; obsolete.
+FR-CFG-080	18	dropped	-	PHP ini environment defaults.
+FR-CFG-081	18	dropped	-	PHP_SELF PATH_INFO sanitizing.
+FR-CFG-088	18	dropped	-	Describes PHP Common::run() startup order.
+FR-CFG-098	18	dropped	-	Config class get/set internals.
+FR-CFG-099	18	dropped	-	Setup wizard flow; replaced by first-run setup in 12-settings.md and profiles.
+FR-CFG-101	18	dropped	-	LegacyAdmin project update check against legacyadmin.net; not applicable to DBLoom.
+FR-CFG-110	18	superseded	-	DBLoom uses its own application storage, not LegacyAdmin la_ tables; see 12-settings and 11-target-security.
+FR-CFG-112	18	superseded	-	Storage database discovery/ZeroConf is a pmadb mechanism; DBLoom has own app storage.
+FR-CFG-115	18	superseded	-	Per-user preferences are stored with DBLoom user accounts, no PHP session fallback.
+FR-DEP-010	18	dropped	-	PHP version requirement; DBLoom runs on Node.js.
+FR-DEP-011	18	dropped	-	PHP extension requirements do not apply to Node.
+FR-DEP-012	18	dropped	-	PHP extension suggestions; compression handled by Node libraries if import/export needs them.
+FR-DEP-021	18	dropped	-	mysqli/mysqlnd specific; DBLoom uses a Node driver behind the Adapter (ARCH-TGT-001).
+FR-DEP-030	18	dropped	-	PHP front controller and file entry points; TanStack Start routing replaces them.
+FR-DEP-040	18	dropped	-	LegacyAdmin release archives and config.inc.php setup; DBLoom deployment is defined in DEP-TGT.
+FR-DEP-042	18	dropped	-	Composer packaging is PHP specific.
+FR-DEP-043	18	dropped	-	Git/Composer/Yarn install pipeline specific to LegacyAdmin.
+FR-DEP-044	18	dropped	-	Composer autoloader failure message is PHP specific.
+FR-DEP-051	18	superseded	-	Replaced by .env/settings design and secret handling in 12-settings.md and SEC-TGT; no blowfish_secret or config.inc.php.
+FR-DEP-055	18	superseded	-	DBLoom has its own session/cookie design in 11-target-security.md; sodium cookies and PHP directives not carried.
+FR-DEP-056	18	dropped	-	Opt-in client error reporting to a vendor/project; owner decides whether DBLoom has any telemetry or error reports. (owner decision 2026-10-23, feature: error r
+FR-DEP-060	18	dropped	-	Per-feature la_ storage tables; DBLoom stores own state in its own store. Owner decides which features (bookmarks, tracking, central columns) exist. (owner de
+FR-DEP-063	18	dropped	-	19 config.inc.php table directives for la_ tables; DBLoom uses its own internal store.
+FR-DEP-072	18	dropped	-	create_tables.sql parsing and la_column_info upgrade are LegacyAdmin storage internals.
+FR-DEP-095	18	dropped	-	Composer phpcs/phpstan/psalm workflow; PHP tooling.
+FR-DEP-101	18	dropped	-	SassDart, rtlcss, Babel build of LegacyAdmin themes; DBLoom has its own build.
+FR-DEP-104	18	dropped	-	Prebuilt js/dist and theme CSS in PHP tree; DBLoom ships its own build output or image.
+FR-DEP-150	18	dropped	-	phpunit configuration is PHP specific.
+FR-DEP-151	18	dropped	-	PHP test bootstrap settings.
+FR-DEP-152	18	dropped	-	Describes LegacyAdmin test layout; DBLoom defines its own tests.
+FR-DEP-153	18	dropped	-	LegacyAdmin Selenium env vars; DBLoom picks its own E2E tooling.
+FR-DEP-155	18	dropped	-	LegacyAdmin PHP/JS lint and test gates; DBLoom defines own CI.
+FR-DEP-157	18	dropped	-	LegacyAdmin release engineering and translation scripts; project housekeeping.
+FR-DEP-160	18	dropped	-	PHP version and extension gate at entry points; not applicable to Node.
+FR-DEP-163	18	dropped	-	LegacyAdmin yarn/jest build and test commands.
+FR-DEP-164	18	dropped	-	po/mo translation build with msgfmt; DBLoom has its own i18n approach.
+FR-DEP-165	18	dropped	-	LegacyAdmin Composer/Yarn release packaging steps.
+FR-DEP-166	18	dropped	-	PHP test bootstrap and fixtures.
+FR-DTB-020	18	dropped	-	POST/GET sql_query sources and signed GET are PHP request mechanics; bookmark source handled elsewhere.
+FR-DTB-024	18	dropped	-	PHP session locking does not exist in Node.
+FR-DTB-034	18	dropped	-	Database comment stored in LegacyAdmin relation config storage; MySQL has no native database comment.
+FR-DTB-092	18	dropped	-	Scatter-plot zoom search is a separate feature; legacy has injection defect SEC-DTB-005. (owner decision 2026-10-23, feature: zoom search)
+FR-DTB-094	18	dropped	-	QBE multi-table query builder is a separate feature. (owner decision 2026-10-23, feature: query by example)
+FR-DTB-095	18	dropped	-	QBE form and saved searches. (owner decision 2026-10-23, feature: query by example)
+FR-DTB-140	18	dropped	-	Normalization wizard is a separate feature. (owner decision 2026-10-23, feature: normalization wizard)
+FR-DTB-158	18	dropped	-	QBE form parameters. (owner decision 2026-10-23, feature: query by example)
+FR-DTB-159	18	dropped	-	Saved QBE searches. (owner decision 2026-10-23, feature: query by example)
+FR-IOX-003	18	dropped	-	PHP class-name factory and securePath mechanics; DBLoom uses a closed built-in registry.
+FR-IOX-004	18	dropped	-	PHP property-tree rendering; DBLoom defines options in its own registry and UI.
+FR-IOX-011	18	dropped	-	Second review (Haiku, 10 reviewers, 2026-10-23): XML export dropped (owner decision 2026-10-23).
+FR-IOX-012	18	dropped	-	Second review (Haiku, 10 reviewers, 2026-10-23): LaTeX, ODT, HTML, MediaWiki, Texy, PHP array, YAML, ODS and PDF export dropped; only SQL, CSV and JSON stay.
+FR-IOX-024	18	dropped	-	Internal PHP buffering/echo/escape structure; DBLoom should stream exports via Node streams.
+FR-IOX-029	18	dropped	-	PHP max_execution_time workaround; Node streaming has no such timeout endpoint.
+FR-IOX-039	18	dropped	-	PHP class/factory/global promotion mechanics; replaced by closed built-in importer registry.
+FR-IOX-043	18	dropped	-	Second review (Haiku, 10 reviewers, 2026-10-23): ODS import dropped (owner decision 2026-10-23).
+FR-IOX-044	18	dropped	-	Second review (Haiku, 10 reviewers, 2026-10-23): XML import dropped with XML export (owner decision 2026-10-23).
+FR-IOX-045	18	dropped	-	Niche format; rarely needed for DB administration.
+FR-IOX-047	18	dropped	-	Niche format depending on PHP dbase extension; obsolete for first release.
+FR-IOX-060	18	dropped	-	PECL uploadprogress/PHP session backends are PHP specific; DBLoom uses its own upload progress.
+FR-IOX-069	18	dropped	-	PHP plugin property-tree structure; closed built-in registry replaces it.
+FR-IOX-076	18	dropped	-	Format dropped: only SQL, CSV and JSON stay (owner decision 2026-10-23): XML export.
+FR-IOX-077	18	dropped	-	Format dropped: only SQL, CSV and JSON stay (owner decision 2026-10-23): YAML export.
+FR-IOX-078	18	dropped	-	PHP array export is PHP specific.
+FR-IOX-079	18	dropped	-	Format dropped: only SQL, CSV and JSON stay (owner decision 2026-10-23): LaTeX export.
+FR-IOX-080	18	dropped	-	Format dropped: only SQL, CSV and JSON stay (owner decision 2026-10-23): ODS export.
+FR-IOX-081	18	dropped	-	Format dropped: only SQL, CSV and JSON stay (owner decision 2026-10-23): Word, Texy and MediaWiki export.
+FR-IOX-082	18	dropped	-	Format dropped: only SQL, CSV and JSON stay (owner decision 2026-10-23): PDF export.
+FR-IOX-090	18	dropped	-	Format dropped: only SQL, CSV and JSON stay (owner decision 2026-10-23): MediaWiki import.
+FR-IOX-091	18	dropped	-	Format dropped: only SQL, CSV and JSON stay (owner decision 2026-10-23): ODS import.
+FR-IOX-097	18	dropped	-	Format dropped: only SQL, CSV and JSON stay (owner decision 2026-10-23): schema export.
+FR-PLG-001	18	dropped	-	PHP class-name convention instantiation.
+FR-PLG-002	18	dropped	-	PHP global $plugin_param context injection.
+FR-PLG-003	18	dropped	-	Directory scan discovery; DBLoom uses a closed registry.
+FR-PLG-004	18	dropped	-	PHP class and subclass admittance check.
+FR-PLG-007	18	dropped	-	PHP manager entry points.
+FR-PLG-008	18	dropped	-	PHP DI container and constructor lifecycle.
+FR-PLG-009	18	dropped	-	Abstract PHP method list; implementation structure only.
+FR-PLG-010	18	dropped	-	PHP optional method defaults; implementation structure only.
+FR-PLG-015	18	dropped	-	PHP POST key naming and global read-back; DBLoom uses typed form state.
+FR-PLG-017	18	dropped	-	PHP checkbox state resolution via request globals.
+FR-PLG-018	18	dropped	-	PHP chooser data structure; UI format selector built from typed registry.
+FR-PLG-022	18	dropped	-	Recursive PHP property-tree HTML rendering; DBLoom uses typed React option schemas.
+FR-PLG-027	18	dropped	-	Maps stored pseudo-path to PHP class names; PHP-specific.
+FR-PLG-029	18	dropped	-	Directory scan of PHP files for discovery; DBLoom uses closed built-in registry.
+FR-PLG-033	18	dropped	-	Legacy MIME name case fixup for old stored names; no legacy data in new app.
+FR-PLG-040	18	dropped	-	Runs external programs on server; unsafe and disabled by default in legacy. Not carried over.
+FR-PLG-055	18	dropped	-	Table mapping PHP class names to MIME/name; PHP class naming detail.
+FR-PLG-058	18	dropped	-	Stored-name case round trip quirk of legacy lowercase storage; defect-like, not needed.
+FR-SAU-001	18	superseded	-	DBLoom uses own accounts plus connection profiles (SEC-TGT-018/019), no auth_type plugins.
+FR-SAU-002	18	dropped	-	Plugin class lookup error is a PHP mechanic.
+FR-SAU-007	18	superseded	-	Config-file credentials replaced by profiles with vault or account login (SEC-TGT-018/019).
+FR-SAU-008	18	dropped	-	Config-auth connection failure page; DBLoom shows its own connection error UI.
+FR-SAU-009	18	dropped	-	HTTP auth type not offered; reverse-proxy auth not in scope.
+FR-SAU-010	18	dropped	-	PHP server variable fallback chain for HTTP auth.
+FR-SAU-012	18	dropped	-	HTTP auth logout trick not needed.
+FR-SAU-014	18	dropped	-	PHP session HMAC secret handling for signon.
+FR-SAU-015	18	dropped	-	PHP session cookie parameter defaults for signon session.
+FR-SAU-017	18	dropped	-	Including arbitrary PHP script is incompatible with closed registry and no plugin loading.
+FR-SAU-019	18	superseded	-	Encrypted credential cookies replaced by DBLoom sessions and vault (SEC-TGT-*).
+FR-SAU-021	18	dropped	-	Cookie encryption key derivation from blowfish_secret; replaced by key ring.
+FR-SAU-022	18	dropped	-	Per-session sodium key in PHP session.
+FR-SAU-023	18	superseded	-	Password cookie payload not used; DB passwords held in vault or server-side session.
+FR-SAU-028	18	superseded	-	Free host entry replaced by connection profiles; ad-hoc connection per profile design.
+FR-SAU-032	18	dropped	-	PHP session bootstrap and cookie naming; DBLoom has own session design.
+FR-SAU-035	18	dropped	-	Per-window access time in PHP session; replaced by server-side session activity tracking.
+FR-SAU-043	18	dropped	-	Token in every URL is a PHP pattern; DBLoom uses header or cookie based CSRF.
+FR-SAU-044	18	dropped	-	PHP session cookie warning; replaced by DBLoom HTTPS and origin checks (ST-006).
+FR-SAU-045	18	superseded	-	2FA login gate is specified by SEC-TGT-011..014. (consistency pass 2026-10-23, was ADAPT)
+FR-SAU-046	18	superseded	-	2FA configuration storage is covered by SEC-TGT-011..014. (consistency pass 2026-10-23, was ADAPT)
+FR-SAU-048	18	superseded	-	2FA backends replaced by passkeys and TOTP per SEC-TGT-011..014. (consistency pass 2026-10-23, was ADAPT)
+FR-SAU-049	18	superseded	-	Fail-closed 2FA is covered by the target security requirements. (consistency pass 2026-10-23, was KEEP)
+FR-SAU-051	18	superseded	-	Passkey and TOTP enrolment are specified in SEC-TGT-011 to 014. Changed from ADAPT after the sample review.
+FR-SAU-052	18	superseded	-	2FA enrolment flow is covered by SEC-TGT-011..014. (consistency pass 2026-10-23, was KEEP)
+FR-SAU-054	18	superseded	-	TOTP enrolment and QR code are specified in SEC-TGT-012. Changed from KEEP after the sample review.
+FR-SAU-055	18	superseded	-	U2F is covered by passkeys and TOTP in SEC-TGT-011..014. (consistency pass 2026-10-23, was DROP)
+FR-SAU-058	18	superseded	-	Authenticator selection is fully decided by the DBLoom passkey spec SEC-TGT-011. (consistency pass 2026-10-23, was ADAPT)
+FR-SAU-059	18	superseded	-	Assertion validation is covered by SEC-TGT-011 passkey spec. (consistency pass 2026-10-23, was KEEP)
+FR-SAU-060	18	superseded	-	Registration handling is covered by SEC-TGT-011 passkey spec. (consistency pass 2026-10-23, was ADAPT)
+FR-SAU-062	18	superseded	-	Credential storage is defined by the new passkey spec. (consistency pass 2026-10-23, was ADAPT)
+FR-SAU-063	18	superseded	-	Passkey user handle and enrolment screens are defined by SEC-TGT-011. (consistency pass 2026-10-23, was ADAPT)
+FR-SAU-064	18	superseded	-	2FA failure messaging belongs to the new passkey and TOTP spec. (consistency pass 2026-10-23, was ADAPT)
+FR-SAU-065	18	superseded	-	RP id and TOTP issuer are defined by SEC-TGT-011/012. (consistency pass 2026-10-23, was ADAPT)
+FR-SAU-066	18	dropped	-	PHP sodium/session key mechanism; DBLoom keeps state server-side instead (SEC-TGT-114).
+FR-SAU-082	18	superseded	-	WebAuthn request handling is covered by the new passkey spec. (consistency pass 2026-10-23, was DROP)
+FR-SAU-200	18	superseded	-	Idle timeout and absolute lifetime configurable per SEC-TGT-041; client expiry handling shows re-login.
+FR-SAU-203	18	superseded	-	Replaced by allow/deny lists in inbound exposure requirements (DEP-TGT-122 context, SEC-TGT section 13); fixes CIDR defect.
+FR-SAU-204	18	dropped	-	HTTP basic auth mode not in DBLoom; own login per SEC-TGT-010.
+FR-SAU-209	18	superseded	-	Replaced by SEC-TGT-012/013/014 with administrator enforcement policy.
+FR-SAU-210	18	superseded	-	No unverified fallback; DEP-TGT-091 requires failing startup, full signature verification.
+FR-SRV-023	18	dropped	-	Internal AJAX getter endpoint with HTML response; implementation detail.
+FR-SRV-044	18	dropped	-	ConfigurableMenus and configuration storage are LegacyAdmin specific; DBLoom has own user management.
+FR-SRV-049	18	dropped	-	LegacyAdmin menu user groups; replaced by DBLoom own accounts and roles.
+FR-SRV-050	18	dropped	-	Edit-form endpoint for LegacyAdmin menu user groups; not needed.
+FR-SRV-056	18	superseded	-	Single instance with personal connection profiles and vault replaces configured server list.
+FR-SRV-057	18	dropped	-	Legacy route table; PHP route structure, DBLoom defines its own routes.
+FR-SRV-062	18	dropped	-	Advisor rule engine is a whole feature; owner must decide (possibly overlaps AI sidebar). (owner decision 2026-10-23, feature: server advisor)
+FR-SRV-063	18	dropped	-	Advisor rule set loading; query-cache rules for MySQL < 8.0.3 are obsolete anyway. Decide with advisor feature. (owner decision 2026-10-23, feature: server advi
+FR-SRV-068	18	superseded	-	Single instance with personal connection profiles and vault; no config servers list (see 11-target-security, FUTURE shared profiles).
+FR-UIX-009	18	dropped	-	Page-lock icon, cog and goto-top cluster is legacy chrome; unsaved-change guard covered by FR-UIX-021.
+FR-UIX-010	18	dropped	-	Self-link opening a new LegacyAdmin window and PHP error container are legacy; browser handles new tabs.
+FR-UIX-012	18	dropped	-	Theme chooser depends on the theme feature decision. (owner decision 2026-10-23, feature: themes)
+FR-UIX-013	18	superseded	-	DBLoom has own account login and vault design in 11-target-security.md; keep autocomplete hints as implementation detail there.
+FR-UIX-014	18	dropped	-	Noscript and framing-hide trick are legacy; app requires JavaScript and sets framing policy via headers.
+FR-UIX-015	18	dropped	-	Describes legacy is_ajax flag; DBLoom is a JavaScript-dependent app by design.
+FR-UIX-016	18	dropped	-	Generic link/form interception is replaced by client-side routing of TanStack Start.
+FR-UIX-017	18	dropped	-	Exceptions to AJAX interception; router handles native link behaviour (modifier clicks, targets) natively.
+FR-UIX-019	18	dropped	-	Script teardown, body purging and page_content swap are legacy page-swap mechanics.
+FR-UIX-023	18	dropped	-	Custom script loader with cache and onload events replaced by bundler code splitting.
+FR-UIX-024	18	dropped	-	Legacy script lifecycle registration; framework components handle lifecycle.
+FR-UIX-029	18	dropped	-	Describes Twig include placement of messages and errors; covered by notifications and error display.
+FR-UIX-030	18	dropped	-	Retired reserved gap, no requirement.
+FR-UIX-031	18	dropped	-	Retired reserved gap, no requirement.
+FR-UIX-048	18	dropped	-	Hidden form POST to /import is a PHP/jQuery implementation detail.
+FR-UIX-050	18	dropped	-	Singleton and AJAX purging are internals of the legacy page lifecycle.
+FR-UIX-056	18	dropped	-	jQuery sortable-table plugin is implementation detail.
+FR-UIX-057	18	dropped	-	Tooltip hint configuration is a legacy detail; sort indication handled by the new grid.
+FR-UIX-060	18	dropped	-	Zoom search scatter plot is a distinct feature; owner decides. (owner decision 2026-10-23, feature: zoom search)
+FR-UIX-061	18	dropped	-	jqPlot byte-formatter plugin is a library detail.
+FR-UIX-062	18	dropped	-	QBE interface is a distinct feature; owner decides. (owner decision 2026-10-23, feature: query by example)
+FR-UIX-071	18	dropped	-	jQuery-UI tooltip helper is implementation detail.
+FR-UIX-072	18	dropped	-	Hint on/off switch tied to jQuery tooltips; not needed.
+FR-UIX-079	18	dropped	-	jQuery-Validate extension and PHP-injected validators are implementation detail.
+FR-UIX-081	18	dropped	-	PHP max_input_vars guard does not apply to Node.
+FR-UIX-082	18	dropped	-	Reporting to LegacyAdmin project via TraceKit is project infrastructure; no telemetry.
+FR-UIX-083	18	dropped	-	PHP error report ignore/send flow is PHP specific.
+FR-UIX-085	18	dropped	-	Theme switching and per-server themes; owner decides themes scope. (owner decision 2026-10-23, feature: themes)
+FR-UIX-087	18	dropped	-	Theme CSS paths and jQuery-UI CSS are legacy asset mechanics.
+FR-UIX-091	18	dropped	-	Direction-specific icon image files are legacy assets; use mirrored icons via CSS.
+FR-UIX-096	18	dropped	-	url.php redirector is PHP-specific; use rel=noreferrer on external links.
+FR-UIX-098	18	dropped	-	AJAX onload/teardown re-init is legacy page lifecycle; features decided separately.
+FR-UIX-107	18	dropped	-	PHP ajax_request protocol is replaced by TanStack Start server functions and routing.
+FR-UIX-108	18	dropped	-	Legacy JSON response envelope is replaced by typed server functions.
+FR-UIX-110	18	dropped	-	DBLoom is a JS-required SPA/SSR app; no no-JS support claimed.
+FR-UPD-026	14	dropped	-	row states features removed
+INT-CFG-083	18	dropped	-	localStorage import banner is a legacy PHP session-prefs mechanism.
+INT-CFG-084	18	dropped	-	Describes PHP entry-point bootstrapping and DI container.
+INT-CFG-102	18	dropped	-	Only used for version check; no outbound HTTP planned. PHP cURL/stream details irrelevant.
+INT-CFG-113	18	superseded	-	No pmadb control connection; DBLoom storage is separate from target database access.
+INT-CFG-116	18	dropped	-	Legacy prefs import/export through localStorage and config.js.
+INT-DEP-013	18	dropped	-	reCAPTCHA on login is a product choice; DBLoom login hardening may instead use rate limiting (SEC-TGT). Owner decides on CAPTCHA. (owner decision 2026-10-23, fe
+INT-DEP-014	18	superseded	-	DBLoom own accounts and 2FA design are in 11-target-security.md; PHP packages not carried. TOTP/WebAuthn need stays.
+INT-DEP-015	18	dropped	-	Format dropped: only SQL, CSV and JSON stay (owner decision 2026-10-23): PDF output library.
+INT-DEP-058	18	superseded	-	Config/cookie/http/signon auth types replaced by DBLoom accounts and connection profiles with vault (11-target-security.md).
+INT-DEP-065	18	dropped	-	Auto-probing for la_ control storage; DBLoom has its own store.
+INT-DEP-081	18	superseded	-	Retired legacy item; DBLoom defines its own env contract in 12-settings.md.
+INT-DEP-082	18	superseded	-	Retired legacy item; DBLoom deployment defined in DEP-TGT and 12-settings.md.
+INT-DTB-001	18	superseded	-	Replaced by ARCH-TGT-001 Adapter; mysqli DbiExtension is PHP specific.
+INT-IOX-002	18	dropped	-	PHP plugin class contract; internal registry design replaces it.
+INT-SAU-003	18	dropped	-	PHP class structure; DBLoom has own auth design in SEC-TGT-010.
+INT-SAU-038	18	dropped	-	PHP front-controller detail.
+INT-SAU-057	18	superseded	-	WebAuthn server interface is part of the superseded 2FA design; SEC-TGT-011 specifies passkeys. (consistency pass 2026-10-23, was DROP)
+INT-SAU-080	18	dropped	-	PHP library selection detail.
+INT-SAU-081	18	dropped	-	PHP superglobal handling; public origin comes from settings and trusted proxy config.
+INT-SRV-001	18	dropped	-	Describes read-only PHP object with magic setter.
+INT-SRV-007	18	dropped	-	DBLoom edits via GRANT/CREATE USER, so manual grant-table edit and flush warning is obsolete.
+INT-SRV-008	18	dropped	-	Advisor expression language only exists with the advisor feature; decide with it. (owner decision 2026-10-23, feature: server advisor)
+NFR-CC-001	18	dropped	-	PHP version gate.
+NFR-CC-003	18	dropped	-	Yarn/Composer build specifics; DBLoom has its own Node build.
+NFR-CC-011	18	dropped	-	PHP extension checks.
+NFR-CC-012	18	dropped	-	PHP ini and timezone normalisation.
+NFR-CFG-082	18	dropped	-	PHP session cache of prefs and relations; DBLoom has own caching design.
+NFR-CFG-117	18	dropped	-	Per-table degradation without pmadb is irrelevant with DBLoom own storage.
+NFR-DEP-016	18	dropped	-	ext-xml dependency; DBLoom XML handling uses Node libraries if XML import/export is kept.
+NFR-DEP-156	18	dropped	-	phpcs standard, stubs and baselines are PHP specific.
+NFR-IOX-027	18	dropped	-	Derived from PHP memory_limit; Node uses streaming.
+NFR-IOX-028	18	dropped	-	PHP execution time and session error stamp are PHP specific.
+NFR-IOX-053	18	dropped	-	read_limit derived from PHP memory_limit.
+NFR-IOX-054	18	dropped	-	max_execution_time based timeout handling is PHP specific.
+NFR-IOX-059	18	dropped	-	PHP time and memory limits do not apply.
+NFR-IOX-093	18	dropped	-	Second review (Haiku, 10 reviewers, 2026-10-23): buffering rule for the XML and ODS importers, both dropped.
+NFR-PLG-001	18	dropped	-	File-name convention for auto-enumerated PHP transformation files.
+NFR-PLG-002	18	dropped	-	Per-request static cache of directory scan; no scan in DBLoom.
+NFR-PLG-003	18	dropped	-	Static PHP availability methods; internal code structure.
+NFR-SAU-086	18	dropped	-	PHP TESTSUITE constant detail; testability handled by normal test design.
+NFR-SRV-004	18	dropped	-	Legacy getExtraDataForAjaxBehavior mechanism; DBLoom uses typed API responses.
+NFR-SRV-005	18	dropped	-	Selecting mysql database at request start is a legacy side effect; qualify mysql.* explicitly.
+NFR-SRV-006	18	dropped	-	__() usage is PHP specific; DBLoom i18n and number formatting decided elsewhere.
+NFR-SRV-007	18	superseded	-	DBLoom own authorization design (SEC-TGT-*) replaces per-route superuser checks; server privileges enforce database actions.
+NFR-UIX-099	18	dropped	-	Legacy script handler cache; bundler code-splitting handles per-route loading.
+NFR-UIX-100	18	dropped	-	PHP messages.php and version query strings; build tooling uses content-hashed assets.
+NFR-UIX-101	18	dropped	-	Legacy jQuery navigation resize handler detail.
+NFR-UIX-115	18	dropped	-	Babel ES5 downlevel and legacy feature list; modern browsers assumed.
+NFR-UIX-117	18	dropped	-	Twig environment and compiled cache are PHP-specific.
+SEC-CC-002	18	dropped	-	PHP direct-include protection.
+SEC-CC-008	18	superseded	-	Replaced by DBLoom CSRF/request protection design in 11-target-security.md (SEC-TGT-*).
+SEC-CC-009	18	superseded	-	PHP session ini; DBLoom session and cookie hardening specified in 11-target-security.md.
+SEC-CC-010	18	superseded	-	Session fixation protection covered by DBLoom session design in 11-target-security.md.
+SEC-CC-018	18	superseded	-	Cookie credential encryption replaced by DBLoom connection profile vault in 11-target-security.md.
+SEC-CFG-058	18	superseded	-	blowfish_secret/sodium key replaced by DBLoom secret handling in 11-target-security and 12-settings.
+SEC-CFG-059	18	superseded	-	Arbitrary server login replaced by connection profiles and vault.
+SEC-CFG-061	18	superseded	-	Session validity handled by DBLoom own session design, not PHP gc_maxlifetime.
+SEC-CFG-062	18	dropped	-	PHP SaveDir/TempDir setup notice.
+SEC-CFG-063	18	dropped	-	Checks PHP zip/gzip/bzip functions; Node has own libraries.
+SEC-CFG-064	18	dropped	-	PHP config file error display page.
+SEC-CFG-065	18	superseded	-	Cookie flags and naming defined by DBLoom own session/cookie security design.
+SEC-CFG-067	18	dropped	-	PHP include files; not in closed registry design.
+SEC-CFG-104	18	superseded	-	PHP sodium/blowfish key fallback replaced by DBLoom secret management.
+SEC-CFG-114	18	superseded	-	Default-off arbitrary server field replaced by connection profiles.
+SEC-DEP-046	18	dropped	-	PHP-specific packager path relocation via vendor_config.php; no equivalent in a Node deployment.
+SEC-DEP-052	18	superseded	-	Legacy PHP sodium cookie encryption replaced by DBLoom's own session and vault credential protection in 11-target-security.md.
+SEC-DEP-053	18	dropped	-	PHP-specific URL query encryption option; not needed in DBLoom's routing design.
+SEC-DEP-140	18	dropped	-	LegacyAdmin setup script generating config.inc.php; DBLoom uses .env/settings instead.
+SEC-DEP-141	18	superseded	-	DBLoom has own user accounts and connection profiles; no auth_type=config open-access mode.
+SEC-DEP-143	18	dropped	-	Third-party captcha on login not needed; DBLoom has its own account and login protection.
+SEC-DEP-145	18	dropped	-	PHP session_save_path and save_handler setting; Node session storage is DBLoom-specific.
+SEC-DEP-154	18	dropped	-	PHP test/ directory .htaccess note; project housekeeping, not applicable.
+SEC-DTB-005	18	dropped	-	Zoom search is dropped; its maxPlotLimit defect goes with it. (consistency pass 2026-10-23, was ADAPT)
+SEC-PLG-004	18	dropped	-	Physical file existence check before instantiating PHP class; closed registry replaces it.
+SEC-PLG-005	18	dropped	-	External-program transformation not carried over; no server-side command execution from stored options.
+SEC-PLG-006	18	superseded	-	PHP class-name dispatch; DBLoom uses own account/vault authentication design in 11-target-security.md (SEC-TGT-*).
+SEC-SAU-011	18	dropped	-	PHP phpinfo and superglobal specific.
+SEC-SAU-031	18	dropped	-	Optional captcha on login is a product-scope choice; rate limiting exists in SEC-TGT-017. (owner decision 2026-10-23, feature: login captcha)
+SEC-SAU-033	18	superseded	-	Replaced by SEC-TGT-040 (HttpOnly, Secure, SameSite, __Host- prefix).
+SEC-SAU-034	18	superseded	-	Session regenerated at login and privilege change per SEC-TGT-040.
+SEC-SAU-040	18	superseded	-	Replaced by SEC-TGT-042 CSRF protection for all state-changing requests.
+SEC-SAU-041	18	superseded	-	SEC-TGT-042 covers every method; fixes POST-only defect.
+SEC-SAU-068	18	dropped	-	PHP include guards; not applicable.
+SEC-SAU-069	18	dropped	-	PHP front-controller path inflation; router handles paths.
+SEC-SAU-075	18	dropped	-	Local-infile PHP define; local infile handling decided by import design and adapter settings.
+SEC-SAU-076	18	superseded	-	SEC-TGT-043 frame protection headers; framing opt-out via settings.
+SEC-SAU-077	18	superseded	-	SEC-TGT-043 header set (Referrer-Policy, nosniff, no-store); X-XSS-Protection obsolete.
+SEC-SAU-078	18	superseded	-	SEC-TGT-043 strict nonce-based CSP, no inline or eval; legacy CSP variants dropped.
+SEC-SAU-201	18	superseded	-	SEC-TGT-040 session cookie rules; only session cookie plus optional prefs, no 30-day username cookies.
+SEC-SAU-205	18	dropped	-	PHP include of signon script; external SSO handled by OIDC/other auth decisions, not PHP scripts.
+SEC-SAU-206	18	superseded	-	Replaced by SEC-TGT-017 rate limiting with backoff and logging; defect not carried over.
+SEC-SAU-207	18	dropped	-	PHP sodium/blowfish_secret detail; DBLoom uses own secret handling in .env/settings.
+SEC-SAU-208	18	dropped	-	Known PHP defect; not to be preserved.
+SEC-SAU-300	18	dropped	-	Replaced by server-side state and opaque identifiers (SEC-TGT-114).
+SEC-SAU-302	18	superseded	-	Replaced by inbound allow/deny lists in SEC-TGT section 13.3; see SEC-SAU-203.
+SEC-SAU-303	18	superseded	-	Defect not carried over; use verified CIDR library (NFR-TGT-122).
+SEC-SAU-306	18	superseded	-	U2F backend replaced by passkeys; single-use challenges covered in SEC-TGT-011. (consistency pass 2026-10-23, was DROP)
+SEC-SAU-309	18	dropped	-	PHP serialization specific; DBLoom stores JSON.
+SEC-SAU-310	18	dropped	-	PHP session HMAC mechanism; DBLoom does not pass SQL text through URLs, uses its own session and CSRF design.
+SEC-SAU-312	18	superseded	-	Cookie attributes (Secure, HttpOnly, SameSite) covered by DBLoom session design in 11-target-security.md (SEC-TGT-*).
+SEC-SAU-315	18	dropped	-	Sends reports to LegacyAdmin project server; irrelevant. Any DBLoom diagnostics would be separate.
+SEC-SAU-317	18	dropped	-	PHP $_REQUEST/$_GET handling; DBLoom validates input with typed schemas.
+SEC-SAU-321	18	superseded	-	Legacy has no route authorization; DBLoom defines authn/authz for all routes in 11-target-security.md (SEC-TGT-*).
+SEC-SAU-324	18	superseded	-	DBLoom CSRF design in 11-target-security.md; state changes must never happen via GET.
+SEC-SAU-325	18	superseded	-	Whether DBLoom offers TOTP 2FA is a product choice; if yes, narrow window and add replay and attempt limits. (owner decision 2026-10-23, feature: two-factor aut
+SEC-SRV-001	18	superseded	-	AJAX-only gating is a PHP request convention; DBLoom API auth and CSRF in 11-target-security.
+SEC-SRV-005	18	dropped	-	old_passwords and mysql_old_password/sha256 switching are obsolete on MySQL 8.4/MariaDB 10.11.
+SEC-SRV-008	18	dropped	-	setPostAsGlobal is PHP specific; use typed input schema.
+SEC-SRV-010	18	dropped	-	Advisor result link rewriting; decide with advisor feature. (owner decision 2026-10-23, feature: server advisor)
+SEC-TGT-148	11	superseded	-	merged into SEC-TGT-147
+ST-028	12	dropped	-	single instance
+ST-029	12	dropped	-	dropped for first release
+ST-038	12	dropped	-	multi-instance dropped (DEP-TGT-150)
+ST-053	12	dropped	-	no such setting; server-side sessions need none
+ST-073	12	dropped	-	remember-me dropped
+ST-083	12	dropped	-	no email binding
+ST-091	12	dropped	-	captcha dropped, throttling replaces it
+ST-154	12	dropped	-	Download only
+ST-208	12	dropped	-	Row text says dropped
+ST-210	12	dropped	-	Row text says dropped (no feature)
+ST-222	12	deferred	-	FU-005 in FUTURE.md
+UI-CFG-057	18	dropped	-	Session-backed message buckets are a PHP implementation detail.
+UI-CFG-100	18	dropped	-	Setup form tab definitions for PHP setup script.
+UI-DTB-001	18	dropped	-	PHP-array code view of queries is PHP-specific; DBLoom may offer copy-as-code differently if wanted.
+UI-PLG-001	18	dropped	-	PHP form-element id naming for plugin options; DBLoom builds forms in its own components.
+UI-PLG-003	18	dropped	-	Legacy widget rendering details including known defects; not carried over.
+UI-SAU-053	18	superseded	-	Applies only if 2FA is offered; confirmation screen with backend-specific submit button. (owner decision 2026-10-23, feature: two-factor auth)
+UI-SAU-056	18	superseded	-	U2F screens replaced by WebAuthn passkeys. (consistency pass 2026-10-23, was DROP)
+UI-SRV-006	18	dropped	-	Sub-navigation active-state tracking is a template detail; DBLoom routing handles it.
+UI-UIX-045	18	dropped	-	Fixed menubar padding sync via MutationObserver is legacy layout detail; CSS layout handles it.
+CON-CFG-027	18	planned	admin	
+FR-CFG-036	18	planned	admin	
+FR-CFG-041	18	planned	admin	
+FR-ISS-120	17	planned	admin	
+FR-SAU-006	18	planned	admin	
+FR-SAU-037	18	planned	admin	
+FR-TGT-105	11	planned	admin	
+FR-TGT-141	11	planned	admin	
+FR-TGT-146	11	planned	admin	
+FR-TGT-149	11	planned	admin	
+FR-UIX-078	18	planned	admin	
+NFR-TGT-090	11	planned	admin	
+NFR-TGT-107	11	planned	admin	
+NFR-TGT-145	11	planned	admin	
+SEC-DEP-144	18	planned	admin	
+SEC-ISS-103	17	planned	admin	audit log content
+SEC-TGT-125	11	planned	admin	
+SEC-TGT-128	11	planned	admin	
+SEC-TGT-142	11	planned	admin	
+SEC-TGT-143	11	planned	admin	
+SEC-TGT-144	11	planned	admin	
+SEC-TGT-147	11	planned	admin	
+SEC-TGT-150	11	planned	admin	
+ST-011	12	planned	admin	
+ST-012	12	planned	admin	
+ST-014	12	planned	admin	
+ST-032	12	planned	admin	
+ST-034	12	planned	admin	
+ST-035	12	planned	admin	
+ST-036	12	planned	admin	
+ST-037	12	planned	admin	
+ST-092	12	planned	admin	audit
+ST-093	12	planned	admin	
+ST-204	12	planned	admin	
+ST-205	12	planned	admin	
+ST-207	12	planned	admin	
+ST-216	12	planned	admin	
+ST-218	12	planned	admin	
+ST-219	12	planned	admin	
+ST-220	12	planned	admin	
+FR-TGT-250	11	planned	assistant	
+FR-TGT-251	11	planned	assistant	
+SEC-TGT-158	11	planned	assistant	
+ST-223	12	planned	assistant	
+ST-224	12	planned	assistant	
+ST-225	12	planned	assistant	
+DATA-CFG-023	18	planned	auth-account	connection profile defaults
+DATA-UIX-106	18	planned	auth-account	server-side per-account preferences
+DEP-TGT-100	11	planned	auth-account	
+DEP-TGT-123	11	planned	auth-account	
+FR-CFG-013	18	planned	auth-account	
+FR-CFG-014	18	planned	auth-account	
+FR-CFG-016	18	planned	auth-account	
+FR-CFG-017	18	partial	auth-account	theme/lang exist; per-user persistence open
+FR-CFG-018	18	planned	auth-account	
+FR-CFG-042	18	planned	auth-account	
+FR-CFG-095	18	planned	auth-account	
+FR-CFG-096	18	planned	auth-account	
+FR-CFG-097	18	planned	auth-account	
+FR-CFG-118	18	planned	auth-account	
+FR-DEP-045	18	planned	auth-account	
+FR-ISS-003	16	planned	auth-account	
+FR-ISS-102	17	planned	auth-account	
+FR-ISS-112	17	planned	auth-account	
+FR-ISS-122	17	planned	auth-account	
+FR-SAU-004	18	planned	auth-account	
+FR-SAU-029	18	planned	auth-account	
+FR-SAU-050	18	planned	auth-account	
+FR-SAU-061	18	planned	auth-account	
+FR-TGT-101	11	planned	auth-account	
+FR-TGT-102	11	planned	auth-account	
+FR-TGT-104	11	planned	auth-account	
+FR-UIX-006	18	planned	auth-account	profile switcher in account mode
+FR-UIX-080	18	planned	auth-account	
+FR-UPD-003	14	planned	auth-account	
+FR-UPD-014	14	planned	auth-account	
+FR-UPD-023	14	planned	auth-account	captcha on login
+INT-CFG-089	18	partial	auth-account	direct-mode host/port/TLS exist; profiles open
+NFR-CC-007	18	planned	auth-account	per-user prefs store
+SEC-ISS-102	17	planned	auth-account	
+SEC-ISS-105	17	planned	auth-account	
+SEC-SAU-020	18	planned	auth-account	
+SEC-SAU-024	18	planned	auth-account	
+SEC-SAU-067	18	planned	auth-account	
+SEC-TGT-010	11	planned	auth-account	
+SEC-TGT-011	11	planned	auth-account	
+SEC-TGT-012	11	planned	auth-account	
+SEC-TGT-013	11	planned	auth-account	
+SEC-TGT-014	11	planned	auth-account	
+SEC-TGT-015	11	planned	auth-account	
+SEC-TGT-016	11	deferred	auth-account	SSO is listed in FUTURE.md
+SEC-TGT-022	11	planned	auth-account	
+SEC-TGT-024	11	planned	auth-account	
+SEC-TGT-025	11	deferred	auth-account	FUTURE.md FU-005
+SEC-TGT-026	11	planned	auth-account	
+SEC-TGT-027	11	deferred	auth-account	FUTURE.md FU-005
+SEC-TGT-061	11	planned	auth-account	
+SEC-TGT-103	11	planned	auth-account	
+SEC-TGT-106	11	deferred	auth-account	FU-005
+SEC-TGT-152	11	planned	auth-account	
+SEC-TGT-153	11	planned	auth-account	
+SEC-UIX-109	18	planned	auth-account	
+ST-031	12	planned	auth-account	setup wizard rule
+ST-050	12	planned	auth-account	
+ST-051	12	planned	auth-account	
+ST-054	12	planned	auth-account	
+ST-055	12	planned	auth-account	
+ST-056	12	planned	auth-account	
+ST-057	12	planned	auth-account	
+ST-058	12	planned	auth-account	
+ST-059	12	planned	auth-account	
+ST-060	12	planned	auth-account	
+ST-061	12	planned	auth-account	
+ST-062	12	planned	auth-account	
+ST-063	12	planned	auth-account	
+ST-064	12	planned	auth-account	
+ST-065	12	planned	auth-account	
+ST-066	12	planned	auth-account	
+ST-067	12	planned	auth-account	
+ST-068	12	planned	auth-account	
+ST-071	12	planned	auth-account	
+ST-072	12	planned	auth-account	
+ST-075	12	planned	auth-account	
+ST-079	12	planned	auth-account	
+ST-081	12	planned	auth-account	
+ST-082	12	planned	auth-account	
+ST-084	12	planned	auth-account	
+ST-085	12	planned	auth-account	
+ST-086	12	planned	auth-account	
+ST-087	12	planned	auth-account	
+ST-088	12	planned	auth-account	
+ST-089	12	planned	auth-account	
+ST-090	12	planned	auth-account	
+ST-123	12	planned	auth-account	
+ST-124	12	planned	auth-account	
+UI-ISS-133	17	planned	auth-account	Login form server pick
+UI-ISS-134	17	planned	auth-account	
+UI-UPD-006	14	planned	auth-account	Account menu in shell
+UI-UPD-007	14	planned	auth-account	Password and index dialogs
+CON-DTB-001	18	planned	browse-edit	
+CPT-PLG-006	18	planned	browse-edit	column transformations; owner-decided feature
+DATA-CFG-092	18	planned	browse-edit	navigation tree settings
+DATA-CFG-093	18	planned	browse-edit	
+DATA-DEP-066	18	planned	browse-edit	owner decision on scope
+DATA-ISS-010	16	planned	browse-edit	
+DATA-ISS-011	16	planned	browse-edit	
+DATA-ISS-012	16	planned	browse-edit	
+DATA-ISS-013	16	planned	browse-edit	
+DATA-ISS-014	16	planned	browse-edit	
+DATA-ISS-015	16	planned	browse-edit	
+DATA-ISS-016	16	partial	browse-edit	skeleton pages and sorts; exact count open
+DATA-ISS-017	16	planned	browse-edit	
+DATA-ISS-102	17	planned	browse-edit	
+DATA-ISS-108	17	planned	browse-edit	
+DATA-ISS-109	17	planned	browse-edit	
+DATA-ISS-110	17	planned	browse-edit	
+DATA-ISS-112	17	planned	browse-edit	
+DATA-ISS-114	17	planned	browse-edit	
+DATA-ISS-115	17	planned	browse-edit	
+DATA-ISS-118	17	planned	browse-edit	
+DATA-ISS-121	17	planned	browse-edit	
+DATA-ISS-122	17	planned	browse-edit	
+DATA-ISS-123	17	planned	browse-edit	
+DATA-ISS-124	17	planned	browse-edit	
+DATA-ISS-125	17	planned	browse-edit	
+DATA-ISS-128	17	planned	browse-edit	
+DATA-ISS-129	17	planned	browse-edit	
+DATA-ISS-133	17	planned	browse-edit	
+DATA-ISS-135	17	planned	browse-edit	
+DATA-PLG-002	18	planned	browse-edit	column transformations; owner-decided feature
+DATA-PLG-008	18	planned	browse-edit	column transformations; owner-decided feature
+DATA-UPD-010	14	planned	browse-edit	
+DATA-UPD-012	14	planned	browse-edit	
+DATA-UPD-016	14	planned	browse-edit	
+FR-CFG-033	18	planned	browse-edit	per-page settings dialogs, multi-module
+FR-CFG-073	18	planned	browse-edit	
+FR-DTB-005	18	planned	browse-edit	
+FR-DTB-006	18	planned	browse-edit	
+FR-DTB-007	18	planned	browse-edit	
+FR-DTB-009	18	planned	browse-edit	
+FR-DTB-010	18	planned	browse-edit	
+FR-DTB-011	18	planned	browse-edit	
+FR-DTB-090	18	planned	browse-edit	
+FR-DTB-091	18	planned	browse-edit	
+FR-DTB-093	18	planned	browse-edit	
+FR-DTB-100	18	planned	browse-edit	
+FR-DTB-130	18	planned	browse-edit	
+FR-DTB-131	18	planned	browse-edit	
+FR-DTB-132	18	planned	browse-edit	
+FR-DTB-133	18	planned	browse-edit	
+FR-DTB-134	18	planned	browse-edit	
+FR-DTB-135	18	planned	browse-edit	
+FR-DTB-136	18	planned	browse-edit	
+FR-DTB-137	18	planned	browse-edit	
+FR-DTB-138	18	planned	browse-edit	
+FR-DTB-155	18	planned	browse-edit	
+FR-DTB-156	18	planned	browse-edit	
+FR-DTB-157	18	planned	browse-edit	
+FR-DTB-160	18	planned	browse-edit	
+FR-ISS-001	16	planned	browse-edit	
+FR-ISS-004	16	planned	browse-edit	
+FR-ISS-005	16	planned	browse-edit	
+FR-ISS-006	16	planned	browse-edit	
+FR-ISS-007	16	planned	browse-edit	
+FR-ISS-008	16	planned	browse-edit	
+FR-ISS-110	17	planned	browse-edit	
+FR-ISS-131	17	planned	browse-edit	
+FR-ISS-132	17	partial	browse-edit	skeleton lists names; natural sort setting open
+FR-ISS-139	17	partial	browse-edit	skeleton has sort and paging; page reset to check
+FR-ISS-140	17	planned	browse-edit	
+FR-ISS-146	17	planned	browse-edit	
+FR-PLG-025	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-026	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-028	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-030	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-031	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-032	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-034	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-035	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-036	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-037	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-038	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-039	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-041	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-042	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-043	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-044	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-045	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-046	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-047	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-048	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-049	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-050	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-051	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-052	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-053	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-054	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-056	18	planned	browse-edit	column transformations; owner-decided feature
+FR-TGT-232	13	planned	browse-edit	table maintenance statistics
+FR-UIX-034	18	planned	browse-edit	
+FR-UIX-035	18	planned	browse-edit	
+FR-UIX-036	18	planned	browse-edit	
+FR-UIX-038	18	planned	browse-edit	tree filter
+FR-UIX-042	18	planned	browse-edit	owner decision: hidden nav items
+FR-UIX-052	18	planned	browse-edit	
+FR-UIX-053	18	planned	browse-edit	
+FR-UIX-054	18	planned	browse-edit	
+FR-UIX-055	18	planned	browse-edit	
+FR-UIX-073	18	planned	browse-edit	
+FR-UIX-074	18	planned	browse-edit	
+FR-UPD-013	14	planned	browse-edit	
+FR-UPD-021	14	planned	browse-edit	query generator / search
+NFR-DTB-001	18	planned	browse-edit	
+NFR-PLG-004	18	planned	browse-edit	column transformations; owner-decided feature
+SEC-DTB-003	18	planned	browse-edit	
+SEC-DTB-004	18	planned	browse-edit	
+SEC-PLG-007	18	planned	browse-edit	
+SEC-PLG-008	18	planned	browse-edit	
+SEC-SAU-320	18	planned	browse-edit	
+SEC-TGT-151	11	planned	browse-edit	
+ST-117	12	planned	browse-edit	
+ST-118	12	planned	browse-edit	
+UI-DTB-010	18	planned	browse-edit	
+UI-ISS-004	16	planned	browse-edit	Navigation extension; sidebar exists
+UI-ISS-005	16	planned	browse-edit	
+UI-ISS-101	17	planned	browse-edit	
+UI-ISS-103	17	planned	browse-edit	
+UI-ISS-104	17	planned	browse-edit	
+UI-ISS-105	17	planned	browse-edit	
+UI-ISS-109	17	planned	browse-edit	Recent items in shell
+UI-ISS-110	17	planned	browse-edit	
+UI-ISS-112	17	planned	browse-edit	
+UI-ISS-113	17	planned	browse-edit	
+UI-ISS-114	17	planned	browse-edit	
+UI-ISS-115	17	planned	browse-edit	
+UI-ISS-116	17	planned	browse-edit	GIS visualisation
+UI-ISS-117	17	planned	browse-edit	Navigation reload
+UI-ISS-118	17	planned	browse-edit	Navigation hide tables
+UI-ISS-121	17	planned	browse-edit	Navigation paging
+UI-ISS-125	17	planned	browse-edit	
+UI-ISS-127	17	planned	browse-edit	Navigation filter; also export page
+UI-ISS-128	17	planned	browse-edit	
+UI-ISS-136	17	planned	browse-edit	
+UI-ISS-139	17	planned	browse-edit	Table list screen
+UI-ISS-140	17	planned	browse-edit	
+UI-UPD-002	14	planned	browse-edit	
+UI-UPD-012	14	planned	browse-edit	
+UI-UPD-013	14	planned	browse-edit	Host name on main page
+CPT-DTB-002	18	deferred	future	Schema/data change tracking with auto-create is a whole feature the owner must decide. (owner decision 2026-10-23, feature: tracking)
+CPT-SRV-003	18	deferred	future	Replication role detection and multi-primary selection is a feature-scope choice. (owner decision 2026-10-23, feature: replication ui)
+DATA-CFG-026	18	deferred	future	Signon cookie parameters belong to single sign-on, which is deferred. (consistency pass 2026-10-23, was DROP)
+DATA-DTB-004	18	deferred	future	Tracking data model only matters if tracking is adopted. (owner decision 2026-10-23, feature: tracking)
+DATA-DTB-005	18	deferred	future	Designer page storage only matters if the designer is adopted. (owner decision 2026-10-23, feature: designer)
+DATA-PLG-005	18	deferred	future	Relational schema export (Dia/EPS/PDF/SVG) is part of the designer/schema feature choice. (owner decision 2026-10-23, feature: designer)
+DATA-SRV-009	18	deferred	future	Replication status display is part of the replication feature decision. (owner decision 2026-10-23, feature: replication ui)
+DEP-SRV-001	18	deferred	future	Replication version branching belongs purely to the deferred replication UI. (consistency pass 2026-10-23, was ADAPT)
+FR-DTB-066	18	deferred	future	Virtual relations in config storage; product-scope choice, DBLoom has own storage. (owner decision 2026-10-23, feature: designer)
+FR-DTB-101	18	deferred	future	Integrity check only for config-storage relations; depends on virtual relations decision. (owner decision 2026-10-23, feature: designer)
+FR-DTB-110	18	deferred	future	Tracking versions feature. (owner decision 2026-10-23, feature: tracking)
+FR-DTB-111	18	deferred	future	Tracking statement set. (owner decision 2026-10-23, feature: tracking)
+FR-DTB-112	18	deferred	future	Tracking state management. (owner decision 2026-10-23, feature: tracking)
+FR-DTB-113	18	deferred	future	Tracking report and export. (owner decision 2026-10-23, feature: tracking)
+FR-DTB-114	18	deferred	future	Tracking toggle in UI. (owner decision 2026-10-23, feature: tracking)
+FR-DTB-120	18	deferred	future	Designer pages. (owner decision 2026-10-23, feature: designer)
+FR-DTB-121	18	deferred	future	Designer relation creation. (owner decision 2026-10-23, feature: designer)
+FR-DTB-122	18	deferred	future	Designer FK support inspection. (owner decision 2026-10-23, feature: designer)
+FR-DTB-123	18	deferred	future	Designer settings persistence. (owner decision 2026-10-23, feature: designer)
+FR-DTB-124	18	deferred	future	Schema export from designer. (owner decision 2026-10-23, feature: designer)
+FR-DTB-150	18	deferred	future	Tracking capture hook. (owner decision 2026-10-23, feature: tracking)
+FR-DTB-151	18	deferred	future	Tracking statement classification. (owner decision 2026-10-23, feature: tracking)
+FR-IOX-064	18	deferred	future	Visualisation fetching spatial columns as WKT belongs to deferred GIS visualisation. (consistency pass 2026-10-23, was ADAPT)
+FR-IOX-066	18	deferred	future	Visualisation canvas size belongs to deferred GIS visualisation. (consistency pass 2026-10-23, was DROP)
+FR-IOX-067	18	deferred	future	Spatial data editor with live preview is a feature-scope choice. (owner decision 2026-10-23, feature: gis editor)
+FR-IOX-068	18	deferred	future	Visualize GIS data action and spatial cell editing depend on the GIS feature decision. (owner decision 2026-10-23, feature: gis editor)
+FR-IOX-098	18	deferred	future	GIS editor geometry types and SRID follow the GIS feature decision. (owner decision 2026-10-23, feature: gis editor)
+FR-IOX-099	18	deferred	future	GIS visualization output formats follow the GIS feature decision; GD/PDF are PHP specific. (owner decision 2026-10-23, feature: gis editor)
+FR-PLG-013	18	deferred	future	Schema export contract belongs to the designer/schema export feature decision. (owner decision 2026-10-23, feature: designer)
+FR-SAU-013	18	deferred	future	Signon via shared PHP session; whether DBLoom offers SSO/OIDC is an owner scope choice. (owner decision 2026-10-23, feature: single sign-on)
+FR-SAU-016	18	deferred	future	Signon application switching rule depends on whether SSO is offered. (owner decision 2026-10-23, feature: single sign-on)
+FR-SAU-018	18	deferred	future	Signon error echo and redirect depends on SSO decision. (owner decision 2026-10-23, feature: single sign-on)
+FR-SRV-004	18	deferred	future	Replication status display is a whole feature; owner decides scope. (owner decision 2026-10-23, feature: replication ui)
+FR-SRV-009	18	deferred	future	Second review (Haiku, 10 reviewers, 2026-10-23): real-time monitor charts are deferred with charts (FU-010); the reduced monitor keeps status variables and proc
+FR-SRV-024	18	deferred	future	Replication page (primary/replica config) is a whole feature. (owner decision 2026-10-23, feature: replication ui)
+FR-SRV-025	18	deferred	future	Add replication user dialog; part of replication feature. (owner decision 2026-10-23, feature: replication ui)
+FR-SRV-026	18	deferred	future	Change primary workflow; part of replication feature (session credential storage must not be copied). (owner decision 2026-10-23, feature: replication ui)
+FR-SRV-027	18	deferred	future	Replica thread controls; only modern syntax needed if kept. (owner decision 2026-10-23, feature: replication ui)
+FR-SRV-028	18	deferred	future	MariaDB multi-source replica status; part of replication feature. (owner decision 2026-10-23, feature: replication ui)
+FR-SRV-076	18	deferred	future	Replication role detection is part of the replication UI feature; owner decides scope. (owner decision 2026-10-23, feature: replication ui)
+FR-SRV-077	18	deferred	future	Change-primary flow belongs to replication UI feature; owner decides. Arbitrary-server connection also conflicts with security design. (owner decision 2026-10-2
+FR-UIX-059	18	deferred	future	Charting of result data is a feature choice; owner decides. (owner decision 2026-10-23, feature: charts)
+FR-UIX-063	18	deferred	future	Visual designer feature; legacy IE workarounds dropped regardless. (owner decision 2026-10-23, feature: designer)
+INT-IOX-062	18	deferred	future	Geometry factory is part of the deferred GIS layer. (consistency pass 2026-10-23, was DROP)
+INT-IOX-063	18	deferred	future	Per-geometry rendering and WKT methods belong to deferred GIS editor/visualisation. (consistency pass 2026-10-23, was DROP)
+INT-IOX-065	18	deferred	future	GisVisualization rendering is the deferred GIS visualisation feature. (consistency pass 2026-10-23, was DROP)
+SEC-SRV-002	18	deferred	future	Changing replication primary via GUI is replication UI, deferred. (consistency pass 2026-10-23, was SUPERSEDED)
+SEC-SRV-003	18	deferred	future	Replication control with superuser check and POST action; decide with replication UI feature. (owner decision 2026-10-23, feature: replication ui)
+UI-PLG-002	18	deferred	future	Schema plugin options are used by the Designer export dialog, which is deferred. (consistency pass 2026-10-23, was DROP)
+ARCH-TGT-001	11	planned	hardening	
+ARCH-TGT-002	11	planned	hardening	
+ARCH-TGT-003	11	planned	hardening	
+CON-DEP-111	18	planned	hardening	
+CON-TGT-001	11	planned	hardening	
+CPT-DEP-120	18	planned	hardening	
+CPT-UPD-001	14	planned	hardening	
+CPT-UPD-002	14	planned	hardening	
+CPT-UPD-003	14	planned	hardening	
+CPT-UPD-004	14	planned	hardening	
+DATA-CFG-069	18	planned	hardening	app storage schema per feature
+DATA-CFG-094	18	partial	hardening	skeleton has light/dark and i18n scaffold
+DATA-UPD-009	14	planned	hardening	store is SQLite; check utf8 relevance
+DATA-UPD-011	14	planned	hardening	pma user is legacy; check relevance
+DEP-CC-013	18	planned	hardening	
+DEP-CC-014	18	planned	hardening	login outcome logging
+DEP-DTB-001	18	planned	hardening	cross-cutting Strategy branching
+DEP-TGT-091	11	planned	hardening	
+DEP-TGT-092	11	planned	hardening	
+DEP-TGT-120	11	planned	hardening	
+DEP-TGT-121	11	planned	hardening	
+DEP-TGT-122	11	planned	hardening	
+DEP-TGT-124	11	partial	hardening	Dockerfile and compose exist; Coolify docs open
+DEP-TGT-126	11	planned	hardening	
+DEP-TGT-140	11	partial	hardening	.env handling partly in skeleton
+DEP-TGT-150	11	planned	hardening	
+FR-CFG-009	18	partial	hardening	startup config validation
+FR-CFG-078	18	planned	hardening	
+FR-DEP-002	18	planned	hardening	
+FR-DEP-020	18	planned	hardening	
+FR-DEP-033	18	planned	hardening	
+FR-DEP-070	18	planned	hardening	
+FR-DEP-071	18	planned	hardening	
+FR-ISS-012	16	planned	hardening	
+FR-ISS-121	17	planned	hardening	
+FR-ISS-127	17	planned	hardening	
+FR-ISS-129	17	planned	hardening	
+FR-SAU-072	18	planned	hardening	
+FR-SAU-089	18	planned	hardening	
+FR-UIX-018	18	planned	hardening	
+FR-UIX-020	18	planned	hardening	
+FR-UIX-025	18	planned	hardening	
+FR-UIX-026	18	planned	hardening	
+FR-UIX-027	18	planned	hardening	
+FR-UIX-032	18	planned	hardening	
+FR-UIX-033	18	planned	hardening	Ctrl+K palette
+FR-UIX-043	18	planned	hardening	
+FR-UIX-044	18	planned	hardening	
+FR-UIX-089	18	planned	hardening	
+FR-UIX-090	18	planned	hardening	
+FR-UIX-111	18	planned	hardening	Ctrl+K palette
+FR-UIX-113	18	partial	hardening	i18n scaffold done; languages content open
+FR-UIX-118	18	planned	hardening	
+FR-UPD-001	14	unsure	hardening	URL query encryption is a legacy LegacyAdmin feature; fate not stated in row
+FR-UPD-002	14	unsure	hardening	depends on whether URL query encryption exists in DBLoom
+FR-UPD-018	14	planned	hardening	
+FR-UPD-022	14	planned	hardening	
+FR-UPD-024	14	planned	hardening	
+FR-UPD-025	14	planned	hardening	
+INT-CC-004	18	planned	hardening	version gate; may be partly in skeleton login
+INT-DEP-025	18	planned	hardening	
+INT-DEP-047	18	partial	hardening	Docker done; Windows/Linux docs open
+INT-DEP-080	18	planned	hardening	
+NFR-CC-015	18	partial	hardening	skeleton has basic routing errors
+NFR-CFG-105	18	partial	hardening	
+NFR-DEP-161	18	planned	hardening	
+NFR-ISS-001	16	planned	hardening	
+NFR-ISS-002	16	planned	hardening	
+NFR-ISS-103	17	planned	hardening	performance
+NFR-SAU-085	18	planned	hardening	
+NFR-SAU-318	18	planned	hardening	
+NFR-TGT-093	11	planned	hardening	
+NFR-TGT-120	11	planned	hardening	
+NFR-TGT-121	11	planned	hardening	
+NFR-TGT-122	11	planned	hardening	
+NFR-TGT-160	11	partial	hardening	i18n scaffold exists; catalog content and formatting remain
+NFR-UIX-046	18	planned	hardening	
+NFR-UIX-102	18	planned	hardening	
+NFR-UIX-104	18	planned	hardening	
+NFR-UIX-116	18	planned	hardening	
+SEC-CFG-060	18	planned	hardening	
+SEC-CFG-066	18	planned	hardening	
+SEC-CFG-103	18	planned	hardening	
+SEC-DEP-031	18	planned	hardening	
+SEC-DEP-032	18	planned	hardening	
+SEC-DEP-041	18	planned	hardening	
+SEC-DEP-142	18	planned	hardening	
+SEC-DTB-001	18	planned	hardening	Replaced by server-side state/CSRF; skeleton has CSRF
+SEC-ISS-101	17	planned	hardening	
+SEC-SAU-070	18	planned	hardening	
+SEC-SAU-071	18	planned	hardening	
+SEC-SAU-301	18	planned	hardening	
+SEC-SAU-308	18	planned	hardening	
+SEC-SAU-313	18	planned	hardening	
+SEC-SAU-314	18	planned	hardening	
+SEC-SAU-316	18	planned	hardening	
+SEC-TGT-001	11	planned	hardening	
+SEC-TGT-002	11	planned	hardening	
+SEC-TGT-023	11	planned	hardening	
+SEC-TGT-032	11	planned	hardening	
+SEC-TGT-043	11	planned	hardening	
+SEC-TGT-050	11	planned	hardening	
+SEC-TGT-051	11	planned	hardening	central quoting function used by all modules
+SEC-TGT-053	11	planned	hardening	
+SEC-TGT-060	11	planned	hardening	
+SEC-TGT-070	11	planned	hardening	
+SEC-TGT-073	11	planned	hardening	
+SEC-TGT-080	11	planned	hardening	
+SEC-TGT-081	11	planned	hardening	
+SEC-TGT-082	11	planned	hardening	
+SEC-TGT-112	11	planned	hardening	
+SEC-TGT-113	11	planned	hardening	
+SEC-TGT-114	11	planned	hardening	
+SEC-TGT-115	11	planned	hardening	
+SEC-TGT-116	11	planned	hardening	
+SEC-TGT-117	11	planned	hardening	
+SEC-TGT-118	11	planned	hardening	
+SEC-TGT-119	11	planned	hardening	
+SEC-TGT-120	11	planned	hardening	
+SEC-TGT-121	11	planned	hardening	
+SEC-TGT-122	11	planned	hardening	
+SEC-TGT-123	11	planned	hardening	
+SEC-TGT-127	11	planned	hardening	
+SEC-TGT-129	11	planned	hardening	
+SEC-TGT-130	11	planned	hardening	
+SEC-TGT-132	11	planned	hardening	
+SEC-TGT-133	11	planned	hardening	
+SEC-TGT-135	11	planned	hardening	
+SEC-TGT-136	11	planned	hardening	
+SEC-TGT-137	11	planned	hardening	
+SEC-UIX-093	18	planned	hardening	
+SEC-UIX-094	18	planned	hardening	
+SEC-UIX-095	18	planned	hardening	
+ST-001	12	planned	hardening	ENV-only
+ST-002	12	planned	hardening	ENV-only
+ST-003	12	planned	hardening	ENV-only
+ST-004	12	planned	hardening	ENV-only
+ST-005	12	planned	hardening	ENV-only
+ST-006	12	planned	hardening	ENV-only
+ST-008	12	planned	hardening	ENV-only
+ST-009	12	planned	hardening	ENV-only
+ST-010	12	planned	hardening	ENV-only
+ST-013	12	planned	hardening	ENV-only
+ST-015	12	planned	hardening	ENV-only
+ST-017	12	planned	hardening	ENV-only
+ST-018	12	planned	hardening	ENV-only
+ST-019	12	planned	hardening	ENV-only
+ST-020	12	planned	hardening	ENV-only
+ST-021	12	planned	hardening	ENV-only
+ST-022	12	planned	hardening	ENV-only
+ST-023	12	planned	hardening	fixed in code
+ST-024	12	planned	hardening	ENV-only
+ST-025	12	planned	hardening	ENV-only
+ST-030	12	planned	hardening	fixed in code
+ST-033	12	planned	hardening	ENV-only
+ST-052	12	planned	hardening	
+ST-104	12	planned	hardening	
+ST-105	12	planned	hardening	
+ST-106	12	planned	hardening	
+ST-107	12	planned	hardening	
+ST-108	12	planned	hardening	
+ST-109	12	planned	hardening	
+ST-112	12	planned	hardening	
+ST-116	12	planned	hardening	ENV-only
+ST-122	12	planned	hardening	Driver option fixed in code
+ST-125	12	planned	hardening	
+ST-126	12	planned	hardening	
+ST-127	12	planned	hardening	
+ST-159	12	planned	hardening	
+ST-201	12	planned	hardening	
+ST-202	12	planned	hardening	ENV-only per D-20
+ST-203	12	planned	hardening	
+ST-206	12	planned	hardening	
+ST-209	12	planned	hardening	
+ST-211	12	planned	hardening	
+ST-213	12	planned	hardening	i18n content
+ST-215	12	planned	hardening	
+ST-217	12	planned	hardening	Logo ENV-only; custom CSS/JS dropped
+ST-221	12	planned	hardening	ENV and CLI only
+UI-CC-005	18	partial	hardening	i18n scaffold exists; content and RTL open
+UI-ISS-003	16	planned	hardening	Accessibility
+UI-ISS-006	16	planned	hardening	Responsive layout
+UI-ISS-007	16	planned	hardening	General UI consistency
+UI-ISS-131	17	planned	hardening	
+UI-UIX-114	18	planned	hardening	
+UI-UPD-004	14	planned	hardening	i18n content
+UI-UPD-008	14	planned	hardening	
+UI-UPD-014	14	planned	hardening	Charts lib and tooltips
+UI-UPD-015	14	planned	hardening	
+DATA-IOX-036	18	planned	io	
+DATA-IOX-074	18	planned	io	
+DATA-IOX-083	18	planned	io	
+DATA-IOX-089	18	planned	io	
+DATA-ISS-001	16	planned	io	
+DATA-ISS-002	16	planned	io	
+DATA-ISS-003	16	planned	io	
+DATA-ISS-004	16	planned	io	
+DATA-ISS-005	16	planned	io	
+DATA-ISS-006	16	planned	io	
+DATA-ISS-008	16	planned	io	
+DATA-ISS-101	17	planned	io	
+DATA-ISS-103	17	planned	io	
+DATA-ISS-105	17	planned	io	
+DATA-ISS-106	17	planned	io	
+DATA-ISS-107	17	planned	io	
+DATA-ISS-111	17	planned	io	
+DATA-ISS-116	17	planned	io	
+DATA-ISS-120	17	planned	io	
+DATA-ISS-126	17	planned	io	
+DATA-ISS-127	17	planned	io	
+DATA-ISS-130	17	planned	io	
+DATA-ISS-132	17	planned	io	
+DATA-ISS-134	17	planned	io	
+DATA-ISS-136	17	planned	io	
+DATA-ISS-137	17	planned	io	
+DATA-PLG-001	18	planned	io	
+DATA-PLG-003	18	planned	io	
+DATA-PLG-004	18	planned	io	
+DATA-UPD-001	14	planned	io	
+DATA-UPD-002	14	planned	io	
+DATA-UPD-003	14	planned	io	
+DATA-UPD-004	14	planned	io	
+DATA-UPD-005	14	planned	io	
+DATA-UPD-006	14	planned	io	
+DATA-UPD-007	14	planned	io	
+DATA-UPD-013	14	planned	io	
+DATA-UPD-014	14	planned	io	
+DATA-UPD-015	14	planned	io	
+FR-CFG-079	18	planned	io	
+FR-IOX-001	18	planned	io	
+FR-IOX-005	18	planned	io	
+FR-IOX-006	18	planned	io	
+FR-IOX-007	18	planned	io	
+FR-IOX-008	18	planned	io	
+FR-IOX-009	18	planned	io	
+FR-IOX-010	18	planned	io	
+FR-IOX-013	18	planned	io	
+FR-IOX-015	18	planned	io	
+FR-IOX-016	18	planned	io	
+FR-IOX-017	18	planned	io	
+FR-IOX-022	18	planned	io	
+FR-IOX-025	18	planned	io	
+FR-IOX-026	18	planned	io	
+FR-IOX-030	18	planned	io	
+FR-IOX-031	18	planned	io	
+FR-IOX-032	18	planned	io	
+FR-IOX-034	18	planned	io	
+FR-IOX-035	18	planned	io	
+FR-IOX-037	18	planned	io	
+FR-IOX-038	18	planned	io	
+FR-IOX-040	18	planned	io	
+FR-IOX-041	18	planned	io	
+FR-IOX-042	18	planned	io	
+FR-IOX-046	18	planned	io	
+FR-IOX-048	18	planned	io	
+FR-IOX-049	18	planned	io	
+FR-IOX-050	18	planned	io	
+FR-IOX-051	18	planned	io	
+FR-IOX-056	18	planned	io	
+FR-IOX-057	18	planned	io	
+FR-IOX-058	18	planned	io	
+FR-IOX-061	18	planned	io	
+FR-IOX-070	18	planned	io	
+FR-IOX-071	18	planned	io	
+FR-IOX-072	18	planned	io	
+FR-IOX-073	18	planned	io	
+FR-IOX-075	18	planned	io	
+FR-IOX-084	18	planned	io	
+FR-IOX-085	18	planned	io	
+FR-IOX-086	18	planned	io	
+FR-IOX-087	18	planned	io	
+FR-IOX-088	18	planned	io	
+FR-IOX-092	18	planned	io	
+FR-IOX-095	18	planned	io	
+FR-ISS-113	17	planned	io	
+FR-ISS-119	17	planned	io	
+FR-PLG-005	18	planned	io	
+FR-PLG-006	18	planned	io	
+FR-PLG-011	18	planned	io	
+FR-PLG-012	18	planned	io	
+FR-PLG-014	18	planned	io	
+FR-PLG-016	18	planned	io	
+FR-PLG-019	18	planned	io	
+FR-PLG-020	18	planned	io	
+FR-PLG-021	18	planned	io	
+FR-PLG-023	18	planned	io	
+FR-PLG-024	18	planned	io	
+FR-PLG-057	18	planned	io	
+FR-SAU-073	18	planned	io	
+FR-SAU-074	18	planned	io	
+FR-SRV-058	18	planned	io	entry points only; export/import itself in io
+FR-UIX-075	18	planned	io	
+FR-UIX-076	18	planned	io	
+FR-UIX-077	18	planned	io	
+FR-UPD-004	14	planned	io	
+INT-CC-021	18	planned	io	
+INT-PLG-001	18	planned	io	
+INT-PLG-002	18	planned	io	
+INT-PLG-003	18	planned	io	
+INT-PLG-004	18	planned	io	
+INT-PLG-005	18	planned	io	
+INT-PLG-006	18	planned	io	
+NFR-CC-016	18	planned	io	
+NFR-IOX-023	18	planned	io	
+NFR-IOX-052	18	planned	io	
+NFR-IOX-055	18	planned	io	
+NFR-IOX-094	18	planned	io	
+NFR-ISS-102	17	planned	io	
+NFR-ISS-104	17	planned	io	
+SEC-IOX-033	18	planned	io	
+SEC-IOX-096	18	planned	io	
+SEC-PLG-001	18	planned	io	
+SEC-PLG-002	18	planned	io	
+SEC-PLG-003	18	planned	io	
+SEC-SAU-304	18	planned	io	
+SEC-SAU-305	18	planned	io	
+SEC-SAU-307	18	planned	io	
+SEC-TGT-071	11	planned	io	
+SEC-TGT-072	11	planned	io	
+SEC-TGT-154	11	planned	io	
+SEC-TGT-155	11	planned	io	
+ST-111	12	planned	io	
+ST-150	12	planned	io	
+ST-151	12	planned	io	
+ST-152	12	planned	io	
+ST-153	12	planned	io	
+ST-155	12	planned	io	
+ST-156	12	planned	io	
+ST-157	12	planned	io	
+ST-158	12	planned	io	
+ST-160	12	planned	io	
+UI-IOX-018	18	planned	io	
+UI-IOX-019	18	planned	io	
+UI-IOX-020	18	planned	io	
+UI-IOX-021	18	planned	io	
+UI-ISS-001	16	planned	io	Progress for long jobs
+UI-UPD-011	14	planned	io	
+CON-SRV-001	18	planned	server	
+CPT-SRV-001	18	planned	server	
+CPT-SRV-004	18	planned	server	
+DATA-SRV-001	18	planned	server	
+DATA-SRV-002	18	planned	server	
+DATA-SRV-003	18	planned	server	
+DATA-SRV-004	18	planned	server	
+DATA-SRV-005	18	planned	server	
+DATA-SRV-006	18	planned	server	
+DATA-SRV-007	18	planned	server	
+DATA-SRV-008	18	planned	server	
+DATA-SRV-010	18	partial	server	skeleton lists databases read-only
+DATA-SRV-011	18	planned	server	
+DATA-SRV-012	18	planned	server	
+DATA-SRV-013	18	planned	server	
+DATA-SRV-014	18	planned	server	
+DATA-SRV-015	18	planned	server	
+DATA-SRV-016	18	planned	server	
+FR-DEP-023	18	planned	server	
+FR-ISS-002	16	planned	server	
+FR-ISS-009	16	planned	server	
+FR-ISS-116	17	planned	server	
+FR-ISS-130	17	planned	server	
+FR-ISS-138	17	planned	server	
+FR-SRV-001	18	planned	server	
+FR-SRV-002	18	planned	server	
+FR-SRV-003	18	planned	server	
+FR-SRV-005	18	planned	server	
+FR-SRV-006	18	planned	server	
+FR-SRV-007	18	planned	server	
+FR-SRV-008	18	planned	server	
+FR-SRV-010	18	planned	server	monitor scope owner-decided
+FR-SRV-011	18	planned	server	monitor scope owner-decided
+FR-SRV-012	18	planned	server	monitor scope owner-decided
+FR-SRV-013	18	planned	server	monitor scope owner-decided
+FR-SRV-014	18	planned	server	
+FR-SRV-015	18	planned	server	
+FR-SRV-016	18	planned	server	
+FR-SRV-017	18	planned	server	
+FR-SRV-018	18	planned	server	
+FR-SRV-019	18	planned	server	
+FR-SRV-020	18	planned	server	
+FR-SRV-021	18	planned	server	
+FR-SRV-022	18	planned	server	
+FR-SRV-029	18	planned	server	
+FR-SRV-030	18	partial	server	skeleton lists databases read-only; stats/sort open
+FR-SRV-031	18	planned	server	
+FR-SRV-033	18	planned	server	
+FR-SRV-034	18	planned	server	
+FR-SRV-035	18	planned	server	
+FR-SRV-036	18	planned	server	
+FR-SRV-037	18	planned	server	
+FR-SRV-038	18	planned	server	
+FR-SRV-039	18	planned	server	
+FR-SRV-040	18	planned	server	
+FR-SRV-041	18	planned	server	
+FR-SRV-042	18	planned	server	
+FR-SRV-043	18	planned	server	
+FR-SRV-045	18	planned	server	
+FR-SRV-046	18	planned	server	
+FR-SRV-047	18	planned	server	
+FR-SRV-048	18	planned	server	
+FR-SRV-051	18	planned	server	
+FR-SRV-052	18	planned	server	
+FR-SRV-053	18	planned	server	
+FR-SRV-054	18	planned	server	
+FR-SRV-055	18	planned	server	
+FR-SRV-059	18	planned	server	
+FR-SRV-060	18	planned	server	
+FR-SRV-061	18	planned	server	
+FR-SRV-064	18	planned	server	
+FR-SRV-065	18	planned	server	
+FR-SRV-066	18	planned	server	
+FR-SRV-067	18	planned	server	
+FR-SRV-069	18	planned	server	
+FR-SRV-070	18	planned	server	
+FR-SRV-071	18	planned	server	
+FR-SRV-072	18	planned	server	
+FR-SRV-073	18	planned	server	
+FR-SRV-074	18	planned	server	
+FR-SRV-075	18	planned	server	
+FR-TGT-233	13	planned	server	
+FR-UIX-011	18	planned	server	home dashboard
+FR-UIX-097	18	planned	server	
+FR-UPD-005	14	planned	server	
+FR-UPD-008	14	planned	server	
+FR-UPD-009	14	planned	server	
+FR-UPD-010	14	planned	server	
+INT-SRV-002	18	planned	server	
+INT-SRV-003	18	planned	server	
+INT-SRV-004	18	planned	server	
+INT-SRV-005	18	planned	server	
+INT-SRV-006	18	planned	server	
+INT-SRV-009	18	planned	server	
+NFR-SRV-001	18	planned	server	
+NFR-SRV-003	18	planned	server	
+SEC-CC-017	18	planned	server	privilege capability check gates drop-db/admin
+SEC-ISS-106	17	planned	server	
+SEC-ISS-109	17	planned	server	
+SEC-ISS-110	17	planned	server	
+SEC-ISS-111	17	planned	server	
+SEC-ISS-113	17	planned	server	
+SEC-ISS-115	17	planned	server	
+SEC-SAU-319	18	planned	server	
+SEC-SAU-322	18	planned	server	
+SEC-SAU-323	18	planned	server	
+SEC-SRV-004	18	planned	server	
+SEC-SRV-006	18	planned	server	
+SEC-SRV-007	18	planned	server	
+SEC-SRV-009	18	planned	server	
+SEC-SRV-011	18	planned	server	
+SEC-SRV-012	18	planned	server	
+SEC-TGT-062	11	planned	server	
+SEC-TGT-156	11	planned	server	
+SEC-TGT-157	11	planned	server	
+UI-ISS-130	17	planned	server	Charts on monitor
+UI-SRV-001	18	planned	server	
+UI-SRV-002	18	planned	server	
+UI-SRV-003	18	planned	server	
+UI-SRV-004	18	planned	server	
+UI-SRV-005	18	planned	server	
+UI-SRV-008	18	planned	server	
+UI-SRV-009	18	planned	server	
+UI-UPD-009	14	planned	server	Privileges pages
+CPT-UIX-040	18	partial	skeleton	sidebar tree exists; settings not
+DATA-DEP-061	18	partial	skeleton	SQLite store exists; feature tables later
+DATA-DEP-075	18	partial	skeleton	store exists; migration tool coverage unverified
+DATA-TGT-094	11	partial	skeleton	store and host normalisation exist; check key rules
+DATA-TGT-095	11	partial	skeleton	store and host normalisation exist; check key rules
+DATA-UIX-041	18	partial	skeleton	sidebar exists; resize/persist not
+DEP-TGT-125	11	partial	skeleton	optional store exists; stateless mode unverified
+FR-DTB-002	18	partial	skeleton	skeleton grid has default browse; PK order and rest open
+FR-DTB-003	18	partial	skeleton	skeleton pages grid; safe-SELECT rule and settings open
+FR-DTB-004	18	partial	skeleton	skeleton pages; count logic needs check
+FR-DTB-152	18	partial	skeleton	Skeleton grid has sort/paging; settings, multi-column sort, relational display open
+FR-DTB-153	18	partial	skeleton	Skeleton grid has sort/paging; settings, multi-column sort, relational display open
+FR-SAU-005	18	partial	skeleton	skeleton covers the basic login/session part
+FR-SAU-026	18	partial	skeleton	skeleton covers the basic login/session part
+FR-SAU-027	18	done	skeleton	
+FR-SAU-036	18	partial	skeleton	skeleton covers the basic login/session part
+FR-SAU-039	18	done	skeleton	
+FR-SAU-042	18	partial	skeleton	skeleton covers the basic login/session part
+FR-SAU-088	18	partial	skeleton	skeleton covers the basic login/session part
+FR-UIX-001	18	partial	skeleton	shell done
+FR-UIX-002	18	partial	skeleton	i18n scaffold
+FR-UIX-003	18	partial	skeleton	meta/headers partly
+FR-UIX-004	18	partial	skeleton	print hiding not verified
+FR-UIX-005	18	partial	skeleton	header links partly
+FR-UIX-007	18	partial	skeleton	tree error state
+FR-UIX-008	18	partial	skeleton	tabs exist; small-screen collapse open
+FR-UIX-022	18	partial	skeleton	session-ended dialog; re-login in place open
+FR-UIX-037	18	partial	skeleton	lazy tree basics; persisted state open
+FR-UIX-039	18	partial	skeleton	current db/table highlight
+FR-UIX-058	18	partial	skeleton	grid styling
+SEC-DEP-146	18	done	skeleton	CSRF and session regeneration in skeleton
+SEC-ISS-001	16	partial	skeleton	logout done; shared cookie and import file name encoding remain
+SEC-ISS-104	17	partial	skeleton	direct login covers chosen server; re-test after expiry
+SEC-ISS-107	17	planned	skeleton	direct-mode connect with plugin check
+SEC-ISS-108	17	planned	skeleton	connect failure must keep session; direct login path
+SEC-ISS-112	17	partial	skeleton	login page exists; URL prefill rules to check
+SEC-ISS-114	17	partial	skeleton	session and CSRF done; unauthenticated render behaviour to check
+SEC-SAU-025	18	partial	skeleton	skeleton covers the basic login/session part
+SEC-SAU-202	18	partial	skeleton	skeleton covers the basic login/session part
+SEC-SAU-311	18	partial	skeleton	skeleton covers the basic login/session part
+SEC-TGT-017	11	partial	skeleton	rate limit done; account throttling and backoff in auth-account
+SEC-TGT-018	11	done	skeleton	
+SEC-TGT-019	11	partial	skeleton	direct mode exists; mode switch and account mode later
+SEC-TGT-020	11	done	skeleton	
+SEC-TGT-021	11	done	skeleton	
+SEC-TGT-030	11	done	skeleton	
+SEC-TGT-031	11	partial	skeleton	host policy done; resolve-once pinning to check
+SEC-TGT-040	11	done	skeleton	
+SEC-TGT-041	11	partial	skeleton	idle/absolute configurability to check
+SEC-TGT-042	11	done	skeleton	
+SEC-TGT-110	11	done	skeleton	stack in place
+SEC-TGT-111	11	partial	skeleton	server-side session and CSRF done
+SEC-TGT-124	11	partial	skeleton	
+SEC-TGT-126	11	partial	skeleton	host normalisation/allow policy done
+SEC-TGT-131	11	partial	skeleton	rate limit exists
+SEC-TGT-134	11	partial	skeleton	CSRF done; origin checks to verify
+ST-007	12	partial	skeleton	host allow policy exists
+ST-016	12	partial	skeleton	fixed in code; rate limit exists
+ST-026	12	partial	skeleton	session cookie done
+ST-027	12	partial	skeleton	session cookie done
+ST-069	12	partial	skeleton	session lifetime; account-mode UI later
+ST-070	12	partial	skeleton	session lifetime; account-mode UI later
+ST-074	12	planned	skeleton	direct-mode login recall option
+ST-076	12	partial	skeleton	login throttle exists
+ST-077	12	partial	skeleton	login throttle exists
+ST-078	12	partial	skeleton	login throttle exists
+ST-080	12	partial	skeleton	direct-mode target throttle
+ST-100	12	partial	skeleton	host deny policy exists
+ST-101	12	partial	skeleton	host allow policy exists
+ST-102	12	partial	skeleton	Env allow/deny done; UI subset and preview not
+ST-103	12	partial	skeleton	Env gate done; UI restriction not
+ST-113	12	partial	skeleton	Page size in grid exists; pref and admin cap not
+ST-200	12	done	skeleton	Store location is ENV-only in skeleton
+ST-212	12	partial	skeleton	i18n scaffold; setting not
+ST-214	12	partial	skeleton	Light/dark done; default setting not
+UI-ISS-137	17	partial	skeleton	Grid shows range; 1-based and CALL rule to check
+UI-SAU-030	18	partial	skeleton	skeleton covers the basic login/session part
+UI-TGT-001	11	done	skeleton	Shell layout built
+UI-TGT-002	11	partial	skeleton	Shell done; setup wizard steps not
+UI-TGT-003	11	done	skeleton	React/TanStack Start in place
+UI-UPD-005	14	done	skeleton	Light/dark toggle exists
+CPT-DTB-001	18	planned	sql-tab	
+DATA-ISS-119	17	planned	sql-tab	
+FR-CFG-074	18	planned	sql-tab	
+FR-DTB-001	18	planned	sql-tab	
+FR-DTB-008	18	planned	sql-tab	
+FR-DTB-012	18	planned	sql-tab	
+FR-DTB-021	18	planned	sql-tab	
+FR-DTB-022	18	planned	sql-tab	
+FR-DTB-023	18	planned	sql-tab	
+FR-DTB-025	18	planned	sql-tab	
+FR-DTB-026	18	planned	sql-tab	
+FR-DTB-027	18	planned	sql-tab	
+FR-DTB-028	18	planned	sql-tab	
+FR-IOX-100	18	planned	sql-tab	
+FR-IOX-101	18	planned	sql-tab	
+FR-ISS-014	16	planned	sql-tab	
+FR-ISS-101	17	planned	sql-tab	
+FR-ISS-103	17	planned	sql-tab	
+FR-ISS-104	17	planned	sql-tab	
+FR-ISS-106	17	planned	sql-tab	
+FR-ISS-108	17	planned	sql-tab	
+FR-ISS-114	17	planned	sql-tab	
+FR-ISS-115	17	planned	sql-tab	
+FR-ISS-118	17	planned	sql-tab	
+FR-ISS-123	17	planned	sql-tab	
+FR-ISS-124	17	planned	sql-tab	
+FR-ISS-125	17	planned	sql-tab	
+FR-ISS-126	17	planned	sql-tab	
+FR-ISS-133	17	planned	sql-tab	identifier quoting display setting
+FR-ISS-134	17	planned	sql-tab	
+FR-ISS-135	17	planned	sql-tab	
+FR-ISS-141	17	planned	sql-tab	conditional on a visual query builder
+FR-ISS-144	17	planned	sql-tab	
+FR-ISS-145	17	planned	sql-tab	
+FR-TGT-230	13	planned	sql-tab	
+FR-TGT-231	13	planned	sql-tab	
+FR-UIX-021	18	planned	sql-tab	covers all forms; SQL editor content main case
+FR-UIX-047	18	planned	sql-tab	history/bookmarks in editor, no console
+FR-UIX-049	18	planned	sql-tab	
+FR-UIX-065	18	planned	sql-tab	
+FR-UIX-066	18	planned	sql-tab	
+FR-UIX-067	18	planned	sql-tab	
+FR-UIX-068	18	planned	sql-tab	
+FR-UIX-069	18	planned	sql-tab	
+FR-UPD-007	14	planned	sql-tab	
+FR-UPD-015	14	planned	sql-tab	
+FR-UPD-016	14	planned	sql-tab	
+FR-UPD-017	14	planned	sql-tab	bookmarks
+NFR-DTB-002	18	planned	sql-tab	
+NFR-ISS-101	17	planned	sql-tab	
+NFR-ISS-105	17	planned	sql-tab	
+SEC-TGT-033	11	planned	sql-tab	connect and query timeouts
+SEC-TGT-052	11	planned	sql-tab	read-only guard
+ST-110	12	planned	sql-tab	
+ST-114	12	planned	sql-tab	
+ST-115	12	planned	sql-tab	
+ST-119	12	planned	sql-tab	Read-only guard
+ST-120	12	planned	sql-tab	
+ST-121	12	planned	sql-tab	
+ST-128	12	planned	sql-tab	History/audit redaction
+ST-161	12	planned	sql-tab	
+ST-162	12	planned	sql-tab	Own state export
+ST-163	12	planned	sql-tab	Shortcuts and console options
+ST-164	12	planned	sql-tab	
+UI-ISS-002	16	planned	sql-tab	
+UI-ISS-102	17	planned	sql-tab	
+UI-ISS-123	17	planned	sql-tab	
+UI-ISS-126	17	planned	sql-tab	
+UI-ISS-132	17	planned	sql-tab	
+UI-ISS-135	17	planned	sql-tab	
+UI-ISS-138	17	planned	sql-tab	
+UI-UPD-001	14	planned	sql-tab	Explain refresh; export overlay in io
+UI-UPD-003	14	planned	sql-tab	
+UI-UPD-010	14	planned	sql-tab	
+CON-DTB-003	18	planned	structure	
+DATA-DTB-001	18	planned	structure	
+DATA-ISS-007	16	planned	structure	
+DATA-ISS-104	17	planned	structure	
+DATA-ISS-113	17	planned	structure	
+DATA-ISS-117	17	planned	structure	
+DATA-ISS-131	17	planned	structure	
+DATA-ISS-138	17	planned	structure	
+DATA-UPD-008	14	planned	structure	
+DEP-DTB-003	18	planned	structure	
+FR-DTB-030	18	planned	structure	
+FR-DTB-031	18	planned	structure	
+FR-DTB-032	18	planned	structure	
+FR-DTB-033	18	planned	structure	
+FR-DTB-040	18	planned	structure	
+FR-DTB-041	18	planned	structure	
+FR-DTB-042	18	planned	structure	
+FR-DTB-043	18	planned	structure	
+FR-DTB-044	18	planned	structure	
+FR-DTB-045	18	planned	structure	
+FR-DTB-046	18	planned	structure	
+FR-DTB-047	18	planned	structure	
+FR-DTB-048	18	planned	structure	
+FR-DTB-049	18	planned	structure	
+FR-DTB-060	18	planned	structure	
+FR-DTB-061	18	planned	structure	
+FR-DTB-062	18	planned	structure	
+FR-DTB-063	18	planned	structure	
+FR-DTB-064	18	planned	structure	
+FR-DTB-065	18	planned	structure	
+FR-DTB-070	18	planned	structure	
+FR-DTB-071	18	planned	structure	
+FR-DTB-080	18	planned	structure	
+FR-DTB-081	18	planned	structure	
+FR-DTB-082	18	planned	structure	
+FR-DTB-083	18	planned	structure	
+FR-DTB-084	18	planned	structure	
+FR-DTB-102	18	planned	structure	
+FR-DTB-103	18	planned	structure	
+FR-DTB-104	18	planned	structure	
+FR-DTB-105	18	planned	structure	
+FR-DTB-154	18	planned	structure	
+FR-ISS-010	16	planned	structure	
+FR-ISS-011	16	planned	structure	
+FR-ISS-013	16	planned	structure	
+FR-ISS-105	17	planned	structure	
+FR-ISS-107	17	planned	structure	
+FR-ISS-109	17	planned	structure	
+FR-ISS-111	17	planned	structure	
+FR-ISS-117	17	planned	structure	
+FR-ISS-128	17	planned	structure	
+FR-ISS-136	17	planned	structure	
+FR-ISS-137	17	planned	structure	DDL preview of routines/events
+FR-ISS-142	17	planned	structure	
+FR-ISS-143	17	planned	structure	
+FR-ISS-147	17	planned	structure	
+FR-SRV-032	18	planned	structure	create database; also in server overview
+FR-TGT-200	13	planned	structure	adapter feature flags used by structure screens first
+FR-TGT-220	13	planned	structure	
+FR-TGT-221	13	planned	structure	
+FR-TGT-222	13	planned	structure	
+FR-TGT-223	13	planned	structure	
+FR-TGT-240	13	planned	structure	
+FR-TGT-241	13	planned	structure	
+FR-TGT-242	13	planned	structure	
+FR-TGT-243	13	planned	structure	
+FR-UIX-028	18	planned	structure	first used by destructive DDL
+FR-UPD-006	14	planned	structure	events page
+FR-UPD-011	14	planned	structure	
+FR-UPD-012	14	planned	structure	
+FR-UPD-019	14	planned	structure	routines paging
+FR-UPD-020	14	planned	structure	
+NFR-SRV-002	18	planned	structure	database create is a structure feature
+SEC-DTB-002	18	planned	structure	
+UI-DTB-020	18	planned	structure	
+UI-ISS-106	17	planned	structure	
+UI-ISS-107	17	planned	structure	
+UI-ISS-108	17	planned	structure	Confirmation dialogs
+UI-ISS-111	17	planned	structure	
+UI-ISS-119	17	planned	structure	
+UI-ISS-120	17	planned	structure	
+UI-ISS-122	17	planned	structure	Routine editor
+UI-ISS-124	17	planned	structure	
+UI-ISS-129	17	planned	structure	
+UI-SRV-007	18	planned	structure	

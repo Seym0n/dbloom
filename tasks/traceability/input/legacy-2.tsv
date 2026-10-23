@@ -1,0 +1,95 @@
+id	source	decision	area	text
+FR-SRV-048	18	KEEP	user accounts	Database-level and routine-level privilege viewing and editing.
+FR-SRV-051	18	KEEP	storage engines	List supported storage engines.
+FR-SRV-052	18	KEEP	storage engines	Per-engine details and variables.
+FR-SRV-053	18	KEEP	storage engines	InnoDB status and variables page.
+FR-SRV-054	18	KEEP	server plugins	Plugin list grouped by type; sorting done in UI.
+FR-SRV-055	18	KEEP	charsets collations	Charsets and collations with defaults flagged.
+FR-SRV-058	18	ADAPT	server SQL export import	Keep server-level SQL, export and import entry points; PHP script lists, plugin-load errors and offset/timeout form params go; use DBLoom registry.
+FR-SRV-059	18	ADAPT	server monitor	Keep live status charting inputs (numeric status variables, server time); OS name via PHP SysInfo and config host check replaced by adapter capability.
+FR-SRV-060	18	ADAPT	server monitor	Keep slow/general log time-range queries and aggregation; validate time bounds properly and use log_output table sources via adapter.
+FR-SRV-061	18	KEEP	query statistics	Per-hour/minute/second rates and percentage per Com_ counter remain useful.
+FR-SRV-064	18	ADAPT	server variables	Keep global/session variable list, filter and edit; drop PHP static editable list and legacy error strings, guard SET GLOBAL by privilege.
+FR-SRV-065	18	ADAPT	database list	Keep replication flag and size statistics per database; use Strategy for status statements and drop legacy pos/sort handling.
+FR-SRV-066	18	ADAPT	storage engines	Keep engine list and InnoDB status/buffer pool pages; drop PBMS special case and unknown-engine rendering quirks.
+FR-SRV-067	18	ADAPT	server plugins	Keep plugin list grouped by type; drop PHP anchor/tablesorter details and DisableIS handling.
+FR-SRV-069	18	ADAPT	privilege editor	Keep privilege flags per level; derive set from MySQL 8.4/MariaDB 10.11 capabilities via Strategy, include dynamic privileges.
+FR-SRV-070	18	ADAPT	privilege editor	Keep editing privileges via REVOKE/GRANT per scope; avoid tolerated-failure sequence, GRANT OPTION via WITH only on MariaDB, escape all identifiers.
+FR-SRV-071	18	ADAPT	privilege editor	Keep REQUIRE and resource limit options; drop pre-8.0.11 GRANT OPTION in WITH variant.
+FR-SRV-072	18	KEEP	privilege editor	Revoke all privileges at a scope remains needed; escape handling stays.
+FR-SRV-073	18	ADAPT	user management	Keep add-user with host choices and duplicate check; drop old_passwords and PASSWORD() logic, per-profile account vs DB account distinction.
+FR-SRV-074	18	ADAPT	user management	Keep copy/rename user incl. privileges; fix column-privilege defect, use SHOW CREATE USER style, drop user-group copy unless groups kept.
+FR-SRV-075	18	ADAPT	user management	Keep initial filter and show-all user list; query via adapter, not pma-specific user table assumptions.
+INT-SRV-002	18	ADAPT	server monitor	Keep batched typed data points with name allowlist; implement as JSON API, OS metrics only where available.
+INT-SRV-003	18	KEEP	server status	Show a not-loaded state instead of computing on missing data.
+INT-SRV-004	18	ADAPT	pagination	Keep paged lists with has previous/next; page size from DBLoom settings instead of MaxRows config.
+INT-SRV-005	18	KEEP	database drop	Reject empty selection and report pluralized success count.
+INT-SRV-006	18	KEEP	user management	Warn about anonymous localhost account blocking other hosts.
+INT-SRV-009	18	ADAPT	input validation	Keep allowlisting of identifiers, sort columns and flush targets; use schema validation and fix unvalidated binlog log and sort_order.
+NFR-SRV-001	18	ADAPT	binary log	Keep binlog event viewer; TableNavigationLinksMode preference dropped, use standard pagination UI.
+NFR-SRV-002	18	ADAPT	database create	Keep success message with SQL and navigation to new database; no global $db clearing, return error cleanly.
+NFR-SRV-003	18	KEEP	user management	Optional create-database-per-user and wildcard grants remain useful, only after successful account creation.
+SEC-SRV-004	18	ADAPT	binary log	Keep log-name allowlist and additionally validate/escape name in SQL; fix legacy defect.
+SEC-SRV-006	18	ADAPT	password handling	Use IDENTIFIED BY / WITH plugin with escaped value on all supported servers; drop SELECT PASSWORD() and version branches.
+SEC-SRV-007	18	KEEP	password handling	Mask passwords in displayed and logged SQL while executing real value.
+SEC-SRV-009	18	ADAPT	privilege detection	Keep capability detection (can read mysql.user, grant, create user) but via adapter and not session cache; informs UI only.
+SEC-SRV-011	18	ADAPT	password handling	Keep keep/none/userdefined choices, confirmation and masked display; passwords via parameterized/escaped APIs, never logged.
+SEC-SRV-012	18	ADAPT	known defects	Do not copy listed weaknesses; validate plugin names, sort order, binlog name, skip count as integer, protect replication credentials.
+UI-SRV-001	18	ADAPT	server status	Keep section, text, alerts-only and no-format filters on status variables; categories only if populated.
+UI-SRV-002	18	KEEP	process list	Progress column only on MariaDB, via adapter capability.
+UI-SRV-003	18	KEEP	server variables	Byte variables shown raw and humanized; escape non-numeric values.
+UI-SRV-004	18	KEEP	user management	Lock and unlock accounts with success/error feedback; MySQL 8.4 and MariaDB 10.11 support ACCOUNT LOCK.
+UI-SRV-005	18	KEEP	privilege export	Export of user privileges as GRANT statements from list and user page.
+UI-SRV-007	18	ADAPT	database create	Keep create form with charset/collation choice and default marked; permission-gated by server privileges, ShowCreateDb/MaxDbList config dropped.
+UI-SRV-008	18	ADAPT	server monitor	Live monitor chart grid is a whole feature; owner decides. If kept, refresh rates and grid defaults would be redesigned. (owner decision 2026-10-23, feature: server monitor)
+UI-SRV-009	18	ADAPT	process list	Keep optional auto-refresh of process list with selectable interval; implement with client polling, no PHP-style POST/abort mechanics.
+CON-DTB-001	18	ADAPT	table browse count	Keep: never show view totals as exact; make the view count cap a DBLoom setting instead of MaxExactCountViews.
+CON-DTB-003	18	ADAPT	table copy	Keep data-only copy not creating target table; drop the config-storage duplication part.
+CPT-DTB-001	18	KEEP	bookmarks and history	Persisted bookmarks, SQL history and saved searches are a feature choice; la_ tables replaced by DBLoom own storage. (owner decision 2026-10-23, feature: bookmarks and history)
+DATA-DTB-001	18	KEEP	index management	Index type model (primary, unique, index, spatial, fulltext) and loading from information_schema still needed.
+DEP-DTB-001	18	ADAPT	server family strategy	Keep MySQL vs MariaDB branching via Strategy (ARCH-TGT-002); drop checks for versions below MySQL 8.4 / MariaDB 10.11.
+DEP-DTB-003	18	KEEP	identifier case handling	Respect lower_case_table_names when creating or renaming databases and tables.
+FR-DTB-001	18	ADAPT	SQL execution	Keep parse, limit, run, count, render flow as an adapter-based pipeline; not PHP controller structure.
+FR-DTB-002	18	ADAPT	table browse	Keep default SELECT * browse with optional primary key order; drop bookmark-as-default-query behaviour.
+FR-DTB-003	18	ADAPT	table browse paging	Keep automatic paging LIMIT only for safe SELECTs; page sizes become DBLoom settings.
+FR-DTB-004	18	KEEP	table browse count	Total row count via COUNT over the unlimited query, skipped when page is not full.
+FR-DTB-005	18	KEEP	table browse count	Use approximate table count and exact count only below threshold; threshold configurable.
+FR-DTB-006	18	ADAPT	table browse paging	Clamp page position after deletes and also for out-of-range browse requests; avoid error-suppression defect.
+FR-DTB-007	18	ADAPT	table browse sorting	Remember per-table sort order, stored in DBLoom user preferences instead of config-storage table properties.
+FR-DTB-008	18	KEEP	query results	Show SHOW WARNINGS output after executed statements.
+FR-DTB-009	18	KEEP	table browse count	Distinguish views from tables; view counts unknown or capped with a lower-bound notice; no data copy for views.
+FR-DTB-010	18	ADAPT	result display	Keep rows per page, long-text truncation and repeated headers as DBLoom preferences, not PHP session tmpval.
+FR-DTB-011	18	KEEP	foreign key editing	Relational column dropdown with browse fallback for large referenced tables in inline edit.
+FR-DTB-012	18	ADAPT	query profiling	Keep query timing; profiling via SHOW PROFILE is deprecated, use performance_schema or EXPLAIN ANALYZE where available.
+FR-DTB-021	18	ADAPT	SQL multi-statement	Keep running multiple statements with custom delimiter; implement in DBLoom SQL runner and import, not via PHP import route.
+FR-DTB-022	18	ADAPT	SQL rollback	Keep optional transaction wrapper for DML on transactional tables with rollback; implement via explicit transaction in a connection.
+FR-DTB-023	18	ADAPT	query errors	Show server error with failing SQL; optional continue-on-error for multi-statement runs; no mysqlDie page.
+FR-DTB-025	18	KEEP	bookmarks and history	Saving executed queries as bookmarks (replace, all-users) is part of the bookmark feature decision. (owner decision 2026-10-23, feature: bookmarks and history)
+FR-DTB-026	18	KEEP	bookmarks and history	Bookmark placeholder variables only matter if bookmarks are adopted. (owner decision 2026-10-23, feature: bookmarks and history)
+FR-DTB-027	18	ADAPT	bookmarks and history	SQL history stays useful; store per user in DBLoom storage with a configurable cap, not PHP session or la_history.
+FR-DTB-028	18	KEEP	SQL multi-result	Render all result sets from routine calls and report affected rows.
+FR-DTB-030	18	KEEP	database copy rename	Database rename and copy including routines, views, events, triggers and FK handling; no DELIMITER client syntax.
+FR-DTB-031	18	KEEP	database copy rename	Reject empty or identical target names; apply lower_case_table_names rule.
+FR-DTB-032	18	ADAPT	database copy rename	Offer switching to the new database after copy as an in-app navigation choice, not a persisted session flag.
+FR-DTB-033	18	ADAPT	database copy rename	Optional privilege adjustment on copy/rename remains useful; use MySQL 8.4 / MariaDB 10.11 grant tables only.
+FR-DTB-040	18	KEEP	table creation	Generate and execute CREATE TABLE from columns, keys, partitions and options.
+FR-DTB-041	18	ADAPT	table creation	Keep name syntax validation but also enforce the 64-character identifier limit client-side.
+FR-DTB-042	18	ADAPT	table rename	Second review (Haiku, 10 reviewers, 2026-10-23): RENAME TABLE for tables and views stays; the configuration-storage updates are dropped.
+FR-DTB-043	18	KEEP	table rename	Try native RENAME TABLE first, fall back to copy only on failure.
+FR-DTB-044	18	ADAPT	table copy	Keep structure, constraint, index and auto-increment copy steps; drop export-plugin based implementation.
+FR-DTB-045	18	KEEP	table copy	Copy data with NO_AUTO_VALUE_ON_ZERO, non-generated columns only, nothing for views or structure-only.
+FR-DTB-046	18	ADAPT	config storage tables	Second review (Haiku, 10 reviewers, 2026-10-23): copying column transformations with a copied table stays (DBLoom store); internal relations are deferred with the designer.
+FR-DTB-047	18	ADAPT	table drop	Keep DROP VIEW vs DROP TABLE per object type; drop config-storage cleanup.
+FR-DTB-048	18	KEEP	table truncate	Truncate selected tables, skip views, with confirmation.
+FR-DTB-049	18	KEEP	foreign key checks	Optionally disable FOREIGN_KEY_CHECKS for destructive operations and restore the prior value.
+FR-DTB-060	18	KEEP	column management	Add one or more columns via ALTER TABLE ADD, combined with creation flows.
+FR-DTB-061	18	ADAPT	table options	Keep alter-table options (engine, collation, row format, auto-increment, comment); engine-specific options gated by server product.
+FR-DTB-062	18	ADAPT	column management	Keep column metadata for forms from information_schema; reserved-name reporting for pma tables dropped.
+FR-DTB-063	18	KEEP	index management	Create, edit and drop indexes with validation errors (PRIMARY naming rules); edit drops old index in same ALTER.
+FR-DTB-064	18	KEEP	duplicate indexes	Report redundant duplicate indexes as notices.
+FR-DTB-065	18	KEEP	foreign keys	Native InnoDB FK add/change/drop with RESTRICT default.
+FR-DTB-070	18	KEEP	views	Create/alter views with algorithm, definer, security, check option.
+FR-DTB-071	18	KEEP	views	Drop/alter views; no backup step needed.
+FR-DTB-080	18	KEEP	routines	Routine browse/create/edit/execute/drop; DBLoom uses own form/SQL building.
+FR-DTB-081	18	KEEP	routines	Routine execute dialog with parameters and result sets.
+FR-DTB-082	18	KEEP	triggers	Trigger create/edit/drop with validation.

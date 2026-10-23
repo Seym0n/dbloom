@@ -1,0 +1,135 @@
+id	source	status	module	note
+FR-ISS-129	17	planned	hardening	
+FR-ISS-130	17	planned	server	
+FR-ISS-131	17	planned	browse-edit	
+FR-ISS-132	17	partial	browse-edit	skeleton lists names; natural sort setting open
+FR-ISS-133	17	planned	sql-tab	identifier quoting display setting
+FR-ISS-134	17	planned	sql-tab	
+FR-ISS-135	17	planned	sql-tab	
+FR-ISS-136	17	planned	structure	
+FR-ISS-137	17	planned	structure	DDL preview of routines/events
+FR-ISS-138	17	planned	server	
+FR-ISS-139	17	partial	browse-edit	skeleton has sort and paging; page reset to check
+FR-ISS-140	17	planned	browse-edit	
+FR-ISS-141	17	planned	sql-tab	conditional on a visual query builder
+FR-ISS-142	17	planned	structure	
+FR-ISS-143	17	planned	structure	
+FR-ISS-144	17	planned	sql-tab	
+FR-ISS-145	17	planned	sql-tab	
+FR-ISS-146	17	planned	browse-edit	
+FR-ISS-147	17	planned	structure	
+FR-TGT-101	11	planned	auth-account	
+FR-TGT-102	11	planned	auth-account	
+FR-TGT-104	11	planned	auth-account	
+FR-TGT-105	11	planned	admin	
+FR-TGT-141	11	planned	admin	
+FR-TGT-146	11	planned	admin	
+FR-TGT-149	11	planned	admin	
+FR-TGT-200	13	planned	structure	adapter feature flags used by structure screens first
+FR-TGT-220	13	planned	structure	
+FR-TGT-221	13	planned	structure	
+FR-TGT-222	13	planned	structure	
+FR-TGT-223	13	planned	structure	
+FR-TGT-230	13	planned	sql-tab	
+FR-TGT-231	13	planned	sql-tab	
+FR-TGT-232	13	planned	browse-edit	table maintenance statistics
+FR-TGT-233	13	planned	server	
+FR-TGT-240	13	planned	structure	
+FR-TGT-241	13	planned	structure	
+FR-TGT-242	13	planned	structure	
+FR-TGT-243	13	planned	structure	
+FR-TGT-250	11	planned	assistant	
+FR-TGT-251	11	planned	assistant	
+FR-UPD-001	14	unsure	hardening	URL query encryption is a legacy LegacyAdmin feature; fate not stated in row
+FR-UPD-002	14	unsure	hardening	depends on whether URL query encryption exists in DBLoom
+FR-UPD-003	14	planned	auth-account	
+FR-UPD-004	14	planned	io	
+FR-UPD-005	14	planned	server	
+FR-UPD-006	14	planned	structure	events page
+FR-UPD-007	14	planned	sql-tab	
+FR-UPD-008	14	planned	server	
+FR-UPD-009	14	planned	server	
+FR-UPD-010	14	planned	server	
+FR-UPD-011	14	planned	structure	
+FR-UPD-012	14	planned	structure	
+FR-UPD-013	14	planned	browse-edit	
+FR-UPD-014	14	planned	auth-account	
+FR-UPD-015	14	planned	sql-tab	
+FR-UPD-016	14	planned	sql-tab	
+FR-UPD-017	14	planned	sql-tab	bookmarks
+FR-UPD-018	14	planned	hardening	
+FR-UPD-019	14	planned	structure	routines paging
+FR-UPD-020	14	planned	structure	
+FR-UPD-021	14	planned	browse-edit	query generator / search
+FR-UPD-022	14	planned	hardening	
+FR-UPD-023	14	planned	auth-account	captcha on login
+FR-UPD-024	14	planned	hardening	
+FR-UPD-025	14	planned	hardening	
+FR-UPD-026	14	dropped	-	row states features removed
+NFR-ISS-001	16	planned	hardening	
+NFR-ISS-002	16	planned	hardening	
+NFR-ISS-101	17	planned	sql-tab	
+NFR-ISS-102	17	planned	io	
+NFR-ISS-103	17	planned	hardening	performance
+NFR-ISS-104	17	planned	io	
+NFR-ISS-105	17	planned	sql-tab	
+NFR-TGT-090	11	planned	admin	
+NFR-TGT-093	11	planned	hardening	
+NFR-TGT-107	11	planned	admin	
+NFR-TGT-120	11	planned	hardening	
+NFR-TGT-121	11	planned	hardening	
+NFR-TGT-122	11	planned	hardening	
+NFR-TGT-145	11	planned	admin	
+NFR-TGT-160	11	partial	hardening	i18n scaffold exists; catalog content and formatting remain
+SEC-ISS-001	16	partial	skeleton	logout done; shared cookie and import file name encoding remain
+SEC-ISS-101	17	planned	hardening	
+SEC-ISS-102	17	planned	auth-account	
+SEC-ISS-103	17	planned	admin	audit log content
+SEC-ISS-104	17	partial	skeleton	direct login covers chosen server; re-test after expiry
+SEC-ISS-105	17	planned	auth-account	
+SEC-ISS-106	17	planned	server	
+SEC-ISS-107	17	planned	skeleton	direct-mode connect with plugin check
+SEC-ISS-108	17	planned	skeleton	connect failure must keep session; direct login path
+SEC-ISS-109	17	planned	server	
+SEC-ISS-110	17	planned	server	
+SEC-ISS-111	17	planned	server	
+SEC-ISS-112	17	partial	skeleton	login page exists; URL prefill rules to check
+SEC-ISS-113	17	planned	server	
+SEC-ISS-114	17	partial	skeleton	session and CSRF done; unauthenticated render behaviour to check
+SEC-ISS-115	17	planned	server	
+SEC-TGT-001	11	planned	hardening	
+SEC-TGT-002	11	planned	hardening	
+SEC-TGT-010	11	planned	auth-account	
+SEC-TGT-011	11	planned	auth-account	
+SEC-TGT-012	11	planned	auth-account	
+SEC-TGT-013	11	planned	auth-account	
+SEC-TGT-014	11	planned	auth-account	
+SEC-TGT-015	11	planned	auth-account	
+SEC-TGT-016	11	deferred	auth-account	SSO is listed in FUTURE.md
+SEC-TGT-017	11	partial	skeleton	rate limit done; account throttling and backoff in auth-account
+SEC-TGT-018	11	done	skeleton	
+SEC-TGT-019	11	partial	skeleton	direct mode exists; mode switch and account mode later
+SEC-TGT-020	11	done	skeleton	
+SEC-TGT-021	11	done	skeleton	
+SEC-TGT-022	11	planned	auth-account	
+SEC-TGT-023	11	planned	hardening	
+SEC-TGT-024	11	planned	auth-account	
+SEC-TGT-025	11	deferred	auth-account	FUTURE.md FU-005
+SEC-TGT-026	11	planned	auth-account	
+SEC-TGT-027	11	deferred	auth-account	FUTURE.md FU-005
+SEC-TGT-030	11	done	skeleton	
+SEC-TGT-031	11	partial	skeleton	host policy done; resolve-once pinning to check
+SEC-TGT-032	11	planned	hardening	
+SEC-TGT-033	11	planned	sql-tab	connect and query timeouts
+SEC-TGT-040	11	done	skeleton	
+SEC-TGT-041	11	partial	skeleton	idle/absolute configurability to check
+SEC-TGT-042	11	done	skeleton	
+SEC-TGT-043	11	planned	hardening	
+SEC-TGT-050	11	planned	hardening	
+SEC-TGT-051	11	planned	hardening	central quoting function used by all modules
+SEC-TGT-052	11	planned	sql-tab	read-only guard
+SEC-TGT-053	11	planned	hardening	
+SEC-TGT-060	11	planned	hardening	
+SEC-TGT-061	11	planned	auth-account	
+SEC-TGT-062	11	planned	server	
+SEC-TGT-070	11	planned	hardening	

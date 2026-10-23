@@ -1,0 +1,95 @@
+id	source	status	module	note
+DEP-CC-013	18	planned	hardening
+DEP-CC-014	18	planned	hardening	login outcome logging
+INT-CC-004	18	planned	hardening	version gate; may be partly in skeleton login
+INT-CC-021	18	planned	io
+NFR-CC-007	18	planned	auth-account	per-user prefs store
+NFR-CC-015	18	partial	hardening	skeleton has basic routing errors
+NFR-CC-016	18	planned	io
+SEC-CC-017	18	planned	server	privilege capability check gates drop-db/admin
+UI-CC-005	18	partial	hardening	i18n scaffold exists; content and RTL open
+CON-CFG-027	18	planned	admin
+DATA-CFG-023	18	planned	auth-account	connection profile defaults
+DATA-CFG-069	18	planned	hardening	app storage schema per feature
+DATA-CFG-092	18	planned	browse-edit	navigation tree settings
+DATA-CFG-093	18	planned	browse-edit
+DATA-CFG-094	18	partial	hardening	skeleton has light/dark and i18n scaffold
+FR-CFG-009	18	partial	hardening	startup config validation
+FR-CFG-013	18	planned	auth-account
+FR-CFG-014	18	planned	auth-account
+FR-CFG-016	18	planned	auth-account
+FR-CFG-017	18	partial	auth-account	theme/lang exist; per-user persistence open
+FR-CFG-018	18	planned	auth-account
+FR-CFG-033	18	planned	browse-edit	per-page settings dialogs, multi-module
+FR-CFG-036	18	planned	admin
+FR-CFG-041	18	planned	admin
+FR-CFG-042	18	planned	auth-account
+FR-CFG-073	18	planned	browse-edit
+FR-CFG-074	18	planned	sql-tab
+FR-CFG-078	18	planned	hardening
+FR-CFG-079	18	planned	io
+FR-CFG-095	18	planned	auth-account
+FR-CFG-096	18	planned	auth-account
+FR-CFG-097	18	planned	auth-account
+FR-CFG-118	18	planned	auth-account
+INT-CFG-089	18	partial	auth-account	direct-mode host/port/TLS exist; profiles open
+NFR-CFG-105	18	partial	hardening
+SEC-CFG-060	18	planned	hardening
+SEC-CFG-066	18	planned	hardening
+SEC-CFG-103	18	planned	hardening
+CON-SRV-001	18	planned	server
+CPT-SRV-001	18	planned	server
+CPT-SRV-004	18	planned	server
+DATA-SRV-001	18	planned	server
+DATA-SRV-002	18	planned	server
+DATA-SRV-003	18	planned	server
+DATA-SRV-004	18	planned	server
+DATA-SRV-005	18	planned	server
+DATA-SRV-006	18	planned	server
+DATA-SRV-007	18	planned	server
+DATA-SRV-008	18	planned	server
+DATA-SRV-010	18	partial	server	skeleton lists databases read-only
+DATA-SRV-011	18	planned	server
+DATA-SRV-012	18	planned	server
+DATA-SRV-013	18	planned	server
+DATA-SRV-014	18	planned	server
+DATA-SRV-015	18	planned	server
+DATA-SRV-016	18	planned	server
+FR-SRV-001	18	planned	server
+FR-SRV-002	18	planned	server
+FR-SRV-003	18	planned	server
+FR-SRV-005	18	planned	server
+FR-SRV-006	18	planned	server
+FR-SRV-007	18	planned	server
+FR-SRV-008	18	planned	server
+FR-SRV-010	18	planned	server	monitor scope owner-decided
+FR-SRV-011	18	planned	server	monitor scope owner-decided
+FR-SRV-012	18	planned	server	monitor scope owner-decided
+FR-SRV-013	18	planned	server	monitor scope owner-decided
+FR-SRV-014	18	planned	server
+FR-SRV-015	18	planned	server
+FR-SRV-016	18	planned	server
+FR-SRV-017	18	planned	server
+FR-SRV-018	18	planned	server
+FR-SRV-019	18	planned	server
+FR-SRV-020	18	planned	server
+FR-SRV-021	18	planned	server
+FR-SRV-022	18	planned	server
+FR-SRV-029	18	planned	server
+FR-SRV-030	18	partial	server	skeleton lists databases read-only; stats/sort open
+FR-SRV-031	18	planned	server
+FR-SRV-032	18	planned	structure	create database; also in server overview
+FR-SRV-033	18	planned	server
+FR-SRV-034	18	planned	server
+FR-SRV-035	18	planned	server
+FR-SRV-036	18	planned	server
+FR-SRV-037	18	planned	server
+FR-SRV-038	18	planned	server
+FR-SRV-039	18	planned	server
+FR-SRV-040	18	planned	server
+FR-SRV-041	18	planned	server
+FR-SRV-042	18	planned	server
+FR-SRV-043	18	planned	server
+FR-SRV-045	18	planned	server
+FR-SRV-046	18	planned	server
+FR-SRV-047	18	planned	server

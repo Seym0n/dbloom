@@ -1,0 +1,95 @@
+id	source	status	module	note
+UI-IOX-021	18	planned	io	
+FR-SAU-004	18	planned	auth-account	
+FR-SAU-005	18	partial	skeleton	skeleton covers the basic login/session part
+FR-SAU-006	18	planned	admin	
+FR-SAU-026	18	partial	skeleton	skeleton covers the basic login/session part
+FR-SAU-027	18	done	skeleton	
+FR-SAU-029	18	planned	auth-account	
+FR-SAU-036	18	partial	skeleton	skeleton covers the basic login/session part
+FR-SAU-037	18	planned	admin	
+FR-SAU-039	18	done	skeleton	
+FR-SAU-042	18	partial	skeleton	skeleton covers the basic login/session part
+FR-SAU-050	18	planned	auth-account	
+FR-SAU-061	18	planned	auth-account	
+FR-SAU-072	18	planned	hardening	
+FR-SAU-073	18	planned	io	
+FR-SAU-074	18	planned	io	
+FR-SAU-088	18	partial	skeleton	skeleton covers the basic login/session part
+FR-SAU-089	18	planned	hardening	
+NFR-SAU-085	18	planned	hardening	
+NFR-SAU-318	18	planned	hardening	
+SEC-SAU-020	18	planned	auth-account	
+SEC-SAU-024	18	planned	auth-account	
+SEC-SAU-025	18	partial	skeleton	skeleton covers the basic login/session part
+SEC-SAU-067	18	planned	auth-account	
+SEC-SAU-070	18	planned	hardening	
+SEC-SAU-071	18	planned	hardening	
+SEC-SAU-202	18	partial	skeleton	skeleton covers the basic login/session part
+SEC-SAU-301	18	planned	hardening	
+SEC-SAU-304	18	planned	io	
+SEC-SAU-305	18	planned	io	
+SEC-SAU-307	18	planned	io	
+SEC-SAU-308	18	planned	hardening	
+SEC-SAU-311	18	partial	skeleton	skeleton covers the basic login/session part
+SEC-SAU-313	18	planned	hardening	
+SEC-SAU-314	18	planned	hardening	
+SEC-SAU-316	18	planned	hardening	
+SEC-SAU-319	18	planned	server	
+SEC-SAU-320	18	planned	browse-edit	
+SEC-SAU-322	18	planned	server	
+SEC-SAU-323	18	planned	server	
+UI-SAU-030	18	partial	skeleton	skeleton covers the basic login/session part
+CPT-PLG-006	18	planned	browse-edit	column transformations; owner-decided feature
+DATA-PLG-001	18	planned	io	
+DATA-PLG-002	18	planned	browse-edit	column transformations; owner-decided feature
+DATA-PLG-003	18	planned	io	
+DATA-PLG-004	18	planned	io	
+DATA-PLG-008	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-005	18	planned	io	
+FR-PLG-006	18	planned	io	
+FR-PLG-011	18	planned	io	
+FR-PLG-012	18	planned	io	
+FR-PLG-014	18	planned	io	
+FR-PLG-016	18	planned	io	
+FR-PLG-019	18	planned	io	
+FR-PLG-020	18	planned	io	
+FR-PLG-021	18	planned	io	
+FR-PLG-023	18	planned	io	
+FR-PLG-024	18	planned	io	
+FR-PLG-025	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-026	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-028	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-030	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-031	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-032	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-034	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-035	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-036	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-037	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-038	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-039	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-041	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-042	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-043	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-044	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-045	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-046	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-047	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-048	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-049	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-050	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-051	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-052	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-053	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-054	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-056	18	planned	browse-edit	column transformations; owner-decided feature
+FR-PLG-057	18	planned	io	
+INT-PLG-001	18	planned	io	
+INT-PLG-002	18	planned	io	
+INT-PLG-003	18	planned	io	
+INT-PLG-004	18	planned	io	
+INT-PLG-005	18	planned	io	
+INT-PLG-006	18	planned	io	
+NFR-PLG-004	18	planned	browse-edit	column transformations; owner-decided feature
+SEC-PLG-001	18	planned	io	

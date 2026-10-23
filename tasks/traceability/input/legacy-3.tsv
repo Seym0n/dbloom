@@ -1,0 +1,95 @@
+id	source	decision	area	text
+FR-DTB-083	18	KEEP	events	Event management with schedule validation and scheduler status.
+FR-DTB-084	18	ADAPT	routines events triggers	Keep best-effort backup/restore on failed redefinition; wording and implementation become DBLoom's own.
+FR-DTB-090	18	KEEP	database search	Database-wide search with five match types.
+FR-DTB-091	18	KEEP	table search	Table search form with per-column operators.
+FR-DTB-093	18	KEEP	find and replace	Column find/replace with preview and regex mode.
+FR-DTB-100	18	ADAPT	table maintenance	Keep CHECK/ANALYZE/CHECKSUM/OPTIMIZE/REPAIR; drop DisableMultiTableMaintenance config key.
+FR-DTB-102	18	ADAPT	table options	Row format per engine; drop PBXT, Barracuda/legacy InnoDB file format logic.
+FR-DTB-103	18	ADAPT	table options	Keep AUTO_INCREMENT and engine options; gate by server/engine, not legacy detection.
+FR-DTB-104	18	KEEP	table operations	Move/rename/copy table incl. cross-db.
+FR-DTB-105	18	KEEP	table operations	Batch table prefix add/replace.
+FR-DTB-130	18	ADAPT	row insert	Keep multi-row insert form; row count default becomes DBLoom setting rather than $cfg.
+FR-DTB-131	18	KEEP	row edit	Per-row UPDATE with unique WHERE and LIMIT 1.
+FR-DTB-132	18	KEEP	row delete	Per-row delete with safe unique condition.
+FR-DTB-133	18	KEEP	row edit	Unique-row condition from PK/unique key or full-row fallback.
+FR-DTB-134	18	ADAPT	row value encoding	Keep per-type value encoding; ProtectBinary becomes a DBLoom setting.
+FR-DTB-135	18	ADAPT	row edit	Inline edit and edit-next flow; no PHP session state, client/URL state instead.
+FR-DTB-136	18	ADAPT	row insert	Report insert id and affected rows, but compute ids correctly (legacy multi-row id adjustment is inexact).
+FR-DTB-137	18	ADAPT	column transformations	Column transformation feature depends on config storage; decide once. (owner decision 2026-10-23, feature: column transformations)
+FR-DTB-138	18	KEEP	SQL preview	Preview generated SQL without executing.
+FR-DTB-152	18	ADAPT	result pagination	Keep paging/page size/full-partial text/relational display; state in client/user settings not PHP session or $cfg.
+FR-DTB-153	18	ADAPT	result sorting	Keep click-to-sort with multi-column and smart direction; default order becomes a setting.
+FR-DTB-154	18	KEEP	table creation	Create-table guards and column count cap of 4096.
+FR-DTB-155	18	ADAPT	navigation tree	Keep paged tree loading; page sizes become DBLoom settings, no DisableIS variants.
+FR-DTB-156	18	ADAPT	navigation tree	Keep prefix grouping of databases/tables; separators and depth become DBLoom settings.
+FR-DTB-157	18	ADAPT	navigation tree	Keep filter box, natural ordering, hidden items; thresholds become DBLoom settings.
+FR-DTB-160	18	ADAPT	foreign key pickers	Keep related-value dropdown/popup picker; limit and order become DBLoom settings.
+NFR-DTB-001	18	KEEP	result pagination	Avoid redundant COUNT queries when page already shows full result.
+NFR-DTB-002	18	KEEP	query error display	Show the true query and true server error; do not apply automatic LIMIT to failing queries.
+SEC-DTB-001	18	ADAPT	signed SQL URLs	Signed GET SQL no longer needed if SQL is not passed in URLs; use server-side state and CSRF protection instead.
+SEC-DTB-002	18	ADAPT	drop database gating	Keep a guard on DROP DATABASE via DBLoom permissions and mandatory confirmation, not a PHP config flag or client-supplied confirm field.
+SEC-DTB-003	18	ADAPT	signed row identifiers	Row identification passed between views must be tamper-proof; use server-side state or signed row keys, not Core::signSqlQuery; fix silent discard.
+SEC-DTB-004	18	ADAPT	raw SQL fragments	Custom WHERE/ORDER power-user input stays but is validated or parsed; run under user's own privileges, parameterize where possible.
+UI-DTB-010	18	KEEP	insert/edit pickers	Enum, set and foreign-key value pickers remain useful in insert/edit/search forms.
+UI-DTB-020	18	ADAPT	destructive confirmation	Keep explicit confirmation for destructive actions; implement as UI dialog with server-side check, not localized "Yes" POST value.
+DATA-IOX-036	18	ADAPT	export templates	Saved named export presets per user stored in DBLoom own app storage, not la_export_templates or Configuration Storage.
+DATA-IOX-074	18	ADAPT	export defaults	Keep sensible SQL export defaults; defaults live in settings design, not PHP cfg keys.
+DATA-IOX-083	18	ADAPT	export defaults	Keep sensible general export defaults; drop PHP ZipDump/GZipDump config; defaults set via DBLoom settings.
+DATA-IOX-089	18	ADAPT	import defaults	Keep sensible import option defaults; defaults set via DBLoom settings, not PHP cfg.
+FR-IOX-001	18	ADAPT	export formats	Offer SQL, CSV, JSON, XML and chosen others; drop CodeGen, PHP array, Texy, Word 2000; remaining formats are an owner scope choice via format registry.
+FR-IOX-005	18	KEEP	export structure or data	Per-format choice of structure, data, or both remains; invalid values rejected rather than silently falling back.
+FR-IOX-006	18	ADAPT	export download mode	Formats without text view are download-only; keep as format capability flag in registry.
+FR-IOX-007	18	ADAPT	SQL export options	Keep SQL dump options (DDL, drop, triggers, routines, FK disable, transaction); drop legacy compatibility modes for old servers and PHP version comment.
+FR-IOX-008	18	KEEP	CSV export	Configurable separator, enclosure, escape, line terminator, NULL string, header row remain.
+FR-IOX-009	18	ADAPT	CSV for Excel	Keep Excel-friendly CSV preset (separator, BOM/encoding); drop legacy Mac Excel 2003/2008 variants.
+FR-IOX-010	18	KEEP	JSON export	Pretty-print and unicode options remain; implemented via native JSON serialization.
+FR-IOX-013	18	KEEP	raw query export	Exporting result of a free-typed query remains; unsupported formats report a clear error; filename export.<ext>.
+FR-IOX-015	18	KEEP	export scopes	Server, database, table and query-result export scopes remain; invalid parameter combinations rejected with proper error.
+FR-IOX-016	18	KEEP	database export tables	Database export filters by selected tables; show message when none selected.
+FR-IOX-017	18	KEEP	export locking	Forced structure/data override and optional table read lock with guaranteed unlock remain.
+FR-IOX-022	18	ADAPT	export text view	View export output in read-only viewer with copy; Back/Refresh POST replay is PHP form mechanics and dropped.
+FR-IOX-025	18	ADAPT	export compression	Keep zip and gzip output; availability no longer depends on PHP functions or cfg flags.
+FR-IOX-026	18	ADAPT	streaming compression	Compress-on-the-fly becomes native streaming gzip with bounded memory, not a PHP memory budget option.
+FR-IOX-030	18	ADAPT	save export on server	Optional server-side save to configured directory remains if enabled; keep filename sanitization, overwrite guard, write errors; setting in 12-settings.
+FR-IOX-031	18	KEEP	export file naming	Compressed export gains .zip/.gz extension and matching MIME type; format extension appended when absent.
+FR-IOX-032	18	ADAPT	zip separate files	Keep multi-file zip export with one file per table; implement with Node archive library.
+FR-IOX-034	18	ADAPT	filename templates	Keep filename templates with date and server/db/table/columns placeholders; drop PHP strftime and legacy aliases and LEGACYADMIN token.
+FR-IOX-035	18	ADAPT	remember filename template	Remember template per export scope in per-user settings stored in DBLoom storage, not pma user values.
+FR-IOX-037	18	ADAPT	import sources	Keep pasted SQL and uploaded file sources; bookmarks depend on owner bookmark decision; oversized upload message adapted, no FAQ reference.
+FR-IOX-038	18	ADAPT	import format whitelist	Closed set of import formats stays as registry; final format list is owner scope choice; reject unknown formats.
+FR-IOX-040	18	ADAPT	SQL import	Keep streaming statement-by-statement SQL import with skip-errors and skip-first-N; use own SQL splitter; resumable timeout handling not needed.
+FR-IOX-041	18	KEEP	CSV import	Delimiters, enclosure, escape, line ending, replace/ignore, partial import, header row, column list, new table/db creation remain.
+FR-IOX-042	18	KEEP	CSV type detection	Column type inference and CREATE TABLE plus INSERT generation for new-table import remains useful.
+FR-IOX-046	18	ADAPT	LOAD DATA import	Keep LOAD DATA INFILE option with LOCAL capability probing; MySQL 8.4 has local_infile off by default, handle accordingly.
+FR-IOX-048	18	ADAPT	import file source	Browser upload plus optional server-side upload directory; keep path traversal and symlink protection; directory configured via settings.
+FR-IOX-049	18	ADAPT	import decompression	Transparent gzip, bzip2 and zip import stays; no PHP extension or cfg gating; bzip2 optional.
+FR-IOX-050	18	KEEP	import BOM handling	Strip UTF-8 and UTF-16 byte-order marks on first chunk; may also use BOM for charset detection.
+FR-IOX-051	18	ADAPT	import file charset	Convert file charset to UTF-8 on read using Node encoding libraries; SET NAMES fallback for missing iconv not needed.
+FR-IOX-056	18	ADAPT	import error handling	Report failing statement with server error and abort unless ignore-errors set; transactional rollback only for transactional tables; no mysqlDie.
+FR-IOX-057	18	KEEP	SQL import	Disable FK checks during import and always restore, including on errors.
+FR-IOX-058	18	ADAPT	SQL import	Keep success summary with count and filename; UI refresh after DDL via client state invalidation, not panel reload.
+FR-IOX-061	18	ADAPT	upload progress	Progress feedback for long uploads stays, implemented with browser upload events or streaming, not PHP polling route.
+FR-IOX-070	18	ADAPT	export format choice	Default format remembered per user in settings, overridable by URL parameter; no cfg array.
+FR-IOX-071	18	KEEP	CSV export	CSV options: header row, NULL text, separator, enclosure, escape, line terminator, CRLF removal; drop PHP_EOL detail.
+FR-IOX-072	18	ADAPT	CSV export	Excel-compatible CSV variant stays (separator, CRLF, BOM-aware); drop Mac Excel 2003/2008 editions.
+FR-IOX-073	18	KEEP	SQL export	Correct value formatting for NULL, numeric, binary hex, BIT, geometry, strings; INSERT/REPLACE/UPDATE statement types.
+FR-IOX-075	18	ADAPT	JSON export	JSON export stays; header should name DBLoom and version; binary and geometry handling kept.
+FR-IOX-084	18	KEEP	export size filter	Skip tables larger than a given size on database export.
+FR-IOX-085	18	ADAPT	ZIP export	Separate-files ZIP stays with sane entry naming; drop first-dot extension quirk.
+FR-IOX-086	18	ADAPT	export filename template	Filename template with db/table/date tokens stays; replace strftime and legacyadmin tokens with safe own token set.
+FR-IOX-087	18	KEEP	export scope	Server, database and table scope export with selection of databases, tables, structure/data; views after tables.
+FR-IOX-088	18	KEEP	CSV import	Parse CSV with configurable terminator, enclosure, escape, line end, with parameter validation; shown inline not mysqlDie.
+FR-IOX-092	18	ADAPT	LOAD DATA import	LOAD DATA import optional, table scope; escape all interpolated values; refuse compressed input unless decompressed first.
+FR-IOX-095	18	ADAPT	upload errors	Clear upload error messages stay for size, partial, missing file; no php.ini references.
+FR-IOX-100	18	KEEP	DML simulation	Dry-run affected row count for single-table UPDATE/DELETE.
+FR-IOX-101	18	ADAPT	SQL query box	SQL editor runs queries via its own API, not an import route; keep bookmark/parameter support per other decisions.
+NFR-IOX-023	18	ADAPT	export keepalive	Long buffered exports need keepalive or streaming to avoid proxy timeouts; use streaming instead of X-pmaPing.
+NFR-IOX-052	18	ADAPT	import streaming	Import must stream in chunks with bounded memory; chunk sizes are implementation choice.
+NFR-IOX-055	18	ADAPT	import resume	Resumable large imports stay as need; use job-based import with offset, not resubmitting the file.
+NFR-IOX-094	18	ADAPT	upload size limit	Configurable max upload size shown in UI, enforced server-side; not php.ini based.
+SEC-IOX-033	18	ADAPT	download filename	Sanitize download filenames against traversal and header injection; drop url_rewriter.
+SEC-IOX-096	18	KEEP	import injection	Do not interpolate unescaped LDI terminators, charset names or USE detection; validate or quote all.
+UI-IOX-018	18	ADAPT	export UI	Quick versus Custom export modes stay; preference stored in user settings.
+UI-IOX-019	18	KEEP	export UI	Format dropdown with option panel per selected format.
+UI-IOX-020	18	KEEP	export UI	Single-table export row range selection with record count and LIMIT.

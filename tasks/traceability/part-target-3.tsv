@@ -1,0 +1,135 @@
+id	source	status	module	note
+SEC-TGT-071	11	planned	io	
+SEC-TGT-072	11	planned	io	
+SEC-TGT-073	11	planned	hardening	
+SEC-TGT-080	11	planned	hardening	
+SEC-TGT-081	11	planned	hardening	
+SEC-TGT-082	11	planned	hardening	
+SEC-TGT-103	11	planned	auth-account	
+SEC-TGT-106	11	deferred	auth-account	FU-005
+SEC-TGT-110	11	done	skeleton	stack in place
+SEC-TGT-111	11	partial	skeleton	server-side session and CSRF done
+SEC-TGT-112	11	planned	hardening	
+SEC-TGT-113	11	planned	hardening	
+SEC-TGT-114	11	planned	hardening	
+SEC-TGT-115	11	planned	hardening	
+SEC-TGT-116	11	planned	hardening	
+SEC-TGT-117	11	planned	hardening	
+SEC-TGT-118	11	planned	hardening	
+SEC-TGT-119	11	planned	hardening	
+SEC-TGT-120	11	planned	hardening	
+SEC-TGT-121	11	planned	hardening	
+SEC-TGT-122	11	planned	hardening	
+SEC-TGT-123	11	planned	hardening	
+SEC-TGT-124	11	partial	skeleton	
+SEC-TGT-125	11	planned	admin	
+SEC-TGT-126	11	partial	skeleton	host normalisation/allow policy done
+SEC-TGT-127	11	planned	hardening	
+SEC-TGT-128	11	planned	admin	
+SEC-TGT-129	11	planned	hardening	
+SEC-TGT-130	11	planned	hardening	
+SEC-TGT-131	11	partial	skeleton	rate limit exists
+SEC-TGT-132	11	planned	hardening	
+SEC-TGT-133	11	planned	hardening	
+SEC-TGT-134	11	partial	skeleton	CSRF done; origin checks to verify
+SEC-TGT-135	11	planned	hardening	
+SEC-TGT-136	11	planned	hardening	
+SEC-TGT-137	11	planned	hardening	
+SEC-TGT-142	11	planned	admin	
+SEC-TGT-143	11	planned	admin	
+SEC-TGT-144	11	planned	admin	
+SEC-TGT-147	11	planned	admin	
+SEC-TGT-148	11	superseded	-	merged into SEC-TGT-147
+SEC-TGT-150	11	planned	admin	
+SEC-TGT-151	11	planned	browse-edit	
+SEC-TGT-152	11	planned	auth-account	
+SEC-TGT-153	11	planned	auth-account	
+SEC-TGT-154	11	planned	io	
+SEC-TGT-155	11	planned	io	
+SEC-TGT-156	11	planned	server	
+SEC-TGT-157	11	planned	server	
+SEC-TGT-158	11	planned	assistant	
+ST-001	12	planned	hardening	ENV-only
+ST-002	12	planned	hardening	ENV-only
+ST-003	12	planned	hardening	ENV-only
+ST-004	12	planned	hardening	ENV-only
+ST-005	12	planned	hardening	ENV-only
+ST-006	12	planned	hardening	ENV-only
+ST-007	12	partial	skeleton	host allow policy exists
+ST-008	12	planned	hardening	ENV-only
+ST-009	12	planned	hardening	ENV-only
+ST-010	12	planned	hardening	ENV-only
+ST-011	12	planned	admin	
+ST-012	12	planned	admin	
+ST-013	12	planned	hardening	ENV-only
+ST-014	12	planned	admin	
+ST-015	12	planned	hardening	ENV-only
+ST-016	12	partial	skeleton	fixed in code; rate limit exists
+ST-017	12	planned	hardening	ENV-only
+ST-018	12	planned	hardening	ENV-only
+ST-019	12	planned	hardening	ENV-only
+ST-020	12	planned	hardening	ENV-only
+ST-021	12	planned	hardening	ENV-only
+ST-022	12	planned	hardening	ENV-only
+ST-023	12	planned	hardening	fixed in code
+ST-024	12	planned	hardening	ENV-only
+ST-025	12	planned	hardening	ENV-only
+ST-026	12	partial	skeleton	session cookie done
+ST-027	12	partial	skeleton	session cookie done
+ST-028	12	dropped	-	single instance
+ST-029	12	dropped	-	dropped for first release
+ST-030	12	planned	hardening	fixed in code
+ST-031	12	planned	auth-account	setup wizard rule
+ST-032	12	planned	admin	
+ST-033	12	planned	hardening	ENV-only
+ST-034	12	planned	admin	
+ST-035	12	planned	admin	
+ST-036	12	planned	admin	
+ST-037	12	planned	admin	
+ST-038	12	dropped	-	multi-instance dropped (DEP-TGT-150)
+ST-050	12	planned	auth-account	
+ST-051	12	planned	auth-account	
+ST-052	12	planned	hardening	
+ST-053	12	dropped	-	no such setting; server-side sessions need none
+ST-054	12	planned	auth-account	
+ST-055	12	planned	auth-account	
+ST-056	12	planned	auth-account	
+ST-057	12	planned	auth-account	
+ST-058	12	planned	auth-account	
+ST-059	12	planned	auth-account	
+ST-060	12	planned	auth-account	
+ST-061	12	planned	auth-account	
+ST-062	12	planned	auth-account	
+ST-063	12	planned	auth-account	
+ST-064	12	planned	auth-account	
+ST-065	12	planned	auth-account	
+ST-066	12	planned	auth-account	
+ST-067	12	planned	auth-account	
+ST-068	12	planned	auth-account	
+ST-069	12	partial	skeleton	session lifetime; account-mode UI later
+ST-070	12	partial	skeleton	session lifetime; account-mode UI later
+ST-071	12	planned	auth-account	
+ST-072	12	planned	auth-account	
+ST-073	12	dropped	-	remember-me dropped
+ST-074	12	planned	skeleton	direct-mode login recall option
+ST-075	12	planned	auth-account	
+ST-076	12	partial	skeleton	login throttle exists
+ST-077	12	partial	skeleton	login throttle exists
+ST-078	12	partial	skeleton	login throttle exists
+ST-079	12	planned	auth-account	
+ST-080	12	partial	skeleton	direct-mode target throttle
+ST-081	12	planned	auth-account	
+ST-082	12	planned	auth-account	
+ST-083	12	dropped	-	no email binding
+ST-084	12	planned	auth-account	
+ST-085	12	planned	auth-account	
+ST-086	12	planned	auth-account	
+ST-087	12	planned	auth-account	
+ST-088	12	planned	auth-account	
+ST-089	12	planned	auth-account	
+ST-090	12	planned	auth-account	
+ST-091	12	dropped	-	captcha dropped, throttling replaces it
+ST-092	12	planned	admin	audit
+ST-093	12	planned	admin	
+ST-100	12	partial	skeleton	host deny policy exists
+ST-101	12	partial	skeleton	host allow policy exists
