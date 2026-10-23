@@ -1,0 +1,11 @@
+# Todo: skeleton (see SPEC/21 section 11)
+- [x] 1 Foundation
+- [x] 2 Docker, compose, CI
+- [x] 3 Store + node:sqlite
+- [x] 4 Host normalisation
+- [x] 5 Direct-mode auth
+- [x] 6 DB helpers
+- [x] 7 Shell + sidebar tree
+- [x] 8 Table grid
+- [x] 9 Session-ended + logout
+- [ ] 10 A11y/motion pass (no axe run yet; manual screenshots reviewed light/dark at 1440, 768, 390)

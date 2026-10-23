@@ -1,0 +1,160 @@
+@import 'tailwindcss';
+@import '@fontsource/ibm-plex-sans/latin-400.css';
+@import '@fontsource/ibm-plex-sans/latin-500.css';
+@import '@fontsource/ibm-plex-sans/latin-600.css';
+@import '@fontsource/ibm-plex-mono/latin-400.css';
+
+/* Framed sheet (app style): a tinted L-frame holds sidebar and top bar, the work sits on a white sheet. */
+:root {
+  color-scheme: light;
+  --ground: #f4f8f6;
+  --surface: #ffffff;
+  --raised: #f4f6f7;
+  --active: #e6ebe9;
+  --border: #e4e9e7;
+  --rule: #eff2f1;
+  --control: #c9cfcd;
+  --text: #131614;
+  --muted: #565d5a;
+  --faint: #66706c;
+  --accent: #17715a;
+  --accent-ink: #ffffff;
+  --primary: #1d1f20;
+  --primary-ink: #ffffff;
+  --positive: #1e7b4f;
+  --negative: #c4242a;
+  --pill-neutral-bg: #e6ebe9;
+  --pill-neutral-ink: #2e3532;
+  --pill-warning-bg: #fffbeb;
+  --pill-warning-ink: #92400e;
+  --pill-negative-bg: #ffedea;
+  --pill-negative-ink: #831c1e;
+  --radius-sheet: 16px;
+  --radius-card: 8px;
+  --radius-control: 6px;
+  --sheet-inset: 8px;
+  --sidebar-width: 244px;
+  --assistant-width: 340px;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --ground: #0c0e0d;
+  --surface: #141716;
+  --raised: #1b1f1e;
+  --active: #232827;
+  --border: #262b29;
+  --rule: #1d2120;
+  --control: #4a514f;
+  --text: #f2f5f4;
+  --muted: #b4bbb8;
+  --faint: #949c99;
+  --accent: #3fb594;
+  --accent-ink: #06130f;
+  --primary: #f2f5f4;
+  --primary-ink: #0c0e0d;
+  --positive: #3fc07a;
+  --negative: #e5566f;
+  --pill-neutral-bg: #232827;
+  --pill-neutral-ink: #d5dad8;
+  --pill-warning-bg: #2b2412;
+  --pill-warning-ink: #f0c879;
+  --pill-negative-bg: #2c1a20;
+  --pill-negative-ink: #e5566f;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --ground: #0c0e0d;
+    --surface: #141716;
+    --raised: #1b1f1e;
+    --active: #232827;
+    --border: #262b29;
+    --rule: #1d2120;
+    --control: #4a514f;
+    --text: #f2f5f4;
+    --muted: #b4bbb8;
+    --faint: #949c99;
+    --accent: #3fb594;
+    --accent-ink: #06130f;
+    --primary: #f2f5f4;
+    --primary-ink: #0c0e0d;
+    --positive: #3fc07a;
+    --negative: #e5566f;
+    --pill-neutral-bg: #232827;
+    --pill-neutral-ink: #d5dad8;
+    --pill-warning-bg: #2b2412;
+    --pill-warning-ink: #f0c879;
+    --pill-negative-bg: #2c1a20;
+    --pill-negative-ink: #e5566f;
+  }
+}
+
+@theme inline {
+  --color-ground: var(--ground);
+  --color-surface: var(--surface);
+  --color-raised: var(--raised);
+  --color-active: var(--active);
+  --color-border: var(--border);
+  --color-rule: var(--rule);
+  --color-control: var(--control);
+  --color-ink: var(--text);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-accent: var(--accent);
+  --color-primary: var(--primary);
+  --color-negative: var(--negative);
+  --color-positive: var(--positive);
+  --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 20px;
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+button {
+  cursor: pointer;
+}
+
+/* Motion is feedback only: press, hover, focus. Nothing performs an entrance. */
+.press {
+  transition:
+    transform 100ms ease-out,
+    background-color 120ms ease-out;
+}
+.press:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .press {
+    transition: background-color 120ms ease-out;
+  }
+  .press:active:not(:disabled) {
+    transform: none;
+  }
+}
+
+dialog::backdrop {
+  background: rgb(0 0 0 / 0.35);
+}

@@ -1,0 +1,9 @@
+node_modules
+.output
+.git
+.claude
+.agents
+SPEC
+legacy-release
+data
+test-results

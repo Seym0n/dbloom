@@ -1,0 +1,7 @@
+legacy-release
+SPEC
+.output
+node_modules
+src/routeTree.gen.ts
+.claude
+.agents

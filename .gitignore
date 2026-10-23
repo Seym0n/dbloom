@@ -1,1 +1,10 @@
 legacy-release
+node_modules
+.output
+.env
+data
+test-results
+playwright-report
+.tanstack
+
+.taste-skill
