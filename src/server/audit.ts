@@ -1,7 +1,23 @@
+import type { StructureAuditEvent } from './structure/types'
+
 /** One JSON line per event on stdout. Never pass passwords, tokens or cell values (SEC-TGT-023). */
 export function audit(
   event: string,
   fields: Record<string, string | number | boolean | undefined> = {},
 ): void {
   console.log(JSON.stringify({ t: new Date().toISOString(), audit: event, ...fields }))
+}
+
+/** Structure statements: hash only, never SQL text or literals (NFR-TGT-090, SEC-TGT-023). */
+export function auditStructure(event: StructureAuditEvent): void {
+  audit('structure.statement', {
+    user: event.user,
+    target: event.target,
+    kind: event.kind,
+    class: event.class,
+    statementHash: event.statementHash,
+    outcome: event.outcome,
+    errno: event.errno,
+    durationMs: event.durationMs,
+  })
 }

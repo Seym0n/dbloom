@@ -35,11 +35,12 @@ export const login = createServerFn({ method: 'POST' })
 export const getSessionInfo = createServerFn({ method: 'GET' })
   .middleware([sameOriginMiddleware])
   .handler(async () => {
-    const { sessions } = getRuntime()
+    const { sessions, config } = getRuntime()
     const session = sessions.resolve(getCookie(SESSION_COOKIE))
     if (!session) return null
     return {
       csrf: session.csrf,
+      readOnly: config.readOnly || session.readOnly,
       target: {
         host: session.target.host,
         port: session.target.port,

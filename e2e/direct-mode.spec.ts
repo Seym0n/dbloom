@@ -29,7 +29,7 @@ test.describe('SCN-004 log in directly to a target', () => {
   test('good credentials land on the database list', async ({ page }) => {
     await signIn(page)
     await expect(page.getByRole('navigation', { name: 'Databases' })).toBeVisible()
-    await expect(page.getByRole('button', { name: 'e2e_shop' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'e2e_shop', exact: true })).toBeVisible()
     const session = (await page.context().cookies()).find((c) => c.name === COOKIE)
     expect(session).toMatchObject({ httpOnly: true, secure: true, sameSite: 'Strict', path: '/' })
   })
@@ -38,8 +38,8 @@ test.describe('SCN-004 log in directly to a target', () => {
 test.describe('SCN-005 open a table', () => {
   test.beforeEach(async ({ page }) => {
     await signIn(page)
-    await page.getByRole('button', { name: 'e2e_shop' }).click()
-    await page.getByRole('button', { name: 'orders' }).click()
+    await page.getByRole('button', { name: 'e2e_shop', exact: true }).click()
+    await page.getByRole('button', { name: 'orders', exact: true }).click()
   })
 
   test('first page, sort, next page and the SQL that ran', async ({ page }) => {
@@ -68,7 +68,7 @@ test.describe('SCN-005 open a table', () => {
   })
 
   test('a second table opens in its own tab; an empty table says so', async ({ page }) => {
-    await page.getByRole('button', { name: 'empty_table' }).click()
+    await page.getByRole('button', { name: 'empty_table', exact: true }).click()
     await expect(page.getByRole('tab')).toHaveCount(2)
     await expect(page.getByText('This table has no rows.')).toBeVisible()
     await page.getByRole('button', { name: 'Close empty_table' }).click()
@@ -85,7 +85,7 @@ test.describe('requests and logout (SEC-TGT-042, SCN-010)', () => {
       }
     })
     await signIn(page)
-    await expect(page.getByRole('button', { name: 'e2e_shop' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'e2e_shop', exact: true })).toBeVisible()
     // The login call has no CSRF header yet; replay a later data call.
     await expect.poll(() => seen.some((r) => r.headers['x-dbloom-csrf'])).toBe(true)
     const { url, headers: original, body } = seen.find((r) => r.headers['x-dbloom-csrf'])!
@@ -121,8 +121,8 @@ test.describe('requests and logout (SEC-TGT-042, SCN-010)', () => {
 test.describe('SCN-009 session ends', () => {
   test('one neutral dialog, work stays, signing in again continues', async ({ page, context }) => {
     await signIn(page)
-    await page.getByRole('button', { name: 'e2e_shop' }).click()
-    await page.getByRole('button', { name: 'orders' }).click()
+    await page.getByRole('button', { name: 'e2e_shop', exact: true }).click()
+    await page.getByRole('button', { name: 'orders', exact: true }).click()
     await expect(page.getByText('Rows 1–50')).toBeVisible()
 
     // Another tab of the same browser logs out: the cookie is gone for this page too.

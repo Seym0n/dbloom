@@ -12,6 +12,12 @@ let runtime: Runtime | undefined
 /** Lazy singleton: config errors surface on the first request and in the log, not at import time. */
 export function getRuntime(): Runtime {
   if (runtime) return runtime
+  // Dev and local runs: read .env without overriding variables that are already set.
+  try {
+    process.loadEnvFile('.env')
+  } catch {
+    // no .env file (containers pass real variables)
+  }
   const config = loadConfig()
   mkdirSync(config.dataDir, { recursive: true })
   const store = openSqliteStore(join(config.dataDir, 'dbloom.db'))

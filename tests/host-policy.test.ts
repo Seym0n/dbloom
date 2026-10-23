@@ -13,6 +13,8 @@ const base: Config = {
   sessionIdleMs: 1,
   sessionAbsoluteMs: 1,
   connectTimeoutMs: 1,
+  readOnly: false,
+  statementTimeoutMs: 30_000,
 }
 const deny = { allowLoopback: false, allowPrivate: false }
 const t = (host: string, port = 3306) => ({ host, port, username: 'u' })

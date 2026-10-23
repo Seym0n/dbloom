@@ -24,6 +24,8 @@ const config: Config = {
   sessionIdleMs: 60_000,
   sessionAbsoluteMs: 600_000,
   connectTimeoutMs: 3000,
+  readOnly: false,
+  statementTimeoutMs: 30_000,
 }
 
 describe.each(servers)('direct-mode login against $name', ({ port }) => {

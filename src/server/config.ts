@@ -12,6 +12,10 @@ export type Config = {
   sessionIdleMs: number
   sessionAbsoluteMs: number
   connectTimeoutMs: number
+  /** DBLOOM_READ_ONLY: forces every session read-only. */
+  readOnly: boolean
+  /** DBLOOM_STATEMENT_TIMEOUT_SECONDS (default 30). */
+  statementTimeoutMs: number
 }
 
 const bool = (v: string | undefined) => v === 'true' || v === '1'
@@ -25,6 +29,12 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
   if (tls !== 'verify' && tls !== 'skip-verify' && tls !== 'off') {
     throw new Error('DBLOOM_TARGET_TLS must be verify, skip-verify or off')
   }
+  const timeoutRaw = env.DBLOOM_STATEMENT_TIMEOUT_SECONDS
+  const timeoutSeconds = timeoutRaw === undefined || timeoutRaw === '' ? 30 : Number(timeoutRaw)
+  if (!Number.isFinite(timeoutSeconds) || timeoutSeconds <= 0) {
+    throw new Error('DBLOOM_STATEMENT_TIMEOUT_SECONDS must be a number greater than zero')
+  }
+  const timeoutMs = timeoutSeconds * 1000
   const config: Config = {
     dataDir: env.DBLOOM_DATA_DIR ?? './data',
     allowedTargets: (env.DBLOOM_DIRECT_TARGETS ?? '')
@@ -39,6 +49,8 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     sessionIdleMs: num(env.DBLOOM_SESSION_IDLE_MINUTES, 30) * 60_000,
     sessionAbsoluteMs: num(env.DBLOOM_SESSION_ABSOLUTE_HOURS, 12) * 3_600_000,
     connectTimeoutMs: num(env.DBLOOM_CONNECT_TIMEOUT_SECONDS, 10) * 1000,
+    readOnly: bool(env.DBLOOM_READ_ONLY),
+    statementTimeoutMs: timeoutMs,
   }
   // SEC-TGT-018: free-form targets need a named allow-list or an explicit acknowledgement.
   if (config.allowedTargets.length === 0 && !config.freeFormAck) {

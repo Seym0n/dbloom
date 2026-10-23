@@ -2,6 +2,7 @@ import { createHash, randomBytes, timingSafeEqual } from 'node:crypto'
 import type { Config } from './config'
 import type { TargetPool } from './db/target-pool'
 import type { Store } from './store/store'
+import { planStore } from './structure/plans'
 import type { TargetKey } from './target'
 
 export type LiveSession = {
@@ -9,9 +10,10 @@ export type LiveSession = {
   csrf: string
   target: TargetKey
   pool: TargetPool
+  readOnly: boolean
 }
 
-type Runtime = { csrf: string; target: TargetKey; pool: TargetPool }
+type Runtime = { csrf: string; target: TargetKey; pool: TargetPool; readOnly: boolean }
 
 const hash = (token: string) => createHash('sha256').update(token).digest('hex')
 
@@ -41,7 +43,7 @@ export class SessionManager {
       lastSeenAt: now,
       expiresAt: now + this.config.sessionAbsoluteMs,
     })
-    this.live.set(idHash, { csrf, target, pool })
+    this.live.set(idHash, { csrf, target, pool, readOnly: false })
     return { token, csrf }
   }
 
@@ -64,6 +66,11 @@ export class SessionManager {
     return { idHash, ...runtime }
   }
 
+  setReadOnly(idHash: string, value: boolean): void {
+    const runtime = this.live.get(idHash)
+    if (runtime) runtime.readOnly = value
+  }
+
   verifyCsrf(session: LiveSession, presented: string | undefined): boolean {
     if (!presented) return false
     const a = Buffer.from(session.csrf)
@@ -79,6 +86,7 @@ export class SessionManager {
     const runtime = this.live.get(idHash)
     this.live.delete(idHash)
     this.store.deleteSession(idHash)
+    planStore.dropSession(idHash)
     await runtime?.pool.end().catch(() => undefined)
   }
 

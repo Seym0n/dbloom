@@ -7,6 +7,7 @@ export default definePlugin(() => {
     getRuntime()
   } catch (error) {
     console.error(`DBLoom cannot start: ${error instanceof Error ? error.message : String(error)}`)
-    process.exit(1)
+    // In dev the error stays visible in the log and on each request; killing the worker only hangs the socket.
+    if (process.env.NODE_ENV === 'production') process.exit(1)
   }
 })
