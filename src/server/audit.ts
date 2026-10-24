@@ -81,3 +81,60 @@ export function auditSqlStatement(event: SqlStatementAuditEvent): void {
     durationMs: event.durationMs,
   })
 }
+
+export type RowsChangeAuditEvent = {
+  user: string
+  target: string
+  db: string
+  table: string
+  operation: 'insert' | 'update' | 'delete'
+  rowCount: number
+  statementCount: number
+  maxClass: 'none' | 'soft' | 'hard'
+  identityKind: 'primary' | 'unique' | 'all-columns'
+  outcome: 'ok' | 'conflict' | 'gone' | 'error' | 'partial'
+  errno?: number
+  durationMs?: number
+  planId?: string
+}
+
+/** One line per applied or attempted row plan: counts and outcome only, never values, keys or SQL (FR-ROW-024). */
+export function auditRowsChange(event: RowsChangeAuditEvent): void {
+  audit('rows.change', {
+    user: event.user,
+    target: event.target,
+    db: event.db,
+    table: event.table,
+    operation: event.operation,
+    rowCount: event.rowCount,
+    statementCount: event.statementCount,
+    class: event.maxClass,
+    identityKind: event.identityKind,
+    outcome: event.outcome,
+    errno: event.errno,
+    durationMs: event.durationMs,
+    planId: event.planId,
+  })
+}
+
+export type RowsRefusedAuditEvent = {
+  user: string
+  target: string
+  db: string
+  table: string
+  operation?: 'insert' | 'update' | 'delete'
+  /** Stable refusal code (read-only, token-missing, ...). */
+  code: string
+}
+
+/** One line per refused row write (FR-ROW-024). */
+export function auditRowsRefused(event: RowsRefusedAuditEvent): void {
+  audit('rows.refused', {
+    user: event.user,
+    target: event.target,
+    db: event.db,
+    table: event.table,
+    operation: event.operation,
+    code: event.code,
+  })
+}

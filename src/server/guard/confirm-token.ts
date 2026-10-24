@@ -4,6 +4,14 @@ import { WriteGuardError } from './write-guard'
 
 const MAX_CONSUMED = 10_000
 
+/** Canonical JSON of bound values (a Buffer serialises through its own toJSON, bigint as tagged decimal). */
+function canonicalParams(params: unknown[]): string {
+  return JSON.stringify(params, (_k, v: unknown) => {
+    if (typeof v === 'bigint') return { $bigint: v.toString() }
+    return v
+  })
+}
+
 /** SHA-256 over the SQL texts, each prefixed by its byte length, so concatenation cannot be ambiguous. */
 export function hashStatements(statements: Statement[]): string {
   const h = createHash('sha256')
@@ -16,6 +24,15 @@ export function hashStatements(statements: Statement[]): string {
     len.writeUInt32BE(bytes.length)
     h.update(len)
     h.update(bytes)
+    // Only statements with parameters add bytes, so hashes of statements without `params` are unchanged.
+    if (s.params !== undefined) {
+      const params = Buffer.from(canonicalParams(s.params), 'utf8')
+      const plen = Buffer.alloc(4)
+      plen.writeUInt32BE(params.length)
+      h.update(Buffer.from([0x70]))
+      h.update(plen)
+      h.update(params)
+    }
   }
   return h.digest('hex')
 }

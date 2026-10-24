@@ -45,6 +45,20 @@ const HINTS: Record<number, string> = {
   1699: 'The statement needs a privilege or option that this server does not give.',
 }
 
+/**
+ * Slot for the hints of module rows (FR-ROW-025: 1048, 1264, 1292, 1366, 1406, 3105, 3140 and wording for
+ * 1062, 1216, 1217, 1451, 1452, 1054). Empty after task 0; work package B fills it. `HINTS` wins on a clash.
+ */
+export const ROW_HINTS: Record<number, string> = {
+  1048: 'This column cannot be empty (NULL); enter a value.',
+  1264: 'The value is outside the range of the column type.',
+  1292: 'The value is not valid for the column type.',
+  1366: 'The value is not valid for the column type or its character set.',
+  1406: 'The value is longer than the column allows.',
+  3105: 'This column is generated; its value cannot be written.',
+  3140: 'The text is not valid JSON.',
+}
+
 /** The uniform text for everything that is not a server reply (connection, TLS, driver). */
 export const CONNECTION_MESSAGE = 'Could not connect to the server'
 
@@ -64,7 +78,7 @@ export function mapMysqlError(error: unknown, statementIndex?: number): Structur
   const e: DriverError = typeof error === 'object' && error !== null ? (error as DriverError) : {}
   const code = typeof e.code === 'string' ? e.code : 'UNKNOWN'
   if (typeof e.sqlMessage === 'string' && typeof e.errno === 'number' && e.errno > 0) {
-    const hint = HINTS[e.errno]
+    const hint = HINTS[e.errno] ?? ROW_HINTS[e.errno]
     return { errno: e.errno, code, message: e.sqlMessage, ...(hint ? { hint } : {}) }
   }
   // Timeouts raised by the guard carry their own code; everything else is a connection-level failure.

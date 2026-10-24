@@ -1,8 +1,8 @@
 import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
-import { audit } from './audit'
-import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, pageRows } from './db/rows'
-import { listDatabases, listTables, resolveTable } from './db/schema'
+import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from './db/rows'
+import { listDatabases, listTables } from './db/schema'
+import { getRowsImpl, rowsEnvOf } from './rows/service'
 import { sessionMiddleware } from './middleware'
 
 export const getDatabases = createServerFn({ method: 'POST' })
@@ -27,9 +27,28 @@ export const getTableRows = createServerFn({ method: 'POST' })
     }),
   )
   .handler(async ({ context, data }) => {
-    const { pool, target } = context.session
-    const table = await resolveTable(pool, data.db, data.table)
-    const result = await pageRows(pool, table, data)
-    audit('table.open', { user: target.username, db: data.db, table: data.table })
-    return { ...result, kind: table.kind, estimatedRows: table.estimatedRows }
+    // The skeleton function delegates to the rows service (FR-ROW-006); the legacy fields stay, the new ones are additive.
+    const res = await getRowsImpl(rowsEnvOf(context.session), {
+      db: data.db,
+      table: data.table,
+      page: data.page,
+      pageSize: data.pageSize,
+      sort: data.sort ? [{ column: data.sort, direction: data.direction ?? 'asc' }] : [],
+    })
+    return {
+      columns: res.columns,
+      kinds: res.kinds,
+      rows: res.rows,
+      sql: res.sqlShown,
+      kind: res.table.kind,
+      estimatedRows: res.table.estimatedRows,
+      page: res.page,
+      hasNext: res.hasNext,
+      hasPrev: res.hasPrev,
+      total: res.total,
+      timings: res.timings,
+      identity: res.identity,
+      permissions: res.permissions,
+      timeZone: res.timeZone,
+    }
   })

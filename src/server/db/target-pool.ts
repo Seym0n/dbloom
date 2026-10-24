@@ -38,6 +38,8 @@ export async function openTargetPool(
     bigNumberStrings: true,
     decimalNumbers: false,
     jsonStrings: true,
+    // `execute` (module rows) caches prepared statements per connection; the server allows 16 382 in total.
+    maxPreparedStatements: 100,
   })
   try {
     await pool.query('SELECT 1')

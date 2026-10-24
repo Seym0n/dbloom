@@ -11,6 +11,8 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
+import { Route as ApiRowsUploadRouteImport } from './routes/api/rows/upload'
+import { Route as ApiRowsCellIdRouteImport } from './routes/api/rows/cell.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,31 +24,50 @@ const ApiHealthRoute = ApiHealthRouteImport.update({
   path: '/api/health',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiRowsUploadRoute = ApiRowsUploadRouteImport.update({
+  id: '/api/rows/upload',
+  path: '/api/rows/upload',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiRowsCellIdRoute = ApiRowsCellIdRouteImport.update({
+  id: '/api/rows/cell/$id',
+  path: '/api/rows/cell/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/api/health': typeof ApiHealthRoute
+  '/api/rows/upload': typeof ApiRowsUploadRoute
+  '/api/rows/cell/$id': typeof ApiRowsCellIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/api/health': typeof ApiHealthRoute
+  '/api/rows/upload': typeof ApiRowsUploadRoute
+  '/api/rows/cell/$id': typeof ApiRowsCellIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/api/health': typeof ApiHealthRoute
+  '/api/rows/upload': typeof ApiRowsUploadRoute
+  '/api/rows/cell/$id': typeof ApiRowsCellIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/health'
+  fullPaths: '/' | '/api/health' | '/api/rows/upload' | '/api/rows/cell/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/health'
-  id: '__root__' | '/' | '/api/health'
+  to: '/' | '/api/health' | '/api/rows/upload' | '/api/rows/cell/$id'
+  id:
+    '__root__' | '/' | '/api/health' | '/api/rows/upload' | '/api/rows/cell/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ApiHealthRoute: typeof ApiHealthRoute
+  ApiRowsUploadRoute: typeof ApiRowsUploadRoute
+  ApiRowsCellIdRoute: typeof ApiRowsCellIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +86,28 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiHealthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/rows/upload': {
+      id: '/api/rows/upload'
+      path: '/api/rows/upload'
+      fullPath: '/api/rows/upload'
+      preLoaderRoute: typeof ApiRowsUploadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/rows/cell/$id': {
+      id: '/api/rows/cell/$id'
+      path: '/api/rows/cell/$id'
+      fullPath: '/api/rows/cell/$id'
+      preLoaderRoute: typeof ApiRowsCellIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ApiHealthRoute: ApiHealthRoute,
+  ApiRowsUploadRoute: ApiRowsUploadRoute,
+  ApiRowsCellIdRoute: ApiRowsCellIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

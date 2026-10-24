@@ -8,6 +8,8 @@ import {
   applyEntryLimit,
   type SqlStateOptions,
 } from '../sql/state'
+import { scopeKey, type PrefScope, type PrefValues, type PrefsStore } from '../rows/prefs'
+import { MAX_TABLE_SCOPES, PREF_KEYS, type PrefKey } from '../rows/types'
 import type {
   Bookmark,
   HistoryEntry,
@@ -61,6 +63,18 @@ const SQL_STATE_SCHEMA = `
   ) STRICT;
 `
 
+const UI_PREFS_SCHEMA = `
+  CREATE TABLE ui_prefs (
+    owner_key  TEXT NOT NULL,
+    target_key TEXT NOT NULL,
+    scope      TEXT NOT NULL,
+    key        TEXT NOT NULL,
+    value      TEXT NOT NULL,
+    updated_at INTEGER NOT NULL,
+    PRIMARY KEY (owner_key, target_key, scope, key)
+  ) STRICT;
+`
+
 /** Migration n+1 is MIGRATIONS[n]; `PRAGMA user_version` holds the number applied (FR-SQL-020). */
 export const MIGRATIONS: ((db: DatabaseSync) => void)[] = [
   // 1: the skeleton schema, unchanged. Idempotent, because files made before versions existed
@@ -68,6 +82,8 @@ export const MIGRATIONS: ((db: DatabaseSync) => void)[] = [
   (db) => db.exec(SESSIONS_SCHEMA),
   // 2: history and bookmarks
   (db) => db.exec(SQL_STATE_SCHEMA),
+  // 3: display preferences of module rows (FR-ROW-010, spec 24 section 5.9)
+  (db) => db.exec(UI_PREFS_SCHEMA),
 ]
 
 /** Applies pending migrations in one transaction; refuses a database newer than the code. */
@@ -101,7 +117,7 @@ type Row = {
   expires_at: number
 }
 
-export type SqliteStore = Store & { sql: SqlStateStore }
+export type SqliteStore = Store & { sql: SqlStateStore; prefs: PrefsStore }
 
 export function openSqliteStore(path: string, options: Partial<SqlStateOptions> = {}): SqliteStore {
   const db = new DatabaseSync(path)
@@ -113,6 +129,7 @@ export function openSqliteStore(path: string, options: Partial<SqlStateOptions> 
     throw error
   }
   const sql = createSqliteSqlState(db, { ...DEFAULT_STATE_OPTIONS, ...options })
+  const prefs = createSqlitePrefs(db)
 
   const insert = db.prepare(
     'INSERT INTO sessions (id_hash, target_key, user_name, created_at, last_seen_at, expires_at) VALUES (?, ?, ?, ?, ?, ?)',
@@ -141,6 +158,7 @@ export function openSqliteStore(path: string, options: Partial<SqlStateOptions> 
     deleteSession: (idHash) => void remove.run(idHash),
     purgeSessions: (before) => Number(purge.run(before).changes),
     sql,
+    prefs,
     close: () => db.close(),
   }
 }
@@ -355,4 +373,72 @@ export function createSqliteSqlState(
     prune(o.owner_key, opts.historyEntries, opts.historyDays * DAY_MS, now())
   }
   return store
+}
+
+// ---- Display preferences ----------------------------------------------------------------------------------
+
+const isPrefKey = (k: string): k is PrefKey => (PREF_KEYS as readonly string[]).includes(k)
+
+/**
+ * SQLite implementation of `PrefsStore` (spec 24 section 5.9). Every statement carries
+ * `owner_key = ? AND target_key = ?`; at most `MAX_TABLE_SCOPES` table scopes per owner and target,
+ * the least recently updated removed on write (FR-CFG-073).
+ */
+export function createSqlitePrefs(
+  db: DatabaseSync,
+  now: () => number = Date.now,
+  maxTableScopes: number = MAX_TABLE_SCOPES,
+): PrefsStore {
+  const selScope = db.prepare(
+    'SELECT key, value FROM ui_prefs WHERE owner_key = ? AND target_key = ? AND scope = ?',
+  )
+  const upsert = db.prepare(
+    `INSERT INTO ui_prefs (owner_key, target_key, scope, key, value, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?)
+     ON CONFLICT (owner_key, target_key, scope, key)
+     DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at`,
+  )
+  const prune = db.prepare(
+    `DELETE FROM ui_prefs WHERE owner_key = ? AND target_key = ? AND scope <> 'global' AND scope IN (
+       SELECT scope FROM (
+         SELECT scope, MAX(updated_at) AS u FROM ui_prefs
+          WHERE owner_key = ? AND target_key = ? AND scope <> 'global'
+          GROUP BY scope ORDER BY u DESC, scope DESC LIMIT -1 OFFSET ?))`,
+  )
+  const count = db.prepare(
+    `SELECT COUNT(DISTINCT scope) AS n FROM ui_prefs
+      WHERE owner_key = ? AND target_key = ? AND scope <> 'global'`,
+  )
+
+  const read = (ownerKey: string, targetKey: string, scope: string, out: PrefValues) => {
+    for (const row of selScope.all(ownerKey, targetKey, scope) as {
+      key: string
+      value: string
+    }[]) {
+      if (!isPrefKey(row.key)) continue
+      try {
+        out[row.key] = JSON.parse(row.value) as unknown
+      } catch {
+        // a damaged value is treated as absent
+      }
+    }
+  }
+
+  return {
+    get(ownerKey, targetKey, table) {
+      const out: PrefValues = {}
+      read(ownerKey, targetKey, 'global', out)
+      if (table) read(ownerKey, targetKey, scopeKey({ kind: 'table', ...table }), out)
+      return out
+    },
+    set(ownerKey, targetKey, scope: PrefScope, key, value) {
+      upsert.run(ownerKey, targetKey, scopeKey(scope), key, JSON.stringify(value), now())
+      if (scope.kind === 'table') {
+        prune.run(ownerKey, targetKey, ownerKey, targetKey, maxTableScopes)
+      }
+    },
+    tableScopeCount(ownerKey, targetKey) {
+      return (count.get(ownerKey, targetKey) as { n: number }).n
+    },
+  }
 }

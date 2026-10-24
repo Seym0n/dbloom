@@ -206,6 +206,9 @@ export type StatementKind =
   | 'dropTable'
   | 'setForeignKeyChecks'
   | 'userSql' // SQL typed in the SQL tab (module sql-tab)
+  | 'rowInsert' // module rows (FR-ROW-020)
+  | 'rowUpdate'
+  | 'rowDelete'
 
 export type Statement = {
   sql: string
@@ -213,7 +216,15 @@ export type Statement = {
   class: StatementClass
   /** One line for the preview, e.g. "Drops column `note` and its data". English; i18n later. */
   effect: string
+  /**
+   * Values bound to the `?` placeholders of `sql` (module rows, FR-ROW-001). Absent for every other module.
+   * When present they are part of the statement hash (a token binds to the exact values).
+   */
+  params?: unknown[]
 }
+
+/** A statement as the client sees it: never the bound values (`params` stay on the server). */
+export type PublicStatement = Omit<Statement, 'params'>
 
 export type PlanWarning = { code: string; message: string }
 
@@ -263,7 +274,7 @@ export type PreviewInput = z.infer<typeof previewInput>
 
 export type PreviewResult = {
   planId: string
-  statements: Statement[]
+  statements: PublicStatement[]
   warnings: PlanWarning[]
   /** True when any statement is class hard: execute needs `confirmToken`. */
   confirmRequired: boolean

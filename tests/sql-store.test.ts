@@ -80,7 +80,7 @@ describe('migrations', () => {
     expect(store.sql.addHistory('o', entry()).id).toBeGreaterThan(0)
     store.close()
     store = undefined
-    expect(version(path)).toBe(2)
+    expect(version(path)).toBe(MIGRATIONS.length)
   })
 
   test('explicit user_version 1 upgrades to 2', () => {
