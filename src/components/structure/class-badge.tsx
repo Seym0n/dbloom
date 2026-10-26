@@ -26,12 +26,18 @@ function Pill({
 }
 
 /** Class of a statement: a pale pill with a glyph and a word, so colour is never the only signal. */
-export function ClassBadge({ value }: { value: StatementClass }) {
+export function ClassBadge({
+  value,
+  scope = 'structure',
+}: {
+  value: StatementClass
+  scope?: 'structure' | 'rows'
+}) {
   if (value === 'hard') {
     return (
       <Pill tone="negative">
         <ShieldAlert size={12} aria-hidden />
-        {t('structure.class.hard')}
+        {t(scope === 'rows' ? 'rows.class.hard' : 'structure.class.hard')}
       </Pill>
     )
   }
@@ -39,14 +45,14 @@ export function ClassBadge({ value }: { value: StatementClass }) {
     return (
       <Pill tone="warning">
         <CircleAlert size={12} aria-hidden />
-        {t('structure.class.soft')}
+        {t(scope === 'rows' ? 'rows.class.soft' : 'structure.class.soft')}
       </Pill>
     )
   }
   return (
     <Pill tone="neutral">
       <ShieldCheck size={12} aria-hidden />
-      {t('structure.class.none')}
+      {t(scope === 'rows' ? 'rows.class.none' : 'structure.class.none')}
     </Pill>
   )
 }

@@ -164,7 +164,7 @@ export function PlanBody({ plan, tableName }: { plan: RowPlanInfo; tableName?: s
               <span className="text-xs text-muted">
                 {t('rows.dialog.step', { n: i + 1, total: plan.totalStatements })}
               </span>
-              <ClassBadge value={s.class} />
+              <ClassBadge value={s.class} scope="rows" />
               <span className="min-w-0 flex-1 text-sm break-words">{s.effect}</span>
               <CopyButton text={s.preview} label={t('rows.dialog.copyStep', { n: i + 1 })} />
             </div>
