@@ -38,7 +38,10 @@ export type RowEditingOptions = {
   locale?: string
   /** Real link to the referenced rows of a foreign key value; names are encoded once by the caller. */
   fkHref?: (fk: FkInfo, values: Record<string, string>) => string | undefined
-  /** Real link to the rows of a referencing group; plain click calls `onOpenGroup` if given. */
+  /**
+   * Real link to the rows of a referencing group; plain click calls `onOpenGroup` if given. `values` maps the
+   * foreign key columns of the referencing table to this row's values.
+   */
   groupHref?: (group: ReferencingGroup, values: Record<string, string>) => string
   onOpenGroup?: (group: ReferencingGroup, values: Record<string, string>) => void
   /** A write was applied: the grid has been refreshed already; use it for toasts or counters. */
@@ -288,6 +291,25 @@ export function useRowEditing(options: RowEditingOptions): {
   return { hooks, dialogs }
 }
 
+/** The foreign key columns of a referencing table, each with the value of the row it points to. */
+function referencingValues(
+  response: GetRowsResponse | undefined,
+  group: ReferencingGroup,
+  row: Record<string, string>,
+): Record<string, string> {
+  const fk =
+    response?.table.incoming.find(
+      (f) => f.name === group.fk && f.refTable === response.table.table,
+    ) ?? response?.table.incoming.find((f) => f.name === group.fk)
+  const out: Record<string, string> = {}
+  fk?.columns.forEach((column, i) => {
+    const ref = fk.refColumns[i]
+    const value = ref === undefined ? undefined : row[ref]
+    if (value !== undefined) out[column] = value
+  })
+  return out
+}
+
 function selectedRows(snapshot: GridSnapshot) {
   const response = snapshot.response
   if (!response) return []
@@ -510,7 +532,10 @@ function EditingDialogs({
       rowKey={request.key}
       canInsert={Boolean(r?.permissions.insert) && !r?.permissions.readOnly}
       hrefFor={
-        options.groupHref ? (group) => options.groupHref?.(group, request.values) ?? '#' : undefined
+        options.groupHref
+          ? (group) =>
+              options.groupHref?.(group, referencingValues(r, group, request.values)) ?? '#'
+          : undefined
       }
       onOpen={
         options.onOpenGroup ? (group) => options.onOpenGroup?.(group, request.values) : undefined

@@ -17,6 +17,8 @@ import { t } from '~/i18n'
 import { getDatabases } from '~/server/browse.functions'
 import { logout } from '~/server/session.functions'
 import type { ExecuteResult, PreviewInput } from '~/server/structure/types'
+import type { OpenSearch } from '~/routes/index'
+import type { FilterNode } from '~/server/rows/types'
 import { SidebarTree, type OpenTable } from './sidebar-tree'
 
 export type SessionInfo = {
@@ -38,6 +40,8 @@ type ShellTab = {
   initialText?: string
   /** Absent for a new table. */
   table?: string
+  /** A table tab opened from a link: rows whose columns equal these values (FR-ROW-014). */
+  key?: [string, string][]
 }
 
 const SEP = '\u0000'
@@ -46,6 +50,22 @@ const tableTab = (db: string, table: string): ShellTab => ({
   kind: 'table',
   db,
   table,
+})
+/** The key of a link as a filter: every [column, value] pair is an equality, all of them must hold. */
+const keyFilter = (key: [string, string][]): FilterNode => ({
+  type: 'group',
+  op: 'and',
+  children: key.map(([column, value]) => ({
+    type: 'condition' as const,
+    column,
+    op: '=' as const,
+    values: [value],
+  })),
+})
+const linkedTab = (db: string, table: string, key: [string, string][]): ShellTab => ({
+  ...tableTab(db, table),
+  id: `t${SEP}${db}${SEP}${table}${SEP}${JSON.stringify(key)}`,
+  key,
 })
 const designTab = (db: string, table: string): ShellTab => ({
   id: `d${SEP}${db}${SEP}${table}`,
@@ -92,7 +112,7 @@ function AssistantPanel({ onClose }: { onClose: () => void }) {
 
 const tabButtonId = (id: string) => `tab-${id.replace(/[^A-Za-z0-9_-]/g, '_')}`
 
-export function AppShell({ session }: { session: SessionInfo }) {
+export function AppShell({ session, open: link }: { session: SessionInfo; open?: OpenSearch }) {
   // The CSRF token lives in memory only; set while rendering so the first requests already carry it.
   if (typeof window !== 'undefined') setCsrfToken(session.csrf)
 
@@ -133,6 +153,16 @@ export function AppShell({ session }: { session: SessionInfo }) {
     setActiveKey(tab.id)
     setMenuOpen(false)
   }
+
+  // A link into a table (`/?db=..&table=..&key=..`) opens its tab, once per distinct link.
+  const linkKey =
+    link?.db && link.table ? JSON.stringify([link.db, link.table, link.key ?? null]) : ''
+  const openedLink = useRef('')
+  useEffect(() => {
+    if (!linkKey || !link?.db || !link.table || openedLink.current === linkKey) return
+    openedLink.current = linkKey
+    open(link.key ? linkedTab(link.db, link.table, link.key) : tableTab(link.db, link.table))
+  }, [linkKey])
 
   function openSql(db?: string, initialText?: string) {
     sqlSeq.current += 1
@@ -451,7 +481,12 @@ export function AppShell({ session }: { session: SessionInfo }) {
               </div>
             ))}
           {active?.kind === 'table' && active.table ? (
-            <TableView key={active.id} db={active.db} table={active.table} />
+            <TableView
+              key={active.id}
+              db={active.db}
+              table={active.table}
+              {...(active.key ? { initialFilter: keyFilter(active.key) } : {})}
+            />
           ) : active ? null : (
             <div className="px-6 pt-8">
               <h1 className="mb-2 text-[22px] font-semibold leading-7">{t('empty.title')}</h1>
