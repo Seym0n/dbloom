@@ -15,7 +15,8 @@ Spec: SPEC/24-module-rows.md (approved; Q1-Q8 = recommended defaults, assistant-
 - Package E started: `e2e/rows-edit.spec.ts` (SCN-037 partly, 038 partly, 040 step 1; both products, `rows-.*` is in `perProductSpecs`), `e2e/fixtures/rows-fixtures.ts`. First real browser run of the editing UI works (insert, inline edit, delete dialogs).
 
 ## NOT done (next session)
-- Package E rest: SCN-037 (3 rows, Ignore, copy), 038 (Tab, trigger, view), 039, 040 steps 2-3 (cascade/token, 1451), 041-051; two-session fixture, storage scan, axe.
+- Package E also: `e2e/rows-bulk.spec.ts` (SCN-041 steps 1-3 on InnoDB), `e2e/rows-nochange.spec.ts` (SCN-039 core). UI finding: plan dialog badge for soft class says "Changes structure" (reuses `structure.class.soft`); needs a rows wording.
+- Package E rest (SCN-041 MyISAM/1000 cap, 039 all-type matrix & 5000-char key & proxy): SCN-037 (3 rows, Ignore, copy), 038 (Tab, trigger, view), 039, 040 steps 2-3 (cascade/token, 1451), 041-051; two-session fixture, storage scan, axe.
 - Task 15: fill the remaining *verify* cells of SPEC/24 (incl. `LEFT(col,...)` cost at ~line 366); update FR-ROW-020 text to the narrower cascade rule (hard only for deletes with ON DELETE CASCADE and updates touching ON UPDATE CASCADE columns).
 - Wire-up: table tab must call `setFormsApi(liveFormsApi)` once (`useLiveFormsApi()` in `server-api-forms-live.ts`) and pass `useRowEditing` hooks to the grid; `fkHref`/`groupHref` built by the table tab. Check the editing UI is actually reachable in the app.
 - `e2e/grid-alignment.spec.ts` must exclude `[data-rows-actions]` cells.
