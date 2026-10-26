@@ -1,7 +1,8 @@
-import { quoteIdent as q } from '../db/identifiers'
 import { NotFoundError } from '../db/schema'
 import {
+  buildCellChunk,
   buildCellRead,
+  buildCellSize,
   buildCount,
   buildDelete,
   buildInsert,
@@ -21,10 +22,8 @@ import { applyPrivileges, identityFor, loadRowTable, readPrivileges } from './mo
 import type { BuiltStatement, GuardValue, Identity, RowTable, TypeKind } from './types'
 
 /**
- * Binds the ports of `execute.ts` to package A (`model.ts`, `builder.ts`, `filter.ts`, `classes.ts`). The two
- * statements marked "local" (byte size and byte chunks of a stored value, used by the download route) are not
- * in `builder.ts`; they are built here from the same pieces (`quoteIdent`, `guardCondition`) and belong there
- * (FR-ROW-001) once package A takes them over.
+ * Binds the ports of `execute.ts` to package A (`model.ts`, `builder.ts`, `filter.ts`, `classes.ts`). Every
+ * statement text comes from `builder.ts` (FR-ROW-001).
  */
 
 const coarse = (kind: TypeKind): 'number' | 'temporal' | 'text' => {
@@ -128,45 +127,12 @@ export const defaultPorts: RowsPorts = {
       decode: (rows) => (rows[0] ? built.projection.decode(rows[0]) : undefined),
     }
   },
-  // local
-  buildCellSize(table, identity, key, column) {
-    const col = table.columns.find((c) => c.name === column)
-    if (!col) throw new Error('unknown column')
-    const where = whereOf(table, identity, key)
-    const sql = `SELECT OCTET_LENGTH(${q(column)}) FROM ${q(table.db)}.${q(table.table)} WHERE ${where.sql} LIMIT 1`
-    return {
-      statement: {
-        sql,
-        params: where.params,
-        preview: sql,
-        kind: 'rowSelect',
-        effect: 'Reads the size of a value',
-      },
-      decode: (rows) => (rows[0] ? (rows[0][0] === null ? null : Number(rows[0][0])) : undefined),
-    }
-  },
-  // local
-  buildCellChunk(table, identity, key, column, offset, length) {
-    const col = table.columns.find((c) => c.name === column)
-    if (!col) throw new Error('unknown column')
-    if (
-      !Number.isSafeInteger(offset) ||
-      offset < 0 ||
-      !Number.isSafeInteger(length) ||
-      length < 1
-    ) {
-      throw new Error('bad range')
-    }
-    const where = whereOf(table, identity, key)
-    const sql = `SELECT SUBSTRING(${q(column)}, ${offset + 1}, ${length}) FROM ${q(table.db)}.${q(table.table)} WHERE ${where.sql} LIMIT 1`
-    return {
-      sql,
-      params: where.params,
-      preview: sql,
-      kind: 'rowSelect',
-      effect: 'Reads a part of a value',
-    }
-  },
+  buildCellSize: (table, identity, key, column) => ({
+    statement: buildCellSize(table, identity, key, column),
+    decode: (rows) => (rows[0] ? (rows[0][0] === null ? null : Number(rows[0][0])) : undefined),
+  }),
+  buildCellChunk: (table, identity, key, column, offset, length) =>
+    buildCellChunk(table, identity, key, column, offset, length),
   buildLookup(ref, input) {
     const built = buildLookup(ref, input)
     return { statement: built.statement, decode: built.decode }

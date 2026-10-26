@@ -27,6 +27,7 @@ import {
   moveColumn,
   newRequestId,
   nextSortList,
+  compactSql,
   parseDisplayPrefs,
   parseSortPref,
   reconcileLayout,
@@ -274,6 +275,24 @@ describe('column layout (FR-ROW-010, DATA-ISS-114)', () => {
   })
 })
 
+describe('the statement strip shows a compact column list', () => {
+  const full =
+    'SELECT `id`, LEFT(`name`, 65537), CASE WHEN OCTET_LENGTH(`name`) > 65536 THEN CHAR_LENGTH(`name`) END, ' +
+    'CAST(`placed` AS CHAR), SUBSTRING(`doc`, 1, 32), OCTET_LENGTH(`doc`), ' +
+    'LEFT(ST_AsText(`g`), 101), CASE WHEN OCTET_LENGTH(ST_AsText(`g`)) > 100 THEN CHAR_LENGTH(ST_AsText(`g`)) END ' +
+    "FROM `d`.`t` WHERE CAST(`placed` AS CHAR) LIKE '%x%' ORDER BY `id` ASC LIMIT 51"
+  test('the cut-off machinery of the column list is removed, the rest is kept', () => {
+    expect(compactSql(full)).toBe(
+      'SELECT `id`, `name`, `placed`, `doc`, ST_AsText(`g`) ' +
+        "FROM `d`.`t` WHERE CAST(`placed` AS CHAR) LIKE '%x%' ORDER BY `id` ASC LIMIT 51",
+    )
+  })
+  test('anything that is not a SELECT of a list is left alone', () => {
+    expect(compactSql('UPDATE `d`.`t` SET `a` = 1')).toBe('UPDATE `d`.`t` SET `a` = 1')
+    expect(compactSql('SELECT 1')).toBe('SELECT 1')
+  })
+})
+
 // ---- Paging and totals ----------------------------------------------------------------------------------------
 
 describe('paging and totals (FR-ROW-007)', () => {
@@ -349,8 +368,8 @@ describe('paging and totals (FR-ROW-007)', () => {
     expect(exact).not.toContain('>Count<')
     expect(exact).not.toMatch(/aria-label="Last page"[^>]*disabled/)
     expect(exact).toContain('Page 1 of 20')
-    expect(exact).toContain('page 12 ms')
-    expect(exact).toContain('count 340 ms')
+    expect(exact).toContain('Loaded in 12 ms')
+    expect(exact).toContain('counted in 340 ms')
   })
 
   test('a view total is a lower bound and a deep offset shows the hint', () => {

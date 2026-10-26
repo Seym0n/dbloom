@@ -49,7 +49,7 @@ test.describe('SCN-049 paging and counts', () => {
     await page.getByRole('button', { name: 'Count' }).click()
     await expect(page.getByText(/200[,.\s ]?000 rows/).first()).toBeVisible()
     await expect(page.getByRole('button', { name: 'Last page' })).toBeEnabled()
-    await expect(page.getByText(/page .*count /)).toBeVisible()
+    await expect(page.getByText(/Loaded in .*counted in /)).toBeVisible()
 
     await page.getByRole('button', { name: 'Last page' }).click()
     await expect(page.getByText(/Rows 199[,.\s ]?951/)).toBeVisible()

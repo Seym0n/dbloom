@@ -311,7 +311,15 @@ export function GridTable(props: GridTableProps) {
                   className="border-b border-rule pr-6 text-right align-middle"
                   style={{ height: 40 }}
                 >
-                  {hooks.rowActions?.({ rowIndex, row, snapshot })}
+                  {/* Quiet until the row is pointed at, focused or selected; always shown on touch screens. */}
+                  <span
+                    className={cn(
+                      'inline-block opacity-0 transition-opacity duration-150 group-focus-within/row:opacity-100 group-hover/row:opacity-100 motion-reduce:transition-none pointer-coarse:opacity-100',
+                      selected && 'opacity-100',
+                    )}
+                  >
+                    {hooks.rowActions?.({ rowIndex, row, snapshot })}
+                  </span>
                 </td>
               )}
             </tr>

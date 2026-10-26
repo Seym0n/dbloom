@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import {
   buildCellRead,
+  buildCellChunk,
+  buildCellSize,
   buildChange,
   buildCount,
   buildDelete,
@@ -37,6 +39,35 @@ const pk: Identity = { kind: 'primary', columns: ['id'] }
 const read = { cellBytes: 100 }
 const v = (s: string) => ({ t: 'v' as const, v: s })
 const gv = (s: string) => ({ t: 'v' as const, v: s })
+
+describe('golden SQL: download byte statements (FR-ROW-001, FR-ROW-012)', () => {
+  it('size: OCTET_LENGTH of one value by identity', () => {
+    const s = buildCellSize(customer, pk, { id: gv('3') }, 'doc')
+    expect(s.sql).toBe('SELECT OCTET_LENGTH(`doc`) FROM `e2e_x`.`customer` WHERE `id` = ? LIMIT 1')
+    expect(s.params).toEqual(['3'])
+    expect(s.kind).toBe('rowSelect')
+  })
+
+  it('chunk: SUBSTRING from a 1-based position, length as given', () => {
+    const s = buildCellChunk(customer, pk, { id: gv('3') }, 'doc', 1048576, 500)
+    expect(s.sql).toBe(
+      'SELECT SUBSTRING(`doc`, 1048577, 500) FROM `e2e_x`.`customer` WHERE `id` = ? LIMIT 1',
+    )
+    expect(s.params).toEqual(['3'])
+    expect(s.kind).toBe('rowSelect')
+  })
+
+  it('refuses an unknown column, a bad range and a missing identity', () => {
+    const key = { id: gv('3') }
+    expect(() => buildCellChunk(customer, pk, key, 'nope', 0, 10)).toThrow(BuildRefusal)
+    expect(() => buildCellChunk(customer, pk, key, 'doc', -1, 10)).toThrow(BuildRefusal)
+    expect(() => buildCellChunk(customer, pk, key, 'doc', 0, 0)).toThrow(BuildRefusal)
+    expect(() => buildCellChunk(customer, pk, key, 'doc', 1.5, 10)).toThrow(BuildRefusal)
+    expect(() => buildCellSize(customer, { kind: 'none', reason: 'view' }, key, 'doc')).toThrow(
+      BuildRefusal,
+    )
+  })
+})
 
 describe('golden SQL (FR-ROW-001)', () => {
   it('page: names qualified and quoted, pageSize + 1 rows, identity as final tie-break', () => {

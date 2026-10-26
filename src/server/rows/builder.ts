@@ -363,6 +363,36 @@ export function buildCellRead(
   }
 }
 
+/** Stored byte size of one value (download route, FR-ROW-012). */
+export function buildCellSize(
+  table: RowTable,
+  identity: Identity,
+  key: RowKey,
+  column: string,
+): BuiltStatement {
+  const col = columnOf(table, column)
+  const where = andAll(identityConditions(table, identity, key))
+  const sql = `SELECT OCTET_LENGTH(${q(col.name)}) FROM ${tableName(table)} WHERE ${where.sql} LIMIT 1`
+  return built('rowSelect', sql, where.params, 'Reads the size of a value')
+}
+
+/** `length` bytes from 0-based byte `offset` of one stored value (download route, FR-ROW-012). */
+export function buildCellChunk(
+  table: RowTable,
+  identity: Identity,
+  key: RowKey,
+  column: string,
+  offset: number,
+  length: number,
+): BuiltStatement {
+  const col = columnOf(table, column)
+  integer(offset, 0, Number.MAX_SAFE_INTEGER - 1, 'Offset')
+  integer(length, 1, Number.MAX_SAFE_INTEGER, 'Length')
+  const where = andAll(identityConditions(table, identity, key))
+  const sql = `SELECT SUBSTRING(${q(col.name)}, ${offset + 1}, ${length}) FROM ${tableName(table)} WHERE ${where.sql} LIMIT 1`
+  return built('rowSelect', sql, where.params, 'Reads a part of a value')
+}
+
 export type LookupSpec = {
   /** Referenced columns of the foreign key, in key order. */
   keyColumns: string[]

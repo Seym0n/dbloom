@@ -70,4 +70,7 @@ test('SCN-045 relation modes: names come from one lookup per page; links and non
   await page.getByRole('button', { name: 'Close orders' }).click()
   await openTable(page, scratch.name, 'orders')
   await expect(page.getByRole('grid').getByText('Name 1', { exact: true })).toBeVisible()
+
+  // The mode is a global preference saved on the server: put it back for the specs that follow.
+  await setMode('Links')
 })

@@ -48,11 +48,14 @@ export function clampWidth(width: number): number {
 
 /**
  * Applies a stored layout to the columns the table has now: entries of dropped columns go, new columns are
- * appended visible at the end, everything else is left untouched.
+ * appended visible at the end, everything else is left untouched. With no saved choice yet, `startHidden` (the
+ * invisible columns, FR-ROW-002: a MySQL generated invisible key `my_row_id`) starts hidden; once the user has
+ * saved a layout, its `hidden` list is the whole truth.
  */
 export function reconcileLayout(
   stored: Partial<ColumnLayout> | undefined,
   names: readonly string[],
+  startHidden: readonly string[] = [],
 ): ColumnLayout {
   const known = new Set(names)
   const order = (stored?.order ?? []).filter((n, i, all) => known.has(n) && all.indexOf(n) === i)
@@ -62,7 +65,7 @@ export function reconcileLayout(
   for (const [name, width] of Object.entries(stored?.widths ?? {})) {
     if (known.has(name) && typeof width === 'number') widths[name] = clampWidth(width)
   }
-  return { order, hidden: (stored?.hidden ?? []).filter((n) => known.has(n)), widths }
+  return { order, hidden: (stored?.hidden ?? startHidden).filter((n) => known.has(n)), widths }
 }
 
 export function visibleOrder(layout: ColumnLayout): string[] {
@@ -216,6 +219,24 @@ export function isExpandable(cell: Cell, displayChars: number): boolean {
 
 export const DISPLAY_CHARS_MIN = 20
 export const DISPLAY_CHARS_MAX = 1000
+
+/**
+ * The statement as the strip shows it: the column list without the cut-off machinery the server adds
+ * (`LEFT(col, n)`, the `CASE WHEN OCTET_LENGTH(col) > n THEN CHAR_LENGTH(col) END` length read, `SUBSTRING` and
+ * `OCTET_LENGTH` of a binary preview, `CAST(col AS CHAR)`). Only the part before the first ` FROM ` is touched;
+ * the exact statement stays in the tooltip and is what Copy copies.
+ */
+export function compactSql(sql: string): string {
+  const from = sql.indexOf(' FROM ')
+  if (from < 0 || !sql.startsWith('SELECT ')) return sql
+  const list = sql
+    .slice(0, from)
+    .replace(/,\s*CASE WHEN OCTET_LENGTH\((.+?)\) > \d+ THEN CHAR_LENGTH\(\1\) END/g, '')
+    .replace(/SUBSTRING\((.+?), 1, 32\),\s*OCTET_LENGTH\(\1\)/g, '$1')
+    .replace(/LEFT\((.+?), \d+\)/g, '$1')
+    .replace(/CAST\((`[^`]+`) AS CHAR\)/g, '$1')
+  return list + sql.slice(from)
+}
 
 export type RelationMode = 'full' | 'links' | 'none'
 

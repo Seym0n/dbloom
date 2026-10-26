@@ -42,6 +42,7 @@ import {
   matchingRows,
   newRequestId,
   nextSortList,
+  compactSql,
   parseDisplayPrefs,
   parseSortPref,
   reconcileLayout,
@@ -90,7 +91,7 @@ export function SqlStrip({ sql }: { sql: string }) {
     <div className="flex items-baseline gap-3 border-t border-rule px-6 py-3">
       <span className="shrink-0 text-xs text-muted">{t('table.sql')}</span>
       <code className="min-w-0 flex-1 truncate font-mono text-xs text-ink" title={sql}>
-        {sql}
+        {compactSql(sql)}
       </code>
       <Button
         variant="ghost"
@@ -335,8 +336,13 @@ function RowsGridLoaded({
     [model],
   )
   const layout = useMemo(
-    () => reconcileLayout(storedLayout, data?.columns ?? []),
-    [storedLayout, data?.columns],
+    () =>
+      reconcileLayout(
+        storedLayout,
+        data?.columns ?? [],
+        (data?.table.columns ?? []).filter((c) => c.invisible).map((c) => c.name),
+      ),
+    [storedLayout, data?.columns, data?.table.columns],
   )
   const columns: GridColumn[] = useMemo(() => {
     if (!data) return []
