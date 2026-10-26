@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from 'react'
 import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Check, Copy, RefreshCw } from 'lucide-react'
+import { Check, Copy, RefreshCw, Timer } from 'lucide-react'
 import { Button } from '~/components/ui/button'
 import { Select } from '~/components/ui/select'
 import type {
@@ -738,7 +738,10 @@ function RowsGridLoaded({
           matches={rowIndexes.length}
           total={rows.length}
         />
-        <div className="ml-auto flex flex-wrap items-center gap-2">
+      </div>
+      {/* Second band: the table's jobs on the left, the view's controls on the right, one edge each. */}
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 px-6 pb-3">
+        <div className="flex flex-wrap items-center gap-2">
           {readOnlyReason && (
             <span className="rounded bg-[var(--pill-neutral-bg)] px-2 text-xs leading-5 text-[var(--pill-neutral-ink)]">
               {readOnlyReason}
@@ -746,6 +749,8 @@ function RowsGridLoaded({
           )}
           <SelectionSummary count={chosen.length} onClear={() => setSelection(clearSelection())} />
           {hooks.toolbar?.(snapshot)}
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
           {model && (
             <ColumnMenu
               columns={model.columns}
@@ -774,6 +779,7 @@ function RowsGridLoaded({
             <span className="hidden lg:inline">{t('rows.grid.refresh')}</span>
           </Button>
           <label className="flex items-center gap-1.5 text-sm text-muted">
+            <Timer size={14} strokeWidth={1.5} aria-hidden className="flex-none" />
             <span className="hidden xl:inline">{t('rows.grid.autoRefresh')}</span>
             <span className="sr-only xl:hidden">{t('rows.grid.autoRefresh')}</span>
             <Select

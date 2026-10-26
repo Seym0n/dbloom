@@ -53,7 +53,12 @@ export function RowCheckbox({
 /** "3 rows selected" with a Clear button; announced politely. */
 export function SelectionSummary({ count, onClear }: { count: number; onClear: () => void }) {
   return (
-    <div className="flex items-center gap-1.5 text-sm" aria-live="polite" aria-atomic="true">
+    <div
+      // The live region exists while empty (so a change is announced) but takes no space, and no flex gap.
+      className="flex items-center gap-1.5 text-sm empty:absolute"
+      aria-live="polite"
+      aria-atomic="true"
+    >
       {count > 0 && (
         <>
           <span className="text-ink">

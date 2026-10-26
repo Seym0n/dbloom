@@ -319,12 +319,12 @@ export function SidebarTree({
           <button
             type="button"
             aria-disabled={structure.readOnly || undefined}
-            title={structure.readOnly ? t('structure.readOnly') : undefined}
+            aria-label={t('structure.menu.newDatabase')}
+            title={structure.readOnly ? t('structure.readOnly') : t('structure.menu.newDatabase')}
             onClick={() => !structure.readOnly && structure.onAction({ type: 'createDatabase' })}
-            className="press -mt-0.5 flex h-6 items-center gap-1 rounded px-1.5 text-xs text-muted hover:bg-active hover:text-ink aria-disabled:cursor-not-allowed pointer-coarse:h-9"
+            className="press -mt-0.5 grid h-6 w-6 place-items-center rounded text-muted hover:bg-active hover:text-ink aria-disabled:cursor-not-allowed pointer-coarse:h-9 pointer-coarse:w-9"
           >
-            <Plus size={12} aria-hidden />
-            {t('structure.menu.newDatabase')}
+            <Plus size={14} aria-hidden />
           </button>
         </div>
         {structure.readOnly && (

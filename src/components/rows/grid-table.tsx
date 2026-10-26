@@ -16,13 +16,16 @@ import {
   type CellRenderer,
 } from './registry'
 
-/** `full` relation mode: the referenced row's name after the key, muted, inside the same cell. */
+/**
+ * `full` relation mode: the referenced row's name goes before the key, muted, so the key stays the last thing in
+ * the cell and right-aligned keys keep one right edge down the column.
+ */
 function withRelation(context: CellContext, content: ReactNode): ReactNode {
   if (!context.relationDisplay) return content
   return (
     <>
+      <span className="mr-2 font-sans text-muted">{context.relationDisplay}</span>
       {content}
-      <span className="ml-1.5 font-sans text-muted">{context.relationDisplay}</span>
     </>
   )
 }

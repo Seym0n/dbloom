@@ -1,5 +1,5 @@
 import { useId, useState } from 'react'
-import { Search, SlidersHorizontal, X } from 'lucide-react'
+import { ArrowRight, Search, SlidersHorizontal, X } from 'lucide-react'
 import { Button } from '~/components/ui/button'
 import { Checkbox } from '~/components/ui/checkbox'
 import { Input } from '~/components/ui/input'
@@ -76,8 +76,14 @@ export function TableSearch({
           </button>
         )}
       </div>
-      <Button type="submit" disabled={disabled} className="pointer-coarse:h-11">
-        {t('rows.search.run')}
+      <Button
+        type="submit"
+        disabled={disabled}
+        aria-label={t('rows.search.run')}
+        className="pointer-coarse:h-11"
+      >
+        <ArrowRight size={14} strokeWidth={1.5} aria-hidden className="sm:hidden" />
+        <span className="hidden sm:inline">{t('rows.search.run')}</span>
       </Button>
       <RowsPopover
         label={t('rows.search.options')}
