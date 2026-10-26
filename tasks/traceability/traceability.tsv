@@ -581,78 +581,78 @@ UI-ISS-133	17	planned	auth-account	Login form server pick
 UI-ISS-134	17	planned	auth-account	
 UI-UPD-006	14	planned	auth-account	Account menu in shell
 UI-UPD-007	14	planned	auth-account	Password and index dialogs
-CON-DTB-001	18	planned	browse-edit	
+CON-DTB-001	18	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
 CPT-PLG-006	18	planned	browse-edit	column transformations; owner-decided feature
 DATA-CFG-092	18	planned	browse-edit	navigation tree settings
-DATA-CFG-093	18	planned	browse-edit	
+DATA-CFG-093	18	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
 DATA-DEP-066	18	planned	browse-edit	owner decision on scope
-DATA-ISS-010	16	planned	browse-edit	
-DATA-ISS-011	16	planned	browse-edit	
-DATA-ISS-012	16	planned	browse-edit	
-DATA-ISS-013	16	planned	browse-edit	
-DATA-ISS-014	16	planned	browse-edit	
-DATA-ISS-015	16	planned	browse-edit	
+DATA-ISS-010	16	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+DATA-ISS-011	16	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+DATA-ISS-012	16	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+DATA-ISS-013	16	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+DATA-ISS-014	16	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+DATA-ISS-015	16	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
 DATA-ISS-016	16	partial	browse-edit	skeleton pages and sorts; exact count open
-DATA-ISS-017	16	planned	browse-edit	
-DATA-ISS-102	17	planned	browse-edit	
-DATA-ISS-108	17	planned	browse-edit	
-DATA-ISS-109	17	planned	browse-edit	
-DATA-ISS-110	17	planned	browse-edit	
-DATA-ISS-112	17	planned	browse-edit	
-DATA-ISS-114	17	planned	browse-edit	
-DATA-ISS-115	17	planned	browse-edit	
-DATA-ISS-118	17	planned	browse-edit	
-DATA-ISS-121	17	planned	browse-edit	
-DATA-ISS-122	17	planned	browse-edit	
-DATA-ISS-123	17	planned	browse-edit	
-DATA-ISS-124	17	planned	browse-edit	
-DATA-ISS-125	17	planned	browse-edit	
-DATA-ISS-128	17	planned	browse-edit	
-DATA-ISS-129	17	planned	browse-edit	
-DATA-ISS-133	17	planned	browse-edit	
-DATA-ISS-135	17	planned	browse-edit	
+DATA-ISS-017	16	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+DATA-ISS-102	17	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+DATA-ISS-108	17	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+DATA-ISS-109	17	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+DATA-ISS-110	17	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+DATA-ISS-112	17	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+DATA-ISS-114	17	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+DATA-ISS-115	17	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+DATA-ISS-118	17	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+DATA-ISS-121	17	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+DATA-ISS-122	17	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+DATA-ISS-123	17	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+DATA-ISS-124	17	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+DATA-ISS-125	17	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+DATA-ISS-128	17	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+DATA-ISS-129	17	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+DATA-ISS-133	17	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+DATA-ISS-135	17	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
 DATA-PLG-002	18	planned	browse-edit	column transformations; owner-decided feature
 DATA-PLG-008	18	planned	browse-edit	column transformations; owner-decided feature
 DATA-UPD-010	14	planned	browse-edit	
 DATA-UPD-012	14	planned	browse-edit	
-DATA-UPD-016	14	planned	browse-edit	
-FR-CFG-033	18	planned	browse-edit	per-page settings dialogs, multi-module
-FR-CFG-073	18	planned	browse-edit	
-FR-DTB-005	18	planned	browse-edit	
-FR-DTB-006	18	planned	browse-edit	
-FR-DTB-007	18	planned	browse-edit	
-FR-DTB-009	18	planned	browse-edit	
-FR-DTB-010	18	planned	browse-edit	
-FR-DTB-011	18	planned	browse-edit	
+DATA-UPD-016	14	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+FR-CFG-033	18	done	browse-edit	per-page settings dialogs, multi-module
+FR-CFG-073	18	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+FR-DTB-005	18	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+FR-DTB-006	18	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+FR-DTB-007	18	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+FR-DTB-009	18	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+FR-DTB-010	18	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+FR-DTB-011	18	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
 FR-DTB-090	18	planned	browse-edit	
-FR-DTB-091	18	planned	browse-edit	
+FR-DTB-091	18	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
 FR-DTB-093	18	planned	browse-edit	
 FR-DTB-100	18	planned	browse-edit	
-FR-DTB-130	18	planned	browse-edit	
-FR-DTB-131	18	planned	browse-edit	
-FR-DTB-132	18	planned	browse-edit	
-FR-DTB-133	18	planned	browse-edit	
-FR-DTB-134	18	planned	browse-edit	
-FR-DTB-135	18	planned	browse-edit	
-FR-DTB-136	18	planned	browse-edit	
+FR-DTB-130	18	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+FR-DTB-131	18	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+FR-DTB-132	18	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+FR-DTB-133	18	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+FR-DTB-134	18	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+FR-DTB-135	18	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+FR-DTB-136	18	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
 FR-DTB-137	18	planned	browse-edit	
-FR-DTB-138	18	planned	browse-edit	
+FR-DTB-138	18	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
 FR-DTB-155	18	planned	browse-edit	
 FR-DTB-156	18	planned	browse-edit	
 FR-DTB-157	18	planned	browse-edit	
-FR-DTB-160	18	planned	browse-edit	
-FR-ISS-001	16	planned	browse-edit	
+FR-DTB-160	18	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+FR-ISS-001	16	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
 FR-ISS-004	16	planned	browse-edit	
 FR-ISS-005	16	planned	browse-edit	
-FR-ISS-006	16	planned	browse-edit	
-FR-ISS-007	16	planned	browse-edit	
-FR-ISS-008	16	planned	browse-edit	
-FR-ISS-110	17	planned	browse-edit	
+FR-ISS-006	16	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+FR-ISS-007	16	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+FR-ISS-008	16	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+FR-ISS-110	17	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
 FR-ISS-131	17	planned	browse-edit	
 FR-ISS-132	17	partial	browse-edit	skeleton lists names; natural sort setting open
 FR-ISS-139	17	partial	browse-edit	skeleton has sort and paging; page reset to check
-FR-ISS-140	17	planned	browse-edit	
-FR-ISS-146	17	planned	browse-edit	
+FR-ISS-140	17	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+FR-ISS-146	17	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
 FR-PLG-025	18	planned	browse-edit	column transformations; owner-decided feature
 FR-PLG-026	18	planned	browse-edit	column transformations; owner-decided feature
 FR-PLG-028	18	planned	browse-edit	column transformations; owner-decided feature
@@ -681,54 +681,54 @@ FR-PLG-053	18	planned	browse-edit	column transformations; owner-decided feature
 FR-PLG-054	18	planned	browse-edit	column transformations; owner-decided feature
 FR-PLG-056	18	planned	browse-edit	column transformations; owner-decided feature
 FR-TGT-232	13	planned	browse-edit	table maintenance statistics
-FR-UIX-034	18	planned	browse-edit	
-FR-UIX-035	18	planned	browse-edit	
-FR-UIX-036	18	planned	browse-edit	
+FR-UIX-034	18	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+FR-UIX-035	18	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+FR-UIX-036	18	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
 FR-UIX-038	18	planned	browse-edit	tree filter
 FR-UIX-042	18	planned	browse-edit	owner decision: hidden nav items
-FR-UIX-052	18	planned	browse-edit	
-FR-UIX-053	18	planned	browse-edit	
-FR-UIX-054	18	planned	browse-edit	
-FR-UIX-055	18	planned	browse-edit	
-FR-UIX-073	18	planned	browse-edit	
-FR-UIX-074	18	planned	browse-edit	
-FR-UPD-013	14	planned	browse-edit	
-FR-UPD-021	14	planned	browse-edit	query generator / search
-NFR-DTB-001	18	planned	browse-edit	
+FR-UIX-052	18	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+FR-UIX-053	18	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+FR-UIX-054	18	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+FR-UIX-055	18	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+FR-UIX-073	18	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+FR-UIX-074	18	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+FR-UPD-013	14	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+FR-UPD-021	14	done	browse-edit	query generator / search
+NFR-DTB-001	18	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
 NFR-PLG-004	18	planned	browse-edit	column transformations; owner-decided feature
-SEC-DTB-003	18	planned	browse-edit	
-SEC-DTB-004	18	planned	browse-edit	
+SEC-DTB-003	18	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+SEC-DTB-004	18	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
 SEC-PLG-007	18	planned	browse-edit	
 SEC-PLG-008	18	planned	browse-edit	
-SEC-SAU-320	18	planned	browse-edit	
-SEC-TGT-151	11	planned	browse-edit	
-ST-117	12	planned	browse-edit	
-ST-118	12	planned	browse-edit	
-UI-DTB-010	18	planned	browse-edit	
+SEC-SAU-320	18	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+SEC-TGT-151	11	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+ST-117	12	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+ST-118	12	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+UI-DTB-010	18	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
 UI-ISS-004	16	planned	browse-edit	Navigation extension; sidebar exists
 UI-ISS-005	16	planned	browse-edit	
 UI-ISS-101	17	planned	browse-edit	
-UI-ISS-103	17	planned	browse-edit	
-UI-ISS-104	17	planned	browse-edit	
-UI-ISS-105	17	planned	browse-edit	
+UI-ISS-103	17	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+UI-ISS-104	17	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+UI-ISS-105	17	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
 UI-ISS-109	17	planned	browse-edit	Recent items in shell
-UI-ISS-110	17	planned	browse-edit	
-UI-ISS-112	17	planned	browse-edit	
-UI-ISS-113	17	planned	browse-edit	
-UI-ISS-114	17	planned	browse-edit	
-UI-ISS-115	17	planned	browse-edit	
+UI-ISS-110	17	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+UI-ISS-112	17	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+UI-ISS-113	17	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+UI-ISS-114	17	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+UI-ISS-115	17	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
 UI-ISS-116	17	planned	browse-edit	GIS visualisation
 UI-ISS-117	17	planned	browse-edit	Navigation reload
 UI-ISS-118	17	planned	browse-edit	Navigation hide tables
 UI-ISS-121	17	planned	browse-edit	Navigation paging
-UI-ISS-125	17	planned	browse-edit	
+UI-ISS-125	17	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
 UI-ISS-127	17	planned	browse-edit	Navigation filter; also export page
-UI-ISS-128	17	planned	browse-edit	
-UI-ISS-136	17	planned	browse-edit	
+UI-ISS-128	17	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+UI-ISS-136	17	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
 UI-ISS-139	17	planned	browse-edit	Table list screen
-UI-ISS-140	17	planned	browse-edit	
-UI-UPD-002	14	planned	browse-edit	
-UI-UPD-012	14	planned	browse-edit	
+UI-ISS-140	17	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+UI-UPD-002	14	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
+UI-UPD-012	14	done	browse-edit	built in rows slice 1 (SPEC/24); some e2e steps open
 UI-UPD-013	14	planned	browse-edit	Host name on main page
 CPT-DTB-002	18	deferred	future	Schema/data change tracking with auto-create is a whole feature the owner must decide. (owner decision 2026-10-23, feature: tracking)
 CPT-SRV-003	18	deferred	future	Replication role detection and multi-primary selection is a feature-scope choice. (owner decision 2026-10-23, feature: replication ui)
@@ -1321,162 +1321,162 @@ UI-TGT-001	11	done	skeleton	Shell layout built
 UI-TGT-002	11	partial	skeleton	Shell done; setup wizard steps not
 UI-TGT-003	11	done	skeleton	React/TanStack Start in place
 UI-UPD-005	14	done	skeleton	Light/dark toggle exists
-CPT-DTB-001	18	planned	sql-tab	
-DATA-ISS-119	17	planned	sql-tab	
-FR-CFG-074	18	planned	sql-tab	
-FR-DTB-001	18	planned	sql-tab	
-FR-DTB-008	18	planned	sql-tab	
-FR-DTB-012	18	planned	sql-tab	
-FR-DTB-021	18	planned	sql-tab	
-FR-DTB-022	18	planned	sql-tab	
-FR-DTB-023	18	planned	sql-tab	
-FR-DTB-025	18	planned	sql-tab	
-FR-DTB-026	18	planned	sql-tab	
-FR-DTB-027	18	planned	sql-tab	
-FR-DTB-028	18	planned	sql-tab	
-FR-IOX-100	18	planned	sql-tab	
-FR-IOX-101	18	planned	sql-tab	
-FR-ISS-014	16	planned	sql-tab	
-FR-ISS-101	17	planned	sql-tab	
-FR-ISS-103	17	planned	sql-tab	
-FR-ISS-104	17	planned	sql-tab	
-FR-ISS-106	17	planned	sql-tab	
-FR-ISS-108	17	planned	sql-tab	
-FR-ISS-114	17	planned	sql-tab	
-FR-ISS-115	17	planned	sql-tab	
-FR-ISS-118	17	planned	sql-tab	
-FR-ISS-123	17	planned	sql-tab	
-FR-ISS-124	17	planned	sql-tab	
-FR-ISS-125	17	planned	sql-tab	
-FR-ISS-126	17	planned	sql-tab	
-FR-ISS-133	17	planned	sql-tab	identifier quoting display setting
-FR-ISS-134	17	planned	sql-tab	
-FR-ISS-135	17	planned	sql-tab	
-FR-ISS-141	17	planned	sql-tab	conditional on a visual query builder
-FR-ISS-144	17	planned	sql-tab	
-FR-ISS-145	17	planned	sql-tab	
-FR-TGT-230	13	planned	sql-tab	
-FR-TGT-231	13	planned	sql-tab	
-FR-UIX-021	18	planned	sql-tab	covers all forms; SQL editor content main case
-FR-UIX-047	18	planned	sql-tab	history/bookmarks in editor, no console
-FR-UIX-049	18	planned	sql-tab	
-FR-UIX-065	18	planned	sql-tab	
-FR-UIX-066	18	planned	sql-tab	
-FR-UIX-067	18	planned	sql-tab	
-FR-UIX-068	18	planned	sql-tab	
-FR-UIX-069	18	planned	sql-tab	
-FR-UPD-007	14	planned	sql-tab	
-FR-UPD-015	14	planned	sql-tab	
-FR-UPD-016	14	planned	sql-tab	
-FR-UPD-017	14	planned	sql-tab	bookmarks
-NFR-DTB-002	18	planned	sql-tab	
-NFR-ISS-101	17	planned	sql-tab	
-NFR-ISS-105	17	planned	sql-tab	
-SEC-TGT-033	11	planned	sql-tab	connect and query timeouts
-SEC-TGT-052	11	planned	sql-tab	read-only guard
-ST-110	12	planned	sql-tab	
-ST-114	12	planned	sql-tab	
-ST-115	12	planned	sql-tab	
-ST-119	12	planned	sql-tab	Read-only guard
-ST-120	12	planned	sql-tab	
-ST-121	12	planned	sql-tab	
-ST-128	12	planned	sql-tab	History/audit redaction
-ST-161	12	planned	sql-tab	
-ST-162	12	planned	sql-tab	Own state export
-ST-163	12	planned	sql-tab	Shortcuts and console options
-ST-164	12	planned	sql-tab	
-UI-ISS-002	16	planned	sql-tab	
-UI-ISS-102	17	planned	sql-tab	
-UI-ISS-123	17	planned	sql-tab	
-UI-ISS-126	17	planned	sql-tab	
-UI-ISS-132	17	planned	sql-tab	
-UI-ISS-135	17	planned	sql-tab	
-UI-ISS-138	17	planned	sql-tab	
-UI-UPD-001	14	planned	sql-tab	Explain refresh; export overlay in io
-UI-UPD-003	14	planned	sql-tab	
-UI-UPD-010	14	planned	sql-tab	
-CON-DTB-003	18	planned	structure	
-DATA-DTB-001	18	planned	structure	
-DATA-ISS-007	16	planned	structure	
-DATA-ISS-104	17	planned	structure	
-DATA-ISS-113	17	planned	structure	
-DATA-ISS-117	17	planned	structure	
-DATA-ISS-131	17	planned	structure	
-DATA-ISS-138	17	planned	structure	
-DATA-UPD-008	14	planned	structure	
-DEP-DTB-003	18	planned	structure	
-FR-DTB-030	18	planned	structure	
-FR-DTB-031	18	planned	structure	
-FR-DTB-032	18	planned	structure	
-FR-DTB-033	18	planned	structure	
-FR-DTB-040	18	planned	structure	
-FR-DTB-041	18	planned	structure	
-FR-DTB-042	18	planned	structure	
-FR-DTB-043	18	planned	structure	
-FR-DTB-044	18	planned	structure	
-FR-DTB-045	18	planned	structure	
-FR-DTB-046	18	planned	structure	
-FR-DTB-047	18	planned	structure	
-FR-DTB-048	18	planned	structure	
-FR-DTB-049	18	planned	structure	
-FR-DTB-060	18	planned	structure	
-FR-DTB-061	18	planned	structure	
-FR-DTB-062	18	planned	structure	
-FR-DTB-063	18	planned	structure	
-FR-DTB-064	18	planned	structure	
-FR-DTB-065	18	planned	structure	
-FR-DTB-070	18	planned	structure	
-FR-DTB-071	18	planned	structure	
-FR-DTB-080	18	planned	structure	
-FR-DTB-081	18	planned	structure	
-FR-DTB-082	18	planned	structure	
-FR-DTB-083	18	planned	structure	
-FR-DTB-084	18	planned	structure	
-FR-DTB-102	18	planned	structure	
-FR-DTB-103	18	planned	structure	
-FR-DTB-104	18	planned	structure	
-FR-DTB-105	18	planned	structure	
-FR-DTB-154	18	planned	structure	
-FR-ISS-010	16	planned	structure	
-FR-ISS-011	16	planned	structure	
-FR-ISS-013	16	planned	structure	
-FR-ISS-105	17	planned	structure	
-FR-ISS-107	17	planned	structure	
-FR-ISS-109	17	planned	structure	
-FR-ISS-111	17	planned	structure	
-FR-ISS-117	17	planned	structure	
-FR-ISS-128	17	planned	structure	
-FR-ISS-136	17	planned	structure	
-FR-ISS-137	17	planned	structure	DDL preview of routines/events
-FR-ISS-142	17	planned	structure	
-FR-ISS-143	17	planned	structure	
-FR-ISS-147	17	planned	structure	
-FR-SRV-032	18	planned	structure	create database; also in server overview
-FR-TGT-200	13	planned	structure	adapter feature flags used by structure screens first
-FR-TGT-220	13	planned	structure	
-FR-TGT-221	13	planned	structure	
-FR-TGT-222	13	planned	structure	
-FR-TGT-223	13	planned	structure	
-FR-TGT-240	13	planned	structure	
-FR-TGT-241	13	planned	structure	
-FR-TGT-242	13	planned	structure	
-FR-TGT-243	13	planned	structure	
-FR-UIX-028	18	planned	structure	first used by destructive DDL
-FR-UPD-006	14	planned	structure	events page
-FR-UPD-011	14	planned	structure	
-FR-UPD-012	14	planned	structure	
-FR-UPD-019	14	planned	structure	routines paging
-FR-UPD-020	14	planned	structure	
-NFR-SRV-002	18	planned	structure	database create is a structure feature
-SEC-DTB-002	18	planned	structure	
-UI-DTB-020	18	planned	structure	
-UI-ISS-106	17	planned	structure	
-UI-ISS-107	17	planned	structure	
-UI-ISS-108	17	planned	structure	Confirmation dialogs
-UI-ISS-111	17	planned	structure	
-UI-ISS-119	17	planned	structure	
-UI-ISS-120	17	planned	structure	
-UI-ISS-122	17	planned	structure	Routine editor
-UI-ISS-124	17	planned	structure	
-UI-ISS-129	17	planned	structure	
-UI-SRV-007	18	planned	structure	
+CPT-DTB-001	18	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+DATA-ISS-119	17	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+FR-CFG-074	18	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+FR-DTB-001	18	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+FR-DTB-008	18	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+FR-DTB-012	18	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+FR-DTB-021	18	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+FR-DTB-022	18	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+FR-DTB-023	18	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+FR-DTB-025	18	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+FR-DTB-026	18	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+FR-DTB-027	18	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+FR-DTB-028	18	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+FR-IOX-100	18	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+FR-IOX-101	18	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+FR-ISS-014	16	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+FR-ISS-101	17	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+FR-ISS-103	17	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+FR-ISS-104	17	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+FR-ISS-106	17	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+FR-ISS-108	17	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+FR-ISS-114	17	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+FR-ISS-115	17	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+FR-ISS-118	17	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+FR-ISS-123	17	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+FR-ISS-124	17	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+FR-ISS-125	17	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+FR-ISS-126	17	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+FR-ISS-133	17	done	sql-tab	identifier quoting display setting
+FR-ISS-134	17	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+FR-ISS-135	17	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+FR-ISS-141	17	done	sql-tab	conditional on a visual query builder
+FR-ISS-144	17	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+FR-ISS-145	17	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+FR-TGT-230	13	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+FR-TGT-231	13	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+FR-UIX-021	18	done	sql-tab	covers all forms; SQL editor content main case
+FR-UIX-047	18	done	sql-tab	history/bookmarks in editor, no console
+FR-UIX-049	18	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+FR-UIX-065	18	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+FR-UIX-066	18	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+FR-UIX-067	18	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+FR-UIX-068	18	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+FR-UIX-069	18	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+FR-UPD-007	14	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+FR-UPD-015	14	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+FR-UPD-016	14	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+FR-UPD-017	14	done	sql-tab	bookmarks
+NFR-DTB-002	18	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+NFR-ISS-101	17	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+NFR-ISS-105	17	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+SEC-TGT-033	11	done	sql-tab	connect and query timeouts
+SEC-TGT-052	11	done	sql-tab	read-only guard
+ST-110	12	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+ST-114	12	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+ST-115	12	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+ST-119	12	done	sql-tab	Read-only guard
+ST-120	12	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+ST-121	12	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+ST-128	12	done	sql-tab	History/audit redaction
+ST-161	12	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+ST-162	12	done	sql-tab	Own state export
+ST-163	12	done	sql-tab	Shortcuts and console options
+ST-164	12	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+UI-ISS-002	16	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+UI-ISS-102	17	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+UI-ISS-123	17	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+UI-ISS-126	17	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+UI-ISS-132	17	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+UI-ISS-135	17	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+UI-ISS-138	17	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+UI-UPD-001	14	done	sql-tab	Explain refresh; export overlay in io
+UI-UPD-003	14	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+UI-UPD-010	14	done	sql-tab	module sql-tab built (SPEC/23), e2e SCN-025 to 036
+CON-DTB-003	18	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+DATA-DTB-001	18	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+DATA-ISS-007	16	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+DATA-ISS-104	17	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+DATA-ISS-113	17	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+DATA-ISS-117	17	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+DATA-ISS-131	17	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+DATA-ISS-138	17	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+DATA-UPD-008	14	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+DEP-DTB-003	18	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-DTB-030	18	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-DTB-031	18	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-DTB-032	18	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-DTB-033	18	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-DTB-040	18	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-DTB-041	18	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-DTB-042	18	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-DTB-043	18	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-DTB-044	18	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-DTB-045	18	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-DTB-046	18	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-DTB-047	18	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-DTB-048	18	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-DTB-049	18	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-DTB-060	18	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-DTB-061	18	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-DTB-062	18	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-DTB-063	18	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-DTB-064	18	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-DTB-065	18	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-DTB-070	18	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-DTB-071	18	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-DTB-080	18	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-DTB-081	18	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-DTB-082	18	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-DTB-083	18	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-DTB-084	18	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-DTB-102	18	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-DTB-103	18	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-DTB-104	18	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-DTB-105	18	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-DTB-154	18	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-ISS-010	16	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-ISS-011	16	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-ISS-013	16	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-ISS-105	17	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-ISS-107	17	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-ISS-109	17	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-ISS-111	17	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-ISS-117	17	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-ISS-128	17	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-ISS-136	17	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-ISS-137	17	done	structure	DDL preview of routines/events
+FR-ISS-142	17	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-ISS-143	17	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-ISS-147	17	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-SRV-032	18	done	structure	create database; also in server overview
+FR-TGT-200	13	done	structure	adapter feature flags used by structure screens first
+FR-TGT-220	13	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-TGT-221	13	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-TGT-222	13	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-TGT-223	13	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-TGT-240	13	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-TGT-241	13	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-TGT-242	13	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-TGT-243	13	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-UIX-028	18	done	structure	first used by destructive DDL
+FR-UPD-006	14	done	structure	events page
+FR-UPD-011	14	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-UPD-012	14	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+FR-UPD-019	14	done	structure	routines paging
+FR-UPD-020	14	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+NFR-SRV-002	18	done	structure	database create is a structure feature
+SEC-DTB-002	18	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+UI-DTB-020	18	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+UI-ISS-106	17	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+UI-ISS-107	17	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+UI-ISS-108	17	done	structure	Confirmation dialogs
+UI-ISS-111	17	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+UI-ISS-119	17	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+UI-ISS-120	17	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+UI-ISS-122	17	done	structure	Routine editor
+UI-ISS-124	17	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+UI-ISS-129	17	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024
+UI-SRV-007	18	done	structure	module structure built (SPEC/22), e2e SCN-013 to 024

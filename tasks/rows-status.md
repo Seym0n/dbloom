@@ -30,7 +30,7 @@ Spec: SPEC/24-module-rows.md (approved; Q1-Q8 = recommended defaults, assistant-
 - Move download byte-chunk statements from `default-ports.ts` into `builder.ts` (FR-ROW-001).
 - `referencingRows` silently skips a group when a key cell is truncated/binary (contract has no flag).
 - UI not visually reviewed by the owner: toolbar wraps to two lines at 1440px; D's UI never run in a browser.
-- Traceability file still says `planned` for skeleton/structure/sql-tab/rows rows; update statuses.
+- (done 2026-10-26) Traceability: structure (85) and sql-tab (74) rows `done`, browse-edit rows with Where=IN (85) `done`; the 3 skeleton rows still `planned` (SEC-ISS-107, SEC-ISS-108, ST-074: check against the code), browse-edit DEFER/OTHER rows stay `planned`.
 - Split-off modules proposed in SPEC/24 (navigation, browse-view, db-search, transformations) are not in the capability map/traceability yet.
 - Skeleton task 10 (a11y/motion pass, axe) still open.
 
