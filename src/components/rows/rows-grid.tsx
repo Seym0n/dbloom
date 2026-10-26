@@ -259,6 +259,9 @@ function RowsGridLoaded({
       return { response, stamp: stamps.current }
     },
     placeholderData: keepPreviousData,
+    // Rows and the catalog behind them change outside DBLoom: a reopened table must ask again, not show the
+    // app-wide 30 s cache (the cached page still shows while the answer is on its way).
+    staleTime: 0,
     retry: false,
     refetchInterval: autoRefresh > 0 && !paused ? autoRefresh * 1000 : false,
   })
