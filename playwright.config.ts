@@ -7,7 +7,7 @@ const READ_ONLY_PORT = 3101
 
 // Run once per product (SCN-022, SCN-024 to SCN-036): `--project=mysql` or `--project=mariadb`.
 // sql-smoke stays with the walking-skeleton specs in the chromium project.
-const perProductSpecs = /(structure-.*|sql-(?!smoke).*)\.spec\.ts/
+const perProductSpecs = /(structure-.*|rows-.*|sql-(?!smoke).*)\.spec\.ts/
 // Fourth server: low limits (2 s statement timeout, 1 000 row cap) for the timeout and cap scenarios.
 const LIMITS_PORT = 3102
 

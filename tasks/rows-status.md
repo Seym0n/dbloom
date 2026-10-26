@@ -10,8 +10,12 @@ Spec: SPEC/24-module-rows.md (approved; Q1-Q8 = recommended defaults, assistant-
 - Package D: forms, editors, dialogs, FK picker, BLOB field, `use-row-editing.tsx`.
 - State: typecheck, lint, build clean; vitest 1545/1548 on first run, the 2 timing-flaky tests (sql-run export hook, structure lock wait) pass on rerun.
 
+## Update 2026-10-26
+- Wire-up done (table-view.tsx), session-end handle cleanup done, grid-alignment exclusion done; Playwright suite re-run: green after fixing stale direct-mode assertions. Docker must be running for DB tests.
+- Package E started: `e2e/rows-edit.spec.ts` (SCN-037 partly, 038 partly, 040 step 1; both products, `rows-.*` is in `perProductSpecs`), `e2e/fixtures/rows-fixtures.ts`. First real browser run of the editing UI works (insert, inline edit, delete dialogs).
+
 ## NOT done (next session)
-- Package E: `e2e/rows-*.spec.ts` for SCN-037..051 (two-session fixture, storage scan, axe). Existing Playwright suite NOT re-run against the new grid.
+- Package E rest: SCN-037 (3 rows, Ignore, copy), 038 (Tab, trigger, view), 039, 040 steps 2-3 (cascade/token, 1451), 041-051; two-session fixture, storage scan, axe.
 - Task 15: fill the remaining *verify* cells of SPEC/24 (incl. `LEFT(col,...)` cost at ~line 366); update FR-ROW-020 text to the narrower cascade rule (hard only for deletes with ON DELETE CASCADE and updates touching ON UPDATE CASCADE columns).
 - Wire-up: table tab must call `setFormsApi(liveFormsApi)` once (`useLiveFormsApi()` in `server-api-forms-live.ts`) and pass `useRowEditing` hooks to the grid; `fkHref`/`groupHref` built by the table tab. Check the editing UI is actually reachable in the app.
 - `e2e/grid-alignment.spec.ts` must exclude `[data-rows-actions]` cells.
