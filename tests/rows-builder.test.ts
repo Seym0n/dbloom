@@ -49,8 +49,8 @@ describe('golden SQL (FR-ROW-001)', () => {
     expect(limit).toBe(25)
     expect(offset).toBe(50)
     expect(statement.sql).toBe(
-      'SELECT `id`, LEFT(`name`, 101), CHAR_LENGTH(`name`), LEFT(`email`, 101), CHAR_LENGTH(`email`), ' +
-        'LEFT(`note`, 101), CHAR_LENGTH(`note`), CAST(`created` AS CHAR), `flag`, CAST(`price` AS CHAR), ' +
+      'SELECT `id`, LEFT(`name`, 101), CASE WHEN OCTET_LENGTH(`name`) > 100 THEN CHAR_LENGTH(`name`) END, LEFT(`email`, 101), CASE WHEN OCTET_LENGTH(`email`) > 100 THEN CHAR_LENGTH(`email`) END, ' +
+        'LEFT(`note`, 101), CASE WHEN OCTET_LENGTH(`note`) > 100 THEN CHAR_LENGTH(`note`) END, CAST(`created` AS CHAR), `flag`, CAST(`price` AS CHAR), ' +
         'SUBSTRING(`doc`, 1, 32), OCTET_LENGTH(`doc`) ' +
         'FROM `e2e_x`.`customer` ORDER BY `name` DESC, `id` ASC LIMIT 26 OFFSET 50',
     )

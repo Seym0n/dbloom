@@ -475,7 +475,10 @@ export function guardCondition(col: RowColumn, g: GuardValue, mode: 'key' | 'old
 export type ReadOptions = {
   /** Largest value of one cell the server sends (ST-115). */
   cellBytes: number
-  /** Also ask for the full length of long text (`CHAR_LENGTH`); default true. */
+  /**
+   * Also ask for the full length of long text; default true. The length is read only where the value can be
+   * cut (`OCTET_LENGTH` is the stored size and cheap, `CHAR_LENGTH` scans multi-byte text), see spec 5.3.
+   */
   lengths?: boolean
 }
 
@@ -486,6 +489,9 @@ export type Projection = {
   decode: (raw: unknown[]) => Cell
 }
 
+const numberOrNull = (v: unknown): number | null =>
+  v === null || v === undefined ? null : Number(v)
+
 function str(v: unknown): string {
   if (typeof v === 'string') return v
   if (Buffer.isBuffer(v)) return v.toString('utf8')
@@ -493,7 +499,12 @@ function str(v: unknown): string {
   return String(v)
 }
 
-function textCell(text: string, full: number | undefined, limit: number): Cell {
+/** `CHAR_LENGTH(expr)` evaluated only for values whose byte size exceeds the limit; NULL for the others. */
+const lengthIfCut = (expr: string, limit: number) =>
+  `CASE WHEN OCTET_LENGTH(${expr}) > ${limit} THEN CHAR_LENGTH(${expr}) END`
+
+/** `full` is the character count where the SQL read it, null or undefined when the text is whole. */
+function textCell(text: string, full: number | null | undefined, limit: number): Cell {
   const length = full ?? charCount(text)
   if (length <= limit) return text
   return { cut: Array.from(text).slice(0, limit).join(''), length }
@@ -531,9 +542,9 @@ export function projectionFor(col: RowColumn, opts: ReadOptions): Projection {
     case 'text':
     case 'json':
       return {
-        exprs: lengths ? [`LEFT(${c}, ${n + 1})`, `CHAR_LENGTH(${c})`] : [`LEFT(${c}, ${n + 1})`],
+        exprs: lengths ? [`LEFT(${c}, ${n + 1})`, lengthIfCut(c, n)] : [`LEFT(${c}, ${n + 1})`],
         decode: (r) =>
-          r[0] === null ? null : textCell(str(r[0]), lengths ? Number(r[1]) : undefined, n),
+          r[0] === null ? null : textCell(str(r[0]), lengths ? numberOrNull(r[1]) : undefined, n),
       }
     case 'geometry': {
       const wkt = `ST_AsText(${c})`
@@ -542,14 +553,15 @@ export function projectionFor(col: RowColumn, opts: ReadOptions): Projection {
       return {
         exprs: [
           `LEFT(${wkt}, ${n + 1})`,
-          ...(lengths ? [`CHAR_LENGTH(${wkt})`] : []),
+          ...(lengths ? [lengthIfCut(wkt, n)] : []),
           ...(withSrid ? [`ST_SRID(${c})`] : []),
         ],
         decode: (r) => {
           if (r[0] === null) return null
           const srid = withSrid ? Number(r[lengths ? 2 : 1]) : 0
           const prefix = srid > 0 ? `SRID=${srid};` : ''
-          return textCell(prefix + str(r[0]), lengths ? Number(r[1]) + prefix.length : undefined, n)
+          const full = lengths ? numberOrNull(r[1]) : undefined
+          return textCell(prefix + str(r[0]), full == null ? full : full + prefix.length, n)
         },
       }
     }

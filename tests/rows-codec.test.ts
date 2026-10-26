@@ -298,7 +298,11 @@ describe('read projections', () => {
   })
   it('long text is cut with its full length, short text stays a string', () => {
     const p = projectionFor(col('t', 'text'), read)
-    expect(p.exprs).toEqual(['LEFT(`t`, 11)', 'CHAR_LENGTH(`t`)'])
+    expect(p.exprs).toEqual([
+      'LEFT(`t`, 11)',
+      'CASE WHEN OCTET_LENGTH(`t`) > 10 THEN CHAR_LENGTH(`t`) END',
+    ])
+    expect(p.decode(['short', null])).toBe('short')
     expect(p.decode(['short', 5])).toBe('short')
     expect(p.decode(['0123456789a', 5000])).toEqual({ cut: '0123456789', length: 5000 })
     expect(p.decode(['😀😀😀😀😀😀😀😀😀😀😀', 11])).toEqual({
@@ -315,7 +319,7 @@ describe('read projections', () => {
     const p = projectionFor(col('g', 'geometry'), { cellBytes: 100 })
     expect(p.exprs).toEqual([
       'LEFT(ST_AsText(`g`), 101)',
-      'CHAR_LENGTH(ST_AsText(`g`))',
+      'CASE WHEN OCTET_LENGTH(ST_AsText(`g`)) > 100 THEN CHAR_LENGTH(ST_AsText(`g`)) END',
       'ST_SRID(`g`)',
     ])
     expect(p.decode(['POINT(1 2)', 10, 4326])).toBe('SRID=4326;POINT(1 2)')
