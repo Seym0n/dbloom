@@ -54,11 +54,18 @@ test.describe('SCN-005 open a table', () => {
       'descending',
     )
     await expect(page.locator('tbody tr').first()).toContainText('882.00')
-    await expect(page.locator('code')).toContainText('ORDER BY `amount` DESC LIMIT 50 OFFSET 0')
+    await expect(page.locator('code')).toContainText('ORDER BY `amount` DESC, `id` ASC LIMIT 51')
 
     await page.getByRole('button', { name: 'Next' }).click()
     await expect(page.getByText('Rows 51–100')).toBeVisible()
     await expect(page.locator('code')).toContainText('OFFSET 50')
+
+    // The sort is a saved preference of the table; clear it (third click) so later tests see the default order.
+    await page.getByRole('button', { name: 'amount' }).click()
+    await expect(page.getByRole('columnheader', { name: 'amount' })).not.toHaveAttribute(
+      'aria-sort',
+      'descending',
+    )
   })
 
   test('values are shown as text, binary is summarised, NULL is marked', async ({ page }) => {

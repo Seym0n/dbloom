@@ -1,5 +1,10 @@
 import { ServerApiGrid } from '~/components/rows/server-api-grid'
 import type { RowsGridHooks } from '~/components/rows/grid-hooks'
+import { liveFormsApi } from '~/components/rows/server-api-forms-live'
+import { setFormsApi } from '~/components/rows/server-api-forms'
+import { useRowEditing } from '~/components/rows/use-row-editing'
+
+setFormsApi(liveFormsApi)
 
 /**
  * The table tab: a title and the rows grid of module `rows` (SPEC 24). Everything the grid does, such as
@@ -15,6 +20,7 @@ export function TableView({
   table: string
   hooks?: RowsGridHooks
 }) {
+  const editing = useRowEditing({ db, table })
   return (
     <section className="flex min-h-0 flex-1 flex-col" aria-labelledby="table-title">
       <header className="flex flex-wrap items-center gap-x-4 gap-y-2 px-6 pt-5 pb-4">
@@ -23,7 +29,8 @@ export function TableView({
           {table}
         </h1>
       </header>
-      <ServerApiGrid key={`${db}.${table}`} db={db} table={table} hooks={hooks} />
+      <ServerApiGrid key={`${db}.${table}`} db={db} table={table} hooks={hooks ?? editing.hooks} />
+      {editing.dialogs}
     </section>
   )
 }

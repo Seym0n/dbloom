@@ -22,14 +22,16 @@ async function baselines(page: Page, cellSelector: string, rows: number): Promis
         .filter((row) => row.querySelector(cellSelector))
         .slice(0, rows)
         .map((row) =>
-          [...row.querySelectorAll(cellSelector)].map((cell) => {
-            const probe = document.createElement('span')
-            probe.style.cssText = 'display:inline-block;width:0;height:0'
-            cell.appendChild(probe)
-            const y = probe.getBoundingClientRect().bottom - cell.getBoundingClientRect().top
-            probe.remove()
-            return Math.round(y * 2) / 2
-          }),
+          [...row.querySelectorAll(cellSelector)]
+            .filter((cell) => !cell.matches('[data-rows-actions]'))
+            .map((cell) => {
+              const probe = document.createElement('span')
+              probe.style.cssText = 'display:inline-block;width:0;height:0'
+              cell.appendChild(probe)
+              const y = probe.getBoundingClientRect().bottom - cell.getBoundingClientRect().top
+              probe.remove()
+              return Math.round(y * 2) / 2
+            }),
         ),
     { cellSelector, rows },
   )
