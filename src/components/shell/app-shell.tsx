@@ -90,6 +90,8 @@ function AssistantPanel({ onClose }: { onClose: () => void }) {
   )
 }
 
+const tabButtonId = (id: string) => `tab-${id.replace(/[^A-Za-z0-9_-]/g, '_')}`
+
 export function AppShell({ session }: { session: SessionInfo }) {
   // The CSRF token lives in memory only; set while rendering so the first requests already carry it.
   if (typeof window !== 'undefined') setCsrfToken(session.csrf)
@@ -353,15 +355,20 @@ export function AppShell({ session }: { session: SessionInfo }) {
       <main className="col-start-1 row-start-2 mr-2 mb-2 ml-2 flex min-h-0 overflow-hidden rounded-[var(--radius-sheet)] border border-border bg-surface md:col-start-2 md:ml-0">
         <div className="flex min-w-0 flex-1 flex-col">
           {tabs.length > 0 && (
-            <div
-              role="tablist"
-              className="flex shrink-0 overflow-x-auto border-b border-border px-3"
-            >
+            <div className="relative flex shrink-0 overflow-x-auto border-b border-border px-3">
+              {/* Close buttons sit beside their tab, so the tablist owns the tab buttons by id and nothing else. */}
+              <div
+                role="tablist"
+                aria-label={t('tab.list')}
+                aria-owns={tabs.map((tab) => tabButtonId(tab.id)).join(' ')}
+                className="absolute size-0"
+              />
               {tabs.map((tab) => {
                 const selected = tab.id === activeKey
                 return (
                   <div key={tab.id} className="relative flex shrink-0 items-center">
                     <button
+                      id={tabButtonId(tab.id)}
                       role="tab"
                       aria-selected={selected}
                       onClick={() => setActiveKey(tab.id)}

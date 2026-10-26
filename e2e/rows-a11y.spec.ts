@@ -7,8 +7,6 @@ import { gridRow, openTable, seedRowsCustomer } from './fixtures/rows-fixtures'
 
 const scan = async (page: Page, include?: string) => {
   const builder = new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
-  // The tab strip belongs to the app shell (skeleton a11y task: close buttons sit inside role=tablist).
-  builder.exclude('[role=tablist]')
   if (include) builder.include(include)
   const { violations } = await builder.analyze()
   return violations.map(
