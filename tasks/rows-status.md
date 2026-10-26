@@ -26,7 +26,7 @@ Spec: SPEC/24-module-rows.md (approved; Q1-Q8 = recommended defaults, assistant-
 - (done 2026-10-26) Wire-up: table tab must call `setFormsApi(liveFormsApi)` once (`useLiveFormsApi()` in `server-api-forms-live.ts`) and pass `useRowEditing` hooks to the grid; `fkHref`/`groupHref` built by the table tab. Check the editing UI is actually reachable in the app.
 - `e2e/grid-alignment.spec.ts` must exclude `[data-rows-actions]` cells.
 - `sessions.ts` should call `cellHandles.dropSession` and `uploads.dropSession` on session end.
-- Tests missing: `lookupRows`, `referencingRows` integration; async/keyboard flows (no jsdom); `lower_case_table_names=1`; role/column-level privileges.
+- (done 2026-10-26) `lookupRows`/`referencingRows` integration: `tests/rows-lookup.integration.test.ts`, both products. Tests still missing: async/keyboard flows (no jsdom); `lower_case_table_names=1`; role/column-level privileges.
 - Move download byte-chunk statements from `default-ports.ts` into `builder.ts` (FR-ROW-001).
 - `referencingRows` silently skips a group when a key cell is truncated/binary (contract has no flag).
 - UI not visually reviewed by the owner: toolbar wraps to two lines at 1440px; D's UI never run in a browser.
