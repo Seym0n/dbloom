@@ -18,6 +18,7 @@ import {
   moveColumn,
   resetLayout,
   setColumnWidth,
+  relationModeOf,
   toggleHidden,
   type DisplayPrefs,
 } from './grid-model'
@@ -240,6 +241,21 @@ export function ColumnMenu({
               >
                 <option value="hex">{t('rows.grid.binaryHex')}</option>
                 <option value="size">{t('rows.grid.binarySize')}</option>
+              </Select>
+            </label>
+            <label className="flex items-center justify-between gap-3 text-sm">
+              <span>{t('rows.grid.relationMode')}</span>
+              <Select
+                compact
+                className="w-auto pointer-coarse:h-11"
+                value={display.relationMode}
+                onChange={(e) =>
+                  onDisplay({ ...display, relationMode: relationModeOf(e.target.value) })
+                }
+              >
+                <option value="links">{t('rows.grid.relationLinks')}</option>
+                <option value="full">{t('rows.grid.relationFull')}</option>
+                <option value="none">{t('rows.grid.relationNone')}</option>
               </Select>
             </label>
             <label className="flex items-start gap-2 text-sm">

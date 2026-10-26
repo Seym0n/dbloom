@@ -37,6 +37,10 @@ export type CellContext = {
    */
   key: Record<string, GuardValue> | undefined
   timeZone: string
+  /** The relation mode of the grid (FR-ROW-014): `none` means a foreign key cell is not a link. */
+  relationMode: 'full' | 'links' | 'none'
+  /** In `full` mode: the referenced row's display value for this cell, once the page's lookup has arrived. */
+  relationDisplay?: string
 }
 
 /** Operations the grid offers to hooks. Stable for the life of the grid. */

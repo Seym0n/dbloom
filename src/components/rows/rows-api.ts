@@ -10,6 +10,8 @@ import type {
   GetPrefsInput,
   GetRowsInput,
   GetRowsResponse,
+  LookupInput,
+  LookupResponse,
   PrefsResponse,
   RowLimitsResponse,
   SetPrefInput,
@@ -23,4 +25,6 @@ export type RowsApi = {
   getLimits(): Promise<RowLimitsResponse>
   getPrefs(input: GetPrefsInput): Promise<PrefsResponse>
   setPref(input: SetPrefInput): Promise<void>
+  /** Display values of foreign key targets for the keys of one page (`full` relation mode); optional in mocks. */
+  lookup?(input: LookupInput): Promise<LookupResponse>
 }

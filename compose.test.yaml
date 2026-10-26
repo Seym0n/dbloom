@@ -1,6 +1,8 @@
 services:
   mysql:
     image: mysql:8.4
+    # The e2e server keeps a pool per live session; the whole suite exceeds the default of 151 connections.
+    command: ['--max-connections=600']
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: shop
@@ -11,6 +13,7 @@ services:
       retries: 40
   mariadb:
     image: mariadb:10.11
+    command: ['--max-connections=600']
     environment:
       MARIADB_ROOT_PASSWORD: root
       MARIADB_DATABASE: shop

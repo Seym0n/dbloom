@@ -140,7 +140,7 @@ export function useRowEditing(options: RowEditingOptions): {
       },
       decorateCell: (ctx, content) => {
         const href = opts.current.fkHref
-        if (!href || ctx.cell === null) return content
+        if (!href || ctx.cell === null || ctx.relationMode === 'none') return content
         const fk = ctx.table.outgoing.find((f) => f.columns.includes(ctx.columnName))
         if (!fk) return content
         const values: Record<string, string> = {}

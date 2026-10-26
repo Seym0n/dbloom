@@ -217,17 +217,25 @@ export function isExpandable(cell: Cell, displayChars: number): boolean {
 export const DISPLAY_CHARS_MIN = 20
 export const DISPLAY_CHARS_MAX = 1000
 
+export type RelationMode = 'full' | 'links' | 'none'
+
 export type DisplayPrefs = {
   displayChars: number
   fullText: boolean
   /** True: binary cells show their size only. False (default): `0x` preview of the first bytes and the size. */
   protectBinary: boolean
   gridEditing: boolean
+  /** Foreign keys (FR-ROW-014): `full` shows the referenced row's name beside the key, `links` only a link, `none` neither. */
+  relationMode: RelationMode
 }
 
 export function clampDisplayChars(n: number): number {
   if (!Number.isFinite(n)) return 100
   return Math.min(DISPLAY_CHARS_MAX, Math.max(DISPLAY_CHARS_MIN, Math.round(n)))
+}
+
+export function relationModeOf(value: unknown): RelationMode {
+  return value === 'full' || value === 'none' ? value : 'links'
 }
 
 export function parseDisplayPrefs(
@@ -240,6 +248,7 @@ export function parseDisplayPrefs(
     fullText: values['rows.fullText'] === true,
     protectBinary: values['rows.protectBinary'] === true,
     gridEditing: values['rows.gridEditing'] !== false,
+    relationMode: relationModeOf(values['rows.relationMode']),
   }
 }
 

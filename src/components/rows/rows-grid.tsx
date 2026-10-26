@@ -145,6 +145,57 @@ function errorText(error: unknown): string | undefined {
  * The browse grid of one table. It reads the limits and the saved preferences, then mounts the grid with
  * them as its starting state; a failed read falls back to defaults instead of blocking the table.
  */
+// ---- Foreign key names (`full` relation mode) ------------------------------------------------------------------------
+
+const MAX_RELATION_FKS = 10
+
+/** The text of a key cell for a lookup; a cut or large binary value cannot be looked up. */
+function keyText(cell: Cell | undefined): string | null {
+  if (typeof cell === 'string') return cell
+  if (cell && typeof cell === 'object' && 'binary' in cell && cell.size <= 32)
+    return `0x${cell.binary}`
+  return null
+}
+
+/** Per outgoing foreign key: the distinct key tuples of this page, in the order of the referenced columns. */
+function relationKeysOf(data: GetRowsResponse | undefined) {
+  if (!data) return []
+  const out: { fk: string; refColumns: string[]; tuples: string[][] }[] = []
+  for (const fk of data.table.outgoing.slice(0, MAX_RELATION_FKS)) {
+    const at = fk.columns.map((c) => data.columns.indexOf(c))
+    if (at.some((i) => i < 0)) continue
+    const seen = new Set<string>()
+    const tuples: string[][] = []
+    for (const row of data.rows) {
+      const tuple = at.map((i) => keyText(row[i]))
+      if (tuple.some((v) => v === null)) continue
+      const id = JSON.stringify(tuple)
+      if (seen.has(id)) continue
+      seen.add(id)
+      tuples.push(tuple as string[])
+    }
+    if (tuples.length > 0) out.push({ fk: fk.name, refColumns: fk.refColumns, tuples })
+  }
+  return out
+}
+
+/** The referenced row's name for the first column of a foreign key, or nothing. */
+function relationDisplayOf(
+  data: GetRowsResponse,
+  row: Cell[],
+  columnName: string,
+  mode: DisplayPrefs['relationMode'],
+  names: Record<string, Record<string, string>> | undefined,
+): { relationDisplay?: string } {
+  if (mode !== 'full' || !names) return {}
+  const fk = data.table.outgoing.find((f) => f.columns[0] === columnName)
+  if (!fk) return {}
+  const tuple = fk.columns.map((c) => keyText(row[data.columns.indexOf(c)]))
+  if (tuple.some((v) => v === null)) return {}
+  const shown = names[fk.name]?.[JSON.stringify(tuple)]
+  return shown ? { relationDisplay: shown } : {}
+}
+
 export function RowsGrid(props: RowsGridProps) {
   const { db, table, api } = props
   const limits = useQuery({
@@ -328,6 +379,8 @@ function RowsGridLoaded({
       persist('rows.protectBinary', next.protectBinary, 'global')
     if (next.gridEditing !== was.gridEditing)
       persist('rows.gridEditing', next.gridEditing, 'global')
+    if (next.relationMode !== was.relationMode)
+      persist('rows.relationMode', next.relationMode, 'global')
   }
 
   // ---- Paging, sort, filter, search: each change but the page starts at page 1 (FR-ISS-139) ----
@@ -444,6 +497,38 @@ function RowsGridLoaded({
     [queryClient, db, table, page, scopeKey],
   )
 
+  // ---- Names behind foreign keys, `full` relation mode: one lookup per foreign key and page (FR-ROW-014) ----
+  const relationKeys = useMemo(() => relationKeysOf(data), [data])
+  const relations = useQuery({
+    queryKey: ['rows', 'relations', db, table, JSON.stringify(relationKeys)],
+    enabled: display.relationMode === 'full' && relationKeys.length > 0 && Boolean(api.lookup),
+    queryFn: async () => {
+      const names: Record<string, Record<string, string>> = {}
+      for (const { fk, refColumns, tuples } of relationKeys) {
+        const answer = await api.lookup!({
+          db,
+          table,
+          fk,
+          page: 0,
+          keys: tuples.map((tuple) =>
+            Object.fromEntries(
+              refColumns.map((c, i) => [c, { t: 'v' as const, v: tuple[i] ?? '' }]),
+            ),
+          ),
+        })
+        const byTuple: Record<string, string> = {}
+        for (const option of answer.options) {
+          byTuple[JSON.stringify(refColumns.map((c) => option.key[c] ?? null))] = option.display
+        }
+        names[fk] = byTuple
+      }
+      return names
+    },
+    staleTime: 0,
+    retry: false,
+    placeholderData: keepPreviousData,
+  })
+
   const controls: GridControls = useMemo(
     () => ({
       refresh: () => void query.refetch(),
@@ -473,6 +558,8 @@ function RowsGridLoaded({
       permissions: response.permissions,
       key: rowKeyOf(response.identity, response.columns, row),
       timeZone: response.timeZone,
+      relationMode: display.relationMode,
+      ...relationDisplayOf(response, row, columnName, display.relationMode, relations.data),
     }
   }
 

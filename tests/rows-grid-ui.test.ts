@@ -259,7 +259,11 @@ describe('column layout (FR-ROW-010, DATA-ISS-114)', () => {
       fullText: false,
       protectBinary: false,
       gridEditing: true,
+      relationMode: 'links',
     })
+    expect(parseDisplayPrefs({ 'rows.relationMode': 'full' }, 100).relationMode).toBe('full')
+    expect(parseDisplayPrefs({ 'rows.relationMode': 'none' }, 100).relationMode).toBe('none')
+    expect(parseDisplayPrefs({ 'rows.relationMode': 'bogus' }, 100).relationMode).toBe('links')
     expect(
       parseDisplayPrefs({ 'rows.displayChars': 5, 'rows.gridEditing': false }, 100),
     ).toMatchObject({

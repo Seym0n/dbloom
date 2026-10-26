@@ -4,6 +4,7 @@ import {
   countRows,
   getRowLimits,
   getRows,
+  lookupRows,
   getRowPrefs,
   setRowPref,
 } from '~/server/rows.functions'
@@ -22,6 +23,7 @@ export const serverRowsApi: RowsApi = {
   },
   getLimits: () => getRowLimits(),
   getPrefs: (data) => getRowPrefs({ data }),
+  lookup: (data) => lookupRows({ data }),
   setPref: async (data) => {
     await setRowPref({ data })
   },

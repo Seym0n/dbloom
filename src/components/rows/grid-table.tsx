@@ -16,6 +16,17 @@ import {
   type CellRenderer,
 } from './registry'
 
+/** `full` relation mode: the referenced row's name after the key, muted, inside the same cell. */
+function withRelation(context: CellContext, content: ReactNode): ReactNode {
+  if (!context.relationDisplay) return content
+  return (
+    <>
+      {content}
+      <span className="ml-1.5 font-sans text-muted">{context.relationDisplay}</span>
+    </>
+  )
+}
+
 export const SELECT_COLUMN_WIDTH = 44
 export const ACTIONS_COLUMN_WIDTH = 120
 
@@ -275,8 +286,8 @@ export function GridTable(props: GridTableProps) {
                     {isEditing
                       ? props.renderEditor(context)
                       : hooks.decorateCell
-                        ? hooks.decorateCell(context, content)
-                        : content}
+                        ? hooks.decorateCell(context, withRelation(context, content))
+                        : withRelation(context, content)}
                     {!isEditing && expandable && (
                       <button
                         type="button"
