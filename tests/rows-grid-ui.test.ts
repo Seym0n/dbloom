@@ -261,7 +261,14 @@ describe('column layout (FR-ROW-010, DATA-ISS-114)', () => {
       protectBinary: false,
       gridEditing: true,
       relationMode: 'links',
+      stringOperator: 'contains',
     })
+    expect(
+      parseDisplayPrefs({ 'rows.defaultStringOperator': 'starts with' }, 100).stringOperator,
+    ).toBe('starts with')
+    expect(parseDisplayPrefs({ 'rows.defaultStringOperator': 'x' }, 100).stringOperator).toBe(
+      'contains',
+    )
     expect(parseDisplayPrefs({ 'rows.relationMode': 'full' }, 100).relationMode).toBe('full')
     expect(parseDisplayPrefs({ 'rows.relationMode': 'none' }, 100).relationMode).toBe('none')
     expect(parseDisplayPrefs({ 'rows.relationMode': 'bogus' }, 100).relationMode).toBe('links')
@@ -490,6 +497,15 @@ describe('filter model (FR-ROW-008)', () => {
     expect(moved.values).toEqual([''])
     const toBlob = withColumn(c, byName.get('doc')!)
     expect(operatorsFor('blob')).toContain(toBlob.op)
+  })
+
+  test('moving from a non-text column to a text column applies the default text operator', () => {
+    const c = newCondition(byName.get('id')!)
+    expect(withColumn(c, byName.get('name')!, 'starts with', 'int').op).toBe('starts with')
+    // Between two text columns, or without a known previous kind, the chosen operator stays.
+    const text = { ...newCondition(byName.get('name')!), op: '=' as const }
+    expect(withColumn(text, byName.get('name')!, 'starts with', 'char').op).toBe('=')
+    expect(withColumn(c, byName.get('name')!, 'starts with').op).toBe('=')
   })
 
   test('values are validated per kind', () => {

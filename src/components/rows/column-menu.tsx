@@ -258,6 +258,23 @@ export function ColumnMenu({
                 <option value="none">{t('rows.grid.relationNone')}</option>
               </Select>
             </label>
+            <label className="flex items-center justify-between gap-3 text-sm">
+              <span>{t('rows.grid.stringOperator')}</span>
+              <Select
+                compact
+                className="w-auto pointer-coarse:h-11"
+                value={display.stringOperator}
+                onChange={(e) =>
+                  onDisplay({
+                    ...display,
+                    stringOperator: e.target.value === 'starts with' ? 'starts with' : 'contains',
+                  })
+                }
+              >
+                <option value="contains">{t('rows.grid.stringContains')}</option>
+                <option value="starts with">{t('rows.grid.stringStartsWith')}</option>
+              </Select>
+            </label>
             <label className="flex items-start gap-2 text-sm">
               <Checkbox
                 className="mt-0.5"

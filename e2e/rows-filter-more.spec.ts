@@ -317,11 +317,48 @@ test.describe('SCN-046 filter builder, more', () => {
     await expect(grid.getByText('Cy 100x Real')).toHaveCount(0)
   })
 
-  test.fixme('the default string operator setting turns "contains" into "starts with"', async () => {
-    // rows.defaultStringOperator is read in rows-grid.tsx (preferredOperator) and validated in
-    // src/server/rows/prefs.ts, but no component renders a control for it (grep finds no UI),
-    // and a hand-made setPref call cannot be shaped reliably without running the app.
-    // Enable when the settings dialog gets a "default string operator" control.
+  test('the default string operator setting turns "contains" into "starts with"', async ({
+    page,
+    scratch,
+    address,
+  }) => {
+    await seedRowsCustomer(scratch, 0)
+    const t = `\`${scratch.name}\`.customer`
+    await scratch.q(`INSERT INTO ${t} (name, email) VALUES ?`, [
+      [
+        ['Ann Lee', 'a1@example.test'],
+        ['Joanna Ray', 'a2@example.test'],
+      ],
+    ])
+    await signIn(page, address)
+    await openTable(page, scratch.name, 'customer')
+
+    const setDefault = async (label: string) => {
+      await page.getByRole('button', { name: 'Columns' }).click()
+      await page
+        .getByRole('dialog', { name: 'Columns' })
+        .getByRole('combobox', { name: 'New text filters' })
+        .selectOption({ label })
+      await page.keyboard.press('Escape')
+    }
+    try {
+      await setDefault('Start with the text')
+      const dialog = await openFilter(page)
+      await dialog.getByRole('combobox', { name: 'Column of condition 1' }).selectOption('name')
+      await expect(dialog.getByRole('combobox', { name: 'Operator of condition 1' })).toHaveValue(
+        'starts with',
+      )
+      await dialog.getByRole('textbox', { name: 'Value of condition 1', exact: true }).fill('ann')
+      await applyFilter(dialog)
+      // `ann` at the start matches Ann Lee but not Joanna Ray.
+      const grid = page.getByRole('grid')
+      await expect(grid.getByText('Ann Lee')).toBeVisible()
+      await expect(grid.getByText('Joanna Ray')).toHaveCount(0)
+    } finally {
+      // Global preference saved on the server: put it back for the specs that follow (close any dialog first).
+      await page.keyboard.press('Escape')
+      await setDefault('Contain the text')
+    }
   })
 })
 

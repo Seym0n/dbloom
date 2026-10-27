@@ -197,9 +197,10 @@ test.describe('SCN-049 statement timeout', () => {
       await expect(page.getByText(/exceeded the time limit/i).first()).toBeVisible({
         timeout: 45_000,
       })
-      // The table's own message and a Retry replace the rows; the toolbar and the pager stay.
+      // The last good rows stay on screen under the message, which says they may not match the new sort.
+      await expect(page.getByText(/may not match your sort or filter/)).toBeVisible()
       await expect(page.getByRole('button', { name: 'Retry' })).toBeVisible()
-      await expect(page.getByRole('button', { name: 'Refresh' })).toBeVisible()
+      await expect(page.getByRole('grid').getByRole('row').nth(1)).toBeVisible()
       await expect(page.getByRole('navigation', { name: 'Pages' })).toBeVisible()
     } finally {
       await scratch.q('UNLOCK TABLES')

@@ -116,14 +116,23 @@ export function withOperator(
   return { ...c, op, values, matchCase: supportsMatchCase(kind, op) ? c.matchCase : false }
 }
 
+const isTextKind = (kind: TypeKind) => kind === 'char' || kind === 'text'
+
+/**
+ * Moves a condition to another column. The operator stays when the new column allows it, except when the user
+ * moves from a non-text column to a text column: then the default text operator (the user's setting) applies.
+ */
 export function withColumn(
   c: DraftCondition,
   column: RowColumn,
   preferred?: FilterOperator,
+  previousKind?: TypeKind,
 ): DraftCondition {
   const ops = operatorsFor(column.kind)
-  const op = ops.includes(c.op) ? c.op : defaultOperator(column.kind, preferred)
-  const resetValues = ops.includes(c.op) ? c.values : initialValues(op)
+  const toText = previousKind !== undefined && !isTextKind(previousKind) && isTextKind(column.kind)
+  const keepOp = ops.includes(c.op) && !toText
+  const op = keepOp ? c.op : defaultOperator(column.kind, preferred)
+  const resetValues = keepOp ? c.values : initialValues(op)
   // A value typed for another kind is rarely valid for this one: keep it only for text kinds.
   const keep = column.kind === 'char' || column.kind === 'text' ? resetValues : initialValues(op)
   return { ...c, column: column.name, op, values: keep, matchCase: false }

@@ -307,7 +307,7 @@ function ConditionRow({
           value={condition.column}
           onChange={(e) => {
             const next = byName.get(e.target.value)
-            if (next) onChange(withColumn(condition, next, preferredOperator))
+            if (next) onChange(withColumn(condition, next, preferredOperator, column?.kind))
           }}
         >
           {columns.map((c) => (

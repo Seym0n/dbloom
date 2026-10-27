@@ -317,9 +317,14 @@ function RowsGridLoaded({
     retry: false,
     refetchInterval: autoRefresh > 0 && !paused ? autoRefresh * 1000 : false,
   })
-  const data: GetRowsResponse | undefined = query.data?.response
-  const stamp = query.data?.stamp ?? 0
-  const settled = !query.isPlaceholderData
+  // The last page that loaded: when a new sort, filter or page fails (a timeout, say), these rows stay on screen
+  // under the error, marked as possibly not matching the choice, instead of leaving an empty table.
+  const lastGood = useRef<typeof query.data>(undefined)
+  if (query.data && !query.isPlaceholderData) lastGood.current = query.data
+  const kept = !query.data && query.isError ? lastGood.current : undefined
+  const data: GetRowsResponse | undefined = query.data?.response ?? kept?.response
+  const stamp = query.data?.stamp ?? kept?.stamp ?? 0
+  const settled = !query.isPlaceholderData && !kept
 
   // The server answers the page it can serve (clamped after deletes, FR-ROW-006); follow it, and step back
   // from an empty page that has a previous one.
@@ -387,6 +392,8 @@ function RowsGridLoaded({
       persist('rows.gridEditing', next.gridEditing, 'global')
     if (next.relationMode !== was.relationMode)
       persist('rows.relationMode', next.relationMode, 'global')
+    if (next.stringOperator !== was.stringOperator)
+      persist('rows.defaultStringOperator', next.stringOperator, 'global')
   }
 
   // ---- Paging, sort, filter, search: each change but the page starts at page 1 (FR-ISS-139) ----
@@ -727,9 +734,7 @@ function RowsGridLoaded({
             columns={model.columns}
             applied={filter}
             onApply={applyFilter}
-            preferredOperator={
-              prefs['rows.defaultStringOperator'] === 'starts with' ? 'starts with' : 'contains'
-            }
+            preferredOperator={display.stringOperator}
           />
         )}
         <TableSearch
@@ -834,7 +839,7 @@ function RowsGridLoaded({
             </button>
           }
         >
-          {data ? t('rows.grid.refreshFailed') : t('table.error')}{' '}
+          {kept ? t('rows.grid.keptLast') : data ? t('rows.grid.refreshFailed') : t('table.error')}{' '}
           {errorText(query.error) && <span className="text-faint">{errorText(query.error)}</span>}
         </Notice>
       )}

@@ -248,6 +248,8 @@ export type DisplayPrefs = {
   gridEditing: boolean
   /** Foreign keys (FR-ROW-014): `full` shows the referenced row's name beside the key, `links` only a link, `none` neither. */
   relationMode: RelationMode
+  /** The operator a new text condition starts with (FR-ROW-008, FR-ISS-007): `starts with` is the index-friendly one. */
+  stringOperator: 'contains' | 'starts with'
 }
 
 export function clampDisplayChars(n: number): number {
@@ -270,6 +272,8 @@ export function parseDisplayPrefs(
     protectBinary: values['rows.protectBinary'] === true,
     gridEditing: values['rows.gridEditing'] !== false,
     relationMode: relationModeOf(values['rows.relationMode']),
+    stringOperator:
+      values['rows.defaultStringOperator'] === 'starts with' ? 'starts with' : 'contains',
   }
 }
 
