@@ -518,7 +518,7 @@ FR-UIX-006	18	planned	auth-account	profile switcher in account mode
 FR-UIX-080	18	planned	auth-account	
 FR-UPD-003	14	planned	auth-account	
 FR-UPD-014	14	planned	auth-account	
-FR-UPD-023	14	planned	auth-account	captcha on login
+FR-UPD-023	14	dropped	-	captcha dropped by ST-091 and D-14
 INT-CFG-089	18	partial	auth-account	direct-mode host/port/TLS exist; profiles open
 NFR-CC-007	18	planned	auth-account	per-user prefs store
 SEC-ISS-102	17	planned	auth-account	

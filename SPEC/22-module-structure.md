@@ -344,7 +344,7 @@ No SQL string is built outside `builder.ts`; the lint rule of SEC-TGT-117 is wid
 3. Read-only refuses every structure function without opening a target connection.
 4. A privilege error shows the server's message and creates nothing.
 5. The *verify* cells of section 5.4 are filled from the integration run and this file is updated.
-6. Lint, typecheck, unit, integration and e2e green in CI on Node 22.13 and 24.
+6. Lint, typecheck, unit, integration and e2e green in CI on Node 24.7 and 24 (minimum raised by SPEC/26 Q1).
 
 ## 13. Task breakdown and work packages
 

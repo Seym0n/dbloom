@@ -502,7 +502,7 @@ export const changeRowsFn = createServerFn({ method: 'POST' })
 7. A 2 000 000-row table opens without an exact count, and "Count" is cancellable; nothing holds a whole BLOB or a whole table in memory.
 8. No SQL fragment, filter value or row value is in browser storage; the audit log has no values.
 9. All 149 rows of `browse-edit` are accounted for exactly once (script check), and the *verify* cells are filled from the integration run with this file updated (done 2026-10-26: the one open cell, the cost of `LEFT(col, ...)`, is in section 5.3).
-10. Lint, typecheck, unit, integration and e2e green in CI on Node 22.13 and 24; axe finds no serious issue on the grid, form and dialogs.
+10. Lint, typecheck, unit, integration and e2e green in CI on Node 24.7 and 24 (minimum raised by SPEC/26 Q1); axe finds no serious issue on the grid, form and dialogs.
 
 ## 13. Task breakdown and work packages
 

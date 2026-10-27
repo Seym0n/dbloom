@@ -125,7 +125,7 @@ None open. Added during implementation: Nitro (`nitro/vite`) is the documented w
 
 ## 13. Implementation notes (2026-10-23)
 Tasks 1 to 9 are implemented and verified (105 unit and integration tests against MySQL 8.4 and MariaDB 10.11, 8 Playwright tests); task 10 is partly done (no axe run). Deviations and findings:
-- **Node minimum raised to 22.13.** `node:sqlite` is unavailable on Node 22.12 without `--experimental-sqlite`; it is unflagged from 22.13 (checked in `node:22.12-slim`). The owner's "22.12+" in OPEN item 2 needs updating, or better-sqlite3 becomes the fallback. Decision for the owner.
+- **Node minimum raised to 22.13.** `node:sqlite` is unavailable on Node 22.12 without `--experimental-sqlite`; it is unflagged from 22.13 (checked in `node:22.12-slim`). The owner's "22.12+" in OPEN item 2 needs updating, or better-sqlite3 becomes the fallback. Decision for the owner. **Superseded 2026-10-27:** minimum is now Node 24.7 (built-in `crypto.argon2`, SPEC/26 Q1); CI matrix 24.7 and 24.
 - Dependency age: the owner allowed same-day releases, so the latest versions are pinned (the 7-day rule of DEP-TGT-126 is waived for this build). TypeScript is 6.0.3 because `typescript-eslint` does not support TypeScript 7 yet. Nitro 3.0.260903-beta is the only Nitro 3 line.
 - Added beyond section 3 (small, shadcn-core and fonts): clsx, tailwind-merge, class-variance-authority, lucide-react, @fontsource/ibm-plex-sans and -mono (fonts are bundled, no Google Fonts call from a self-hosted tool).
 - `mysql2` finding: a bare `SELECT 1` returns BIGINT (string) on MySQL 8.4 and INT (number) on MariaDB 10.11; BIGINT is returned as string by design.

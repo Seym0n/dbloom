@@ -62,7 +62,7 @@ FR-UPD-019	14	planned	structure	routines paging
 FR-UPD-020	14	planned	structure	
 FR-UPD-021	14	planned	browse-edit	query generator / search
 FR-UPD-022	14	planned	hardening	
-FR-UPD-023	14	planned	auth-account	captcha on login
+FR-UPD-023	14	dropped	-	captcha dropped by ST-091 and D-14
 FR-UPD-024	14	planned	hardening	
 FR-UPD-025	14	planned	hardening	
 FR-UPD-026	14	dropped	-	row states features removed

@@ -76,7 +76,7 @@ The reports contain 34 (network), about 75 (auth), 41 (targets/data) and 45 (app
 | ST-028 | Cookie name suffix / instance id | Dropped (single instance) | Only needed for two instances on one host. | | | DEP-TGT-150 | AS-48, APP-07 |
 | ST-029 | Base path (sub-path deployment) | Dropped for the first release (PROPOSED) | Conflicts with `__Host-` (needs path `/`). | | OWN, STACK | SEC-TGT-135 | N-28, APP-26 |
 | ST-030 | Response header constants (`X-Robots-Tag`, no-store, nosniff, Referrer-Policy) | Fixed in code | Nothing to gain from configurability. | | | SEC-TGT-137, 043 | N-29 |
-| ST-031 | First-run setup network rule (loopback only; remote override) | ENV-only | Exists before any store; routes return 404 after setup. | D loopback only | | DEP-TGT-100, 123 | N-30 |
+| ST-031 | First-run setup network rule (any address, setup token required; optional narrowing `DBLOOM_SETUP_NETWORKS`) | ENV-only | Exists before any store; routes return 404 after setup. DEP-TGT-123 (owner, option 2) replaced "loopback only". | D any address | | DEP-TGT-100, 123 | N-30 |
 | ST-032 | Exposure warnings | Fixed in code (computed); administrator acknowledgement audited and re-shown after restart | Silencing must not be permanent. | | | SEC-TGT-125, FR-TGT-146 | N-31 |
 | ST-033 | Outbound HTTP proxy (URL, user, password) | ENV-only (secret) | Attacker proxy would see outbound traffic; password is a secret. | | | none yet | N-32, APP-16 |
 | ST-034 | Step-up window | ENV-only | Stolen session lengthens the window and chains changes; parameter protects the protection (C-10). | F 1 min / D 5 min / C 15 min | | SEC-TGT-143 | AS-43, N-33, APP-38 |

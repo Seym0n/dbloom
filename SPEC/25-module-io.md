@@ -128,7 +128,7 @@ Legend as in files 22 to 24. **Disp**: the triage disposition of `18-scope-triag
 | DATA-ISS-004 | PROPOSED | Export round-trips: utf8mb4 (CJK) survives, expression index parts and generated columns exported in full, user-account exports include the CREATE USER statements. | IN for data and structure (FR-IO-004, 027); account export is OTHER: server |
 | DATA-ISS-005 | PROPOSED | Resuming an import continues exactly where it stopped: offset counts bytes, session settings (charset, SQL mode, FK checks) applied again on every resumed part. | IN (FR-IO-020) |
 | DATA-ISS-006 | PROPOSED | CSV import reports problems per column (rejected or over-long names, a delimiter that merges columns) and never reports success when part of the file was rejected. | IN (FR-IO-018) |
-| DATA-ISS-008 | PROPOSED | Import and export support gzip, bzip2, zip, xz and zstd where the runtime offers them, and say which are available. | IN for gzip and zip, and the format list reports what is available (FR-IO-008, 014); xz, zstd DEFER (not in Node 22.13); bzip2 DROP |
+| DATA-ISS-008 | PROPOSED | Import and export support gzip, bzip2, zip, xz and zstd where the runtime offers them, and say which are available. | IN for gzip and zip, and the format list reports what is available (FR-IO-008, 014); xz DEFER (no runtime support); zstd DEFER for scope only (`node:zlib` has zstd on the Node 24.7 minimum, so it is a small add later, not blocked); bzip2 DROP |
 | DATA-ISS-101 | PROPOSED | Export of selected rows together with all rows related through foreign keys, recursively, cycle-safe, in importable order. | DEFER (second slice; needs the row selection hook of `rows` and a related-row walker; Q8) |
 | DATA-ISS-103 | PROPOSED | An export in a compatibility mode contains complete table definitions, or the mode is not offered; a test compares column counts. | IN (FR-IO-004: no compatibility modes are offered; test in FR-IO-027) |
 | DATA-ISS-105 | PROPOSED | Export of a query result quotes values by the column types reported for the result set, including DISTINCT, computed and aliased columns; the file of a DISTINCT query imports again. | IN (FR-IO-005, 027) |
@@ -482,7 +482,7 @@ Writers are pure functions over iterables of typed events; nothing in `src/serve
 4. An export that fails or is cancelled is never delivered as complete; a hard import never starts without the server-checked token; read-only refuses import without opening a target connection.
 5. Zip bomb, traversal, symlink, lying length and formula injection fixtures are refused or neutralised.
 6. The *verify* cells are filled in from spike 0 and task 12 (section 5.11); none is open. ZIP64 writing is not offered (limit and message in FR-IO-008).
-7. Lint, typecheck, unit, integration and e2e green in CI on Node 22.13 and 24; axe clean.
+7. Lint, typecheck, unit, integration and e2e green in CI on Node 24.7 and 24 (minimum raised by SPEC/26 Q1); axe clean.
 
 ## 13. Task breakdown and work packages
 

@@ -430,7 +430,7 @@ No SQL string is built outside `src/server/sql/fixed.ts`; user text is only slic
 5. History and bookmarks are isolated per target (and per owner), survive a restart in stateful mode, exist only for the session in stateless mode, contain no credentials, and no SQL text is ever in browser storage.
 6. A valid statement that the parser rejects is never blocked; it asks for confirmation unless it is a plain read.
 7. The *verify* cells (mysql2 multi-result streaming, `max_*` timeout variables, read-only transaction error, EXPLAIN/ANALYZE syntax per product, `RETURNING` highlight, WASM loading in the Nitro build, documentation URLs) are filled from the integration run and this file is updated.
-8. Lint, typecheck, unit, integration and e2e green in CI on Node 22.13 and 24.
+8. Lint, typecheck, unit, integration and e2e green in CI on Node 24.7 and 24 (minimum raised by SPEC/26 Q1).
 
 ## 13. Task breakdown and work packages
 
