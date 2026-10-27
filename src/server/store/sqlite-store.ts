@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 import { randomUUID } from 'node:crypto'
 import { DatabaseSync } from 'node:sqlite'
 import {
@@ -30,6 +31,11 @@ import {
 } from '../io/store'
 import { MAX_TEMPLATES } from '../io/types'
 import type { SessionRecord, Store } from './store'
+import type {
+  AccountSessionRecord, AccountStore, AuthSettingKey, LinkTokenRecord, PasskeyRecord,
+  PasswordRecord, ProfileRecord, Role, SettingRow, TotpRecord, User, UserId, UserNotice,
+  UserStatus, UserSummary, VaultRecord,
+} from '../auth/types'
 
 const SESSIONS_SCHEMA = `
   CREATE TABLE IF NOT EXISTS sessions (
@@ -109,6 +115,46 @@ export const MIGRATIONS: ((db: DatabaseSync) => void)[] = [
   (db) => db.exec(UI_PREFS_SCHEMA),
   // 4: named export templates of module io (FR-IO-011, spec 25 section 5.9); io defaults use ui_prefs
   (db) => db.exec(IO_TEMPLATES_SCHEMA),
+  // 5: account authentication store
+  (db) => {
+    for (const sql of [
+      `ALTER TABLE sessions ADD COLUMN kind TEXT NOT NULL DEFAULT 'direct' CHECK (kind IN ('direct','account'))`,
+      `ALTER TABLE sessions ADD COLUMN user_id TEXT REFERENCES users(id) ON DELETE CASCADE`,
+      `ALTER TABLE sessions ADD COLUMN state TEXT NOT NULL DEFAULT 'full' CHECK (state IN ('pending_mfa','enrol_only','must_change','full'))`,
+      `ALTER TABLE sessions ADD COLUMN mfa_at INTEGER`,
+      `ALTER TABLE sessions ADD COLUMN stepup_at INTEGER`,
+      `ALTER TABLE sessions ADD COLUMN security_version INTEGER NOT NULL DEFAULT 0`,
+      `ALTER TABLE sessions ADD COLUMN client_hint TEXT NOT NULL DEFAULT ''`,
+      `ALTER TABLE sessions ADD COLUMN address TEXT NOT NULL DEFAULT ''`,
+    ]) db.exec(sql)
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS site (key TEXT PRIMARY KEY, value TEXT NOT NULL) STRICT;
+      CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL, updated_at INTEGER NOT NULL, updated_by TEXT NOT NULL) STRICT;
+      CREATE TABLE IF NOT EXISTS users (
+        id TEXT PRIMARY KEY, username TEXT NOT NULL, username_key TEXT NOT NULL UNIQUE, display_name TEXT NOT NULL,
+        role TEXT NOT NULL CHECK(role IN ('admin','user')), status TEXT NOT NULL CHECK(status IN ('active','disabled')),
+        security_version INTEGER NOT NULL DEFAULT 0, must_change_password INTEGER NOT NULL DEFAULT 0,
+        temp_password_expires_at INTEGER, webauthn_user_id TEXT NOT NULL UNIQUE, created_at INTEGER NOT NULL,
+        updated_at INTEGER NOT NULL, created_by TEXT NOT NULL, last_sign_in_at INTEGER
+      ) STRICT;
+      CREATE TABLE IF NOT EXISTS passwords (user_id TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE, phc TEXT NOT NULL, changed_at INTEGER NOT NULL) STRICT;
+      CREATE TABLE IF NOT EXISTS webauthn_credentials (
+        id TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE, public_key BLOB NOT NULL,
+        counter INTEGER NOT NULL, transports TEXT NOT NULL, backed_up INTEGER NOT NULL, uv_initial INTEGER NOT NULL,
+        name TEXT NOT NULL, created_at INTEGER NOT NULL, last_used_at INTEGER
+      ) STRICT;
+      CREATE TABLE IF NOT EXISTS totp (user_id TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE, sealed TEXT NOT NULL, last_step INTEGER NOT NULL, created_at INTEGER NOT NULL) STRICT;
+      CREATE TABLE IF NOT EXISTS recovery_codes (user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE, code_mac TEXT NOT NULL, created_at INTEGER NOT NULL, PRIMARY KEY(user_id,code_mac)) STRICT;
+      CREATE TABLE IF NOT EXISTS tokens (
+        id TEXT PRIMARY KEY, kind TEXT NOT NULL CHECK(kind IN ('invite','recovery')), token_hash TEXT NOT NULL UNIQUE,
+        user_id TEXT REFERENCES users(id) ON DELETE CASCADE, role TEXT, created_by TEXT NOT NULL, created_at INTEGER NOT NULL,
+        expires_at INTEGER NOT NULL, used_at INTEGER, revoked_at INTEGER
+      ) STRICT;
+      CREATE TABLE IF NOT EXISTS vaults (user_id TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE, kdf_params TEXT NOT NULL, kdf_salt TEXT NOT NULL, wrap_passphrase TEXT NOT NULL, recovery_salt TEXT NOT NULL, wrap_recovery TEXT NOT NULL, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL) STRICT;
+      CREATE TABLE IF NOT EXISTS connection_profiles (id TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE, name TEXT NOT NULL, host TEXT NOT NULL, port INTEGER NOT NULL, tls TEXT NOT NULL, options TEXT NOT NULL, sealed TEXT NOT NULL, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL, last_used_at INTEGER, UNIQUE(user_id,name)) STRICT;
+      CREATE TABLE IF NOT EXISTS user_notices (id TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE, kind TEXT NOT NULL, created_at INTEGER NOT NULL, read_at INTEGER) STRICT;
+    `)
+  },
 ]
 
 /** Applies pending migrations in one transaction; refuses a database newer than the code. */
@@ -143,6 +189,7 @@ type Row = {
 }
 
 export type SqliteStore = Store & {
+  accounts: AccountStore
   sql: SqlStateStore
   prefs: PrefsStore
   ioPrefs: IoPrefsStore
@@ -158,6 +205,83 @@ export function openSqliteStore(path: string, options: Partial<SqlStateOptions> 
     db.close()
     throw error
   }
+
+  const userFrom = (r: any): User => ({
+    id: r.id, username: r.username, usernameKey: r.username_key, displayName: r.display_name,
+    role: r.role, status: r.status, securityVersion: r.security_version,
+    mustChangePassword: r.must_change_password === 1, tempPasswordExpiresAt: r.temp_password_expires_at,
+    webauthnUserId: r.webauthn_user_id, createdAt: r.created_at, updatedAt: r.updated_at,
+    createdBy: r.created_by, lastSignInAt: r.last_sign_in_at,
+  })
+  const sessionFrom = (r: any): AccountSessionRecord => ({
+    idHash: r.id_hash, targetKey: r.target_key, userName: r.user_name, createdAt: r.created_at,
+    lastSeenAt: r.last_seen_at, expiresAt: r.expires_at, kind: r.kind, userId: r.user_id,
+    state: r.state, mfaAt: r.mfa_at, stepupAt: r.stepup_at, securityVersion: r.security_version,
+    clientHint: r.client_hint, address: r.address,
+  })
+
+  function createAccountStore(db: DatabaseSync): AccountStore {
+    const tx = <T>(fn: () => T): T => {
+      db.exec('BEGIN IMMEDIATE')
+      try { const result = fn(); db.exec('COMMIT'); return result } catch (e) { db.exec('ROLLBACK'); throw e }
+    }
+    const user = (id: string) => db.prepare('SELECT * FROM users WHERE id=?').get(id) as any
+    const settings = () => db.prepare('SELECT key,value,updated_at,updated_by FROM settings ORDER BY key').all() as any[]
+    return {
+      transaction: tx,
+      getSite: () => Object.fromEntries((db.prepare('SELECT key,value FROM site').all() as any[]).map((r) => [r.key, JSON.parse(r.value)])),
+      setSite: (values) => { for (const [k,v] of Object.entries(values)) db.prepare('INSERT INTO site(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value').run(k, JSON.stringify(v)) },
+      getSettings: () => settings().map((r) => ({ key: r.key, value: r.value, updatedAt: r.updated_at, updatedBy: r.updated_by })) as SettingRow[],
+      setSetting: (r) => void db.prepare('INSERT INTO settings(key,value,updated_at,updated_by) VALUES(?,?,?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at=excluded.updated_at,updated_by=excluded.updated_by').run(r.key,r.value,r.updatedAt,r.updatedBy),
+      createUser: (u) => void db.prepare('INSERT INTO users VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)').run(u.id,u.username,u.usernameKey,u.displayName,u.role,u.status,u.securityVersion,u.mustChangePassword?1:0,u.tempPasswordExpiresAt,u.webauthnUserId,u.createdAt,u.updatedAt,u.createdBy,u.lastSignInAt),
+      getUser: (id) => { const r=user(id); return r ? userFrom(r) : undefined },
+      getUserByKey: (key) => { const r=db.prepare('SELECT * FROM users WHERE username_key=?').get(key) as any; return r ? userFrom(r) : undefined },
+      listUsers: () => (db.prepare('SELECT u.*, (SELECT count(*) FROM webauthn_credentials w WHERE w.user_id=u.id) passkeys, (SELECT count(*) FROM recovery_codes c WHERE c.user_id=u.id) recovery, EXISTS(SELECT 1 FROM totp t WHERE t.user_id=u.id) totp, EXISTS(SELECT 1 FROM passwords p WHERE p.user_id=u.id) password FROM users u ORDER BY username_key').all() as any[]).map((r) => ({ ...userFrom(r), factors: { passkeys: r.passkeys, totp: !!r.totp, recoveryCodes: r.recovery }, hasPassword: !!r.password })),
+      updateUser: (id, patch) => { const entries=Object.entries(patch); if (!entries.length) return; const map: Record<string,string>={displayName:'display_name',role:'role',status:'status',securityVersion:'security_version',mustChangePassword:'must_change_password',tempPasswordExpiresAt:'temp_password_expires_at',updatedAt:'updated_at',lastSignInAt:'last_sign_in_at'}; const sets=entries.map(([k])=>`${map[k]}=?`).join(','); db.prepare(`UPDATE users SET ${sets} WHERE id=?`).run(...entries.map(([k,v])=>(k==='mustChangePassword'?(v?1:0):v) as any),id) },
+      deleteUser: (id) => void db.prepare('DELETE FROM users WHERE id=?').run(id),
+      countActiveAdmins: () => Number((db.prepare("SELECT count(*) n FROM users WHERE role='admin' AND status='active'").get() as any).n),
+      getPassword: (id) => { const r=db.prepare('SELECT user_id,phc,changed_at FROM passwords WHERE user_id=?').get(id) as any; return r&&{userId:r.user_id,phc:r.phc,changedAt:r.changed_at} },
+      setPassword: (r) => void db.prepare('INSERT INTO passwords VALUES(?,?,?) ON CONFLICT(user_id) DO UPDATE SET phc=excluded.phc,changed_at=excluded.changed_at').run(r.userId,r.phc,r.changedAt),
+      deletePassword: (id) => void db.prepare('DELETE FROM passwords WHERE user_id=?').run(id),
+      listPasskeys: (id) => (db.prepare('SELECT * FROM webauthn_credentials WHERE user_id=? ORDER BY created_at').all(id) as any[]).map((r)=>({id:r.id,userId:r.user_id,publicKey:new Uint8Array(r.public_key),counter:r.counter,transports:JSON.parse(r.transports),backedUp:!!r.backed_up,uvInitial:!!r.uv_initial,name:r.name,createdAt:r.created_at,lastUsedAt:r.last_used_at})),
+      getPasskey: (id) => { const r=db.prepare('SELECT * FROM webauthn_credentials WHERE id=?').get(id) as any; return r&&{id:r.id,userId:r.user_id,publicKey:new Uint8Array(r.public_key),counter:r.counter,transports:JSON.parse(r.transports),backedUp:!!r.backed_up,uvInitial:!!r.uv_initial,name:r.name,createdAt:r.created_at,lastUsedAt:r.last_used_at} as PasskeyRecord },
+      addPasskey: (r) => void db.prepare('INSERT INTO webauthn_credentials VALUES(?,?,?,?,?,?,?,?,?,?)').run(r.id,r.userId,Buffer.from(r.publicKey),r.counter,JSON.stringify(r.transports),r.backedUp?1:0,r.uvInitial?1:0,r.name,r.createdAt,r.lastUsedAt),
+      updatePasskey: (id,p) => { const e=Object.entries(p); if(e.length) db.prepare(`UPDATE webauthn_credentials SET ${e.map(([k])=>({counter:'counter',name:'name',lastUsedAt:'last_used_at',backedUp:'backed_up'} as any)[k]+'=?').join(',')} WHERE id=?`).run(...e.map(([k,v])=>(k==='backedUp'?(v?1:0):v) as any),id as any) },
+      deletePasskey: (uid,id) => db.prepare('DELETE FROM webauthn_credentials WHERE user_id=? AND id=?').run(uid,id).changes===1,
+      deletePasskeys: (uid) => Number(db.prepare('DELETE FROM webauthn_credentials WHERE user_id=?').run(uid).changes),
+      getTotp: (id) => { const r=db.prepare('SELECT * FROM totp WHERE user_id=?').get(id) as any; return r&&{userId:r.user_id,sealed:r.sealed,lastStep:r.last_step,createdAt:r.created_at} as TotpRecord },
+      setTotp: (r) => void db.prepare('INSERT INTO totp VALUES(?,?,?,?) ON CONFLICT(user_id) DO UPDATE SET sealed=excluded.sealed,last_step=excluded.last_step').run(r.userId,r.sealed,r.lastStep,r.createdAt),
+      advanceTotpStep: (uid,step) => db.prepare('UPDATE totp SET last_step=? WHERE user_id=? AND last_step<?').run(step,uid,step).changes===1,
+      deleteTotp: (uid) => db.prepare('DELETE FROM totp WHERE user_id=?').run(uid).changes===1,
+      replaceRecoveryCodes: (uid,macs,at) => tx(()=>{db.prepare('DELETE FROM recovery_codes WHERE user_id=?').run(uid); const s=db.prepare('INSERT INTO recovery_codes VALUES(?,?,?)'); for(const m of macs)s.run(uid,m,at)}),
+      consumeRecoveryCode: (uid,mac) => db.prepare('DELETE FROM recovery_codes WHERE user_id=? AND code_mac=?').run(uid,mac).changes===1,
+      countRecoveryCodes: (uid) => Number((db.prepare('SELECT count(*) n FROM recovery_codes WHERE user_id=?').get(uid) as any).n),
+      deleteRecoveryCodes: (uid) => Number(db.prepare('DELETE FROM recovery_codes WHERE user_id=?').run(uid).changes),
+      addToken: (r) => void db.prepare('INSERT INTO tokens VALUES(?,?,?,?,?,?,?,?,?,?,?)').run(r.id,r.kind,r.tokenHash,r.userId,r.role,r.createdBy,r.createdAt,r.expiresAt,r.usedAt,r.revokedAt),
+      getTokenByHash: (h) => db.prepare('SELECT * FROM tokens WHERE token_hash=?').get(h) as any,
+      listOpenInvites: (now) => db.prepare("SELECT * FROM tokens WHERE kind='invite' AND used_at IS NULL AND revoked_at IS NULL AND expires_at>?").all(now) as any,
+      markTokenUsed: (id,now,uid) => db.prepare('UPDATE tokens SET used_at=?,user_id=COALESCE(?,user_id) WHERE id=? AND used_at IS NULL AND revoked_at IS NULL AND expires_at>?').run(now,uid as any,id,now).changes===1,
+      revokeToken: (id,now) => db.prepare('UPDATE tokens SET revoked_at=? WHERE id=? AND used_at IS NULL AND revoked_at IS NULL').run(now,id).changes===1,
+      purgeTokens: (before) => Number(db.prepare('DELETE FROM tokens WHERE expires_at<?').run(before).changes),
+      getVault: (uid) => { const r=db.prepare('SELECT * FROM vaults WHERE user_id=?').get(uid) as any; return r&&{userId:r.user_id,kdfParams:JSON.parse(r.kdf_params),kdfSalt:r.kdf_salt,wrapPassphrase:r.wrap_passphrase,recoverySalt:r.recovery_salt,wrapRecovery:r.wrap_recovery,createdAt:r.created_at,updatedAt:r.updated_at} as VaultRecord },
+      setVault: (r) => void db.prepare('INSERT INTO vaults VALUES(?,?,?,?,?,?,?,?) ON CONFLICT(user_id) DO UPDATE SET kdf_params=excluded.kdf_params,kdf_salt=excluded.kdf_salt,wrap_passphrase=excluded.wrap_passphrase,recovery_salt=excluded.recovery_salt,wrap_recovery=excluded.wrap_recovery,updated_at=excluded.updated_at').run(r.userId,JSON.stringify(r.kdfParams),r.kdfSalt,r.wrapPassphrase,r.recoverySalt,r.wrapRecovery,r.createdAt,r.updatedAt),
+      deleteVault: (uid) => void db.prepare('DELETE FROM vaults WHERE user_id=?').run(uid),
+      listProfiles: (uid) => (db.prepare('SELECT * FROM connection_profiles WHERE user_id=? ORDER BY name').all(uid) as any[]).map((r)=>({id:r.id,userId:r.user_id,name:r.name,host:r.host,port:r.port,tls:r.tls,options:JSON.parse(r.options),sealed:r.sealed,createdAt:r.created_at,updatedAt:r.updated_at,lastUsedAt:r.last_used_at})),
+      getProfile: (uid,id) => { const r=db.prepare('SELECT * FROM connection_profiles WHERE user_id=? AND id=?').get(uid,id) as any; return r&&{id:r.id,userId:r.user_id,name:r.name,host:r.host,port:r.port,tls:r.tls,options:JSON.parse(r.options),sealed:r.sealed,createdAt:r.created_at,updatedAt:r.updated_at,lastUsedAt:r.last_used_at} as ProfileRecord },
+      saveProfile: (r) => void db.prepare('INSERT INTO connection_profiles VALUES(?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,host=excluded.host,port=excluded.port,tls=excluded.tls,options=excluded.options,sealed=excluded.sealed,updated_at=excluded.updated_at,last_used_at=excluded.last_used_at').run(r.id,r.userId,r.name,r.host,r.port,r.tls,JSON.stringify(r.options),r.sealed,r.createdAt,r.updatedAt,r.lastUsedAt),
+      deleteProfile: (uid,id) => db.prepare('DELETE FROM connection_profiles WHERE user_id=? AND id=?').run(uid,id).changes===1,
+      countProfiles: (uid) => Number((db.prepare('SELECT count(*) n FROM connection_profiles WHERE user_id=?').get(uid) as any).n),
+      addNotice: (n) => void db.prepare('INSERT INTO user_notices VALUES(?,?,?,?,?)').run(n.id,n.userId,n.kind,n.createdAt,n.readAt),
+      listNotices: (uid) => (db.prepare('SELECT * FROM user_notices WHERE user_id=? ORDER BY created_at DESC').all(uid) as any[]).map(r=>({id:r.id,userId:r.user_id,kind:r.kind,createdAt:r.created_at,readAt:r.read_at})),
+      markNoticeRead: (uid,id,at) => void db.prepare('UPDATE user_notices SET read_at=? WHERE user_id=? AND id=?').run(at,uid,id),
+      createAccountSession: (r) => void db.prepare('UPDATE sessions SET kind=?,user_id=?,state=?,mfa_at=?,stepup_at=?,security_version=?,client_hint=?,address=? WHERE id_hash=?').run(r.kind,r.userId,r.state,r.mfaAt,r.stepupAt,r.securityVersion,r.clientHint,r.address,r.idHash),
+      getAccountSession: (id) => { const r=db.prepare('SELECT * FROM sessions WHERE id_hash=?').get(id) as any; return r&&sessionFrom(r) },
+      updateAccountSession: (id,p) => { const e=Object.entries(p); if(e.length) db.prepare(`UPDATE sessions SET ${e.map(([k])=>({targetKey:'target_key',userName:'user_name',lastSeenAt:'last_seen_at',expiresAt:'expires_at',userId:'user_id',state:'state',mfaAt:'mfa_at',stepupAt:'stepup_at',securityVersion:'security_version',clientHint:'client_hint',address:'address'} as any)[k]+'=?').join(',')} WHERE id_hash=?`).run(...e.map(([,v])=>v as any),id as any) },
+      renameSession: (a,b) => void db.prepare('UPDATE sessions SET id_hash=? WHERE id_hash=?').run(b,a),
+      listUserSessions: (uid) => (db.prepare('SELECT * FROM sessions WHERE user_id=? ORDER BY last_seen_at DESC').all(uid) as any[]).map(sessionFrom),
+      deleteUserSessions: (uid,except) => { const ex:any=except??null; const rows=(db.prepare('SELECT id_hash FROM sessions WHERE user_id=? AND (? IS NULL OR id_hash<>?)').all(uid,ex,ex) as any[]).map(r=>r.id_hash); db.prepare('DELETE FROM sessions WHERE user_id=? AND (? IS NULL OR id_hash<>?)').run(uid,ex,ex); return rows },
+    }
+  }
   const sql = createSqliteSqlState(db, { ...DEFAULT_STATE_OPTIONS, ...options })
   const prefs = createSqlitePrefs(db)
   const ioPrefs = createSqliteIoPrefs(db)
@@ -170,6 +294,7 @@ export function openSqliteStore(path: string, options: Partial<SqlStateOptions> 
   const touch = db.prepare('UPDATE sessions SET last_seen_at = ? WHERE id_hash = ?')
   const remove = db.prepare('DELETE FROM sessions WHERE id_hash = ?')
   const purge = db.prepare('DELETE FROM sessions WHERE expires_at < ?')
+  const accounts = createAccountStore(db)
 
   return {
     createSession: (r) =>
@@ -193,6 +318,7 @@ export function openSqliteStore(path: string, options: Partial<SqlStateOptions> 
     prefs,
     ioPrefs,
     ioTemplates,
+    accounts,
     close: () => db.close(),
   }
 }

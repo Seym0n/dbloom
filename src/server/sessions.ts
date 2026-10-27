@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 import { createHash, randomBytes, timingSafeEqual } from 'node:crypto'
 import type { Config } from './config'
 import type { TargetPool } from './db/target-pool'
@@ -7,6 +8,7 @@ import { memorySqlState } from './sql/state'
 import type { Store } from './store/store'
 import { planStore } from './structure/plans'
 import type { TargetKey } from './target'
+import type { AccountContext, AccountLiveSession, AccountSessionRecord, ConnectionEntry, SessionInfo, SessionState, User } from './auth/types'
 
 export type LiveSession = {
   idHash: string
@@ -94,9 +96,9 @@ export class SessionManager {
     uploads.dropSession(idHash)
     // Running SQL of this session is stopped while the pool can still send KILL QUERY; the in-memory
     // history and bookmarks of stateless mode (owner key = session id hash) go with the session.
-    if (runtime) await runRegistry.cancelSession(runtime.pool, idHash).catch(() => undefined)
+    if (runtime?.pool) await runRegistry.cancelSession(runtime.pool, idHash).catch(() => undefined)
     memorySqlState.dropOwner(idHash)
-    await runtime?.pool.end().catch(() => undefined)
+    if (runtime?.pool) await runtime.pool.end().catch(() => undefined)
   }
 
   async sweep(): Promise<void> {
@@ -113,4 +115,41 @@ export class SessionManager {
     }
     this.store.purgeSessions(now)
   }
+
+  createAccount(user: User, state: SessionState, meta: { clientHint: string; address: string }): { token: string; csrf: string; evicted: string[] } {
+        const token = randomBytes(32).toString('base64url'), csrf = randomBytes(32).toString('base64url'), now = this.now(), idHash = hash(token)
+        const accounts = (this.store as any).accounts
+        const limit = user.role === 'admin' ? 2 : 5
+        const existing = accounts.listUserSessions(user.id)
+        const evicted = existing.slice(0, Math.max(0, existing.length - limit + 1)).map((r: AccountSessionRecord) => r.idHash)
+        for (const id of evicted) { accounts.deleteUserSessions(user.id, id); this.live.delete(id) }
+        this.store.createSession({ idHash, targetKey: '', userName: '', createdAt: now, lastSeenAt: now, expiresAt: now + this.config.sessionAbsoluteMs })
+        accounts.createAccountSession({ idHash, targetKey: '', userName: '', createdAt: now, lastSeenAt: now, expiresAt: now + this.config.sessionAbsoluteMs, kind: 'account', userId: user.id, state, mfaAt: null, stepupAt: null, securityVersion: user.securityVersion, clientHint: meta.clientHint, address: meta.address })
+        this.live.set(idHash, { csrf, target: { host: '', port: 0, username: '' } as TargetKey, pool: undefined as any, readOnly: false })
+        return { token, csrf, evicted }
+  }
+  resolveAccount(token: string | undefined, opts: { background: boolean }): AccountContext | undefined {
+        if (!token) return undefined
+        const idHash=hash(token), accounts=(this.store as any).accounts, row=accounts.getAccountSession(idHash) as AccountSessionRecord|undefined
+        if (!row || row.kind !== 'account') return undefined
+        const user=accounts.getUser(row.userId!)
+        const now=this.now()
+        if (!user || user.status !== 'active' || user.securityVersion !== row.securityVersion || now >= row.expiresAt || now-row.lastSeenAt >= this.config.sessionIdleMs) { void this.end(idHash); return undefined }
+        if (!opts.background) accounts.updateAccountSession(idHash,{lastSeenAt:now})
+        const runtime=this.live.get(idHash)
+        return { idHash, csrf: runtime?.csrf ?? '', kind:'account', state:row.state, user:{id:user.id,username:user.username,displayName:user.displayName,role:user.role,securityVersion:user.securityVersion}, ownerKey:`u:${user.id}`, mfaAt:row.mfaAt, stepupAt:row.stepupAt }
+  }
+  transition(token: string, patch: { state?: SessionState; mfaAt?: number; stepupAt?: number }): { token: string } {
+        const old=hash(token), next=randomBytes(32).toString('base64url'), nextHash=hash(next), accounts=(this.store as any).accounts
+        accounts.updateAccountSession(old,patch); accounts.renameSession(old,nextHash); const runtime=this.live.get(old); if(runtime){this.live.delete(old);this.live.set(nextHash,runtime)} return {token:next}
+  }
+  addConnection(idHash: string, entry: ConnectionEntry) { const r=(this.live as any).get(idHash); if(r){r.connections ??= new Map(); r.connections.set(entry.connectionId,entry)} }
+  getConnection(idHash: string, connectionId: string) { return (this.live.get(idHash) as any)?.connections?.get(connectionId) }
+  listConnections(idHash: string) { return [...((this.live.get(idHash) as any)?.connections?.values() ?? [])] }
+  async closeConnection(idHash: string, connectionId: string) { const e=this.getConnection(idHash,connectionId); if(!e)return false; await e.pool.end().catch(()=>undefined); (this.live.get(idHash) as any)?.connections.delete(connectionId); return true }
+  resolveTarget(token: string|undefined, connectionId: string|undefined, opts:{background:boolean}): AccountLiveSession|undefined { const c=this.resolveAccount(token,opts); if(!c)return undefined; const e=connectionId?this.getConnection(c.idHash,connectionId):undefined; if(!e)return undefined; return {...c,target:e.target,pool:e.pool,readOnly:e.readOnly,connectionId:e.connectionId,scopeKey:`${c.idHash}/${e.connectionId}`} }
+  setVaultKey(idHash:string,key:Buffer|undefined){const r:any=this.live.get(idHash); if(r?.vaultKey)r.vaultKey.fill(0); if(r)r.vaultKey=key}
+  getVaultKey(idHash:string,_now:number){return (this.live.get(idHash) as any)?.vaultKey}
+  listUserSessions(userId:string,currentIdHash:string):SessionInfo[]{return ((this.store as any).accounts.listUserSessions(userId) as AccountSessionRecord[]).map(r=>({ref:r.idHash,clientHint:r.clientHint,address:r.address,createdAt:r.createdAt,lastSeenAt:r.lastSeenAt,current:r.idHash===currentIdHash}))}
+  async endSession(idHash:string,_reason:'signout'|'evicted'|'security'|'expired'|'revoked'){await this.end(idHash)}
 }
