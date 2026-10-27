@@ -76,6 +76,24 @@ describe('Argon2id PHC', () => {
     expect(parsePhc('$argon2i$v=19$m=1,t=1,p=1$dGVzdA==$dGVzdA==$x')).toBeUndefined()
   })
 
+  it('refuses a PHC with unbounded or unsafe Argon2 parameters', async () => {
+    const b64 = (n: number) => Buffer.alloc(n, 1).toString('base64').replace(/=+$/, '')
+    const make = (params: string) => `$argon2id$v=19$${params}$${b64(16)}$${b64(32)}`
+    for (const params of [
+      `m=${'9'.repeat(400)},t=3,p=1`, // Number() gives Infinity
+      'm=4194304,t=3,p=1',
+      'm=65536,t=100000,p=1',
+      'm=65536,t=3,p=1000',
+      'm=65536,t=0,p=1',
+      'm=4,t=3,p=1',
+    ]) {
+      expect(parsePhc(make(params)), params).toBeUndefined()
+    }
+    expect(parsePhc(make('m=65536,t=3,p=1'))).toBeDefined()
+    // verify() treats it as an invalid record: false, no internal error.
+    expect(await svc.verify(make(`m=${'9'.repeat(400)},t=3,p=1`), 'whatever-password')).toBe(false)
+  })
+
   it('needs a rehash when stored parameters are weaker', async () => {
     const weak = await svc.hash('r9!QkeL2sXvN', ARGON2_LOGIN_MIN)
     expect(svc.needsRehash(weak, ARGON2_LOGIN_DEFAULT)).toBe(true)

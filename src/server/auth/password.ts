@@ -97,12 +97,25 @@ export function parsePhc(phc: string): ParsedPhc | undefined {
   const salt = Buffer.from(saltText, 'base64')
   const tag = Buffer.from(tagText, 'base64')
   if (salt.length !== ARGON2_SALT_BYTES || tag.length !== ARGON2_TAG_BYTES) return undefined
-  return {
-    params: { memoryKiB: Number(m), passes: Number(t), parallelism: Number(p) },
-    salt,
-    tag,
-  }
+  const params = { memoryKiB: Number(m), passes: Number(t), parallelism: Number(p) }
+  if (!withinPhcBounds(params)) return undefined
+  return { params, salt, tag }
 }
+
+/** Sanity bounds for a stored PHC: a damaged or hostile record must not start an unbounded Argon2 job (or `Infinity`). */
+const PHC_MAX_MEMORY_KIB = 1024 * 1024
+const PHC_MAX_PASSES = 64
+const PHC_MAX_PARALLELISM = 16
+const withinPhcBounds = (p: Argon2Params) =>
+  Number.isSafeInteger(p.memoryKiB) &&
+  Number.isSafeInteger(p.passes) &&
+  Number.isSafeInteger(p.parallelism) &&
+  p.parallelism >= 1 &&
+  p.parallelism <= PHC_MAX_PARALLELISM &&
+  p.passes >= 1 &&
+  p.passes <= PHC_MAX_PASSES &&
+  p.memoryKiB >= 8 * p.parallelism &&
+  p.memoryKiB <= PHC_MAX_MEMORY_KIB
 
 const unpad = (v: Buffer) => v.toString('base64').replace(/=+$/, '')
 

@@ -54,6 +54,11 @@ describe('verify', () => {
   const stepOf = (nowMs: number) => Math.floor(nowMs / 1000 / 30)
   const now = 1_700_000_000_000 // a fixed moment
 
+  it('does not throw near the epoch when the window reaches negative steps', () => {
+    expect(totp.verify(secret, '000000', -1, 2, 0).ok).toBeTypeOf('boolean')
+    expect(totp.verify(secret, hotp(secret, 0), -1, 2, 10_000)).toEqual({ ok: true, step: 0 })
+  })
+
   it('accepts the exact code', () => {
     const step = stepOf(now)
     expect(totp.verify(secret, hotp(secret, step), step - 1, 1, now)).toEqual({ ok: true, step })

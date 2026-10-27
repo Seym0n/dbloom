@@ -43,6 +43,20 @@ describe('operator file on the disk', () => {
     expect(lookup2.kind).toBe('none') // the service keeps the bundled list absent
     expect(await lookup2.contains('ffffff')).toBe('unavailable')
   })
+
+  it('answers unavailable for a file of the right size with malformed lines', async () => {
+    const bad = path.join(dir, 'bad-lines.txt')
+    writeFileSync(bad, `${'z'.repeat(40)}\n${'a'.repeat(40)}\n`)
+    const lookup2 = await loadBreachedList(bad)
+    expect(lookup2.kind).toBe('none')
+    expect(await lookup2.contains(sha1('x'))).toBe('unavailable')
+  })
+
+  it('answers unavailable for an unsorted file', async () => {
+    const unsorted = path.join(dir, 'unsorted.txt')
+    writeFileSync(unsorted, `${'b'.repeat(40)}\n${'a'.repeat(40)}\n`)
+    expect((await loadBreachedList(unsorted)).kind).toBe('none')
+  })
 })
 
 describe('service wrapper', () => {

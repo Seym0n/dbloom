@@ -62,7 +62,7 @@ export class OwnTotp implements TotpService {
     if (!/^\d{6}$/.test(code)) return { ok: false }
     const nowStep = Math.floor(nowMs / 1000 / TOTP_PERIOD_SECONDS)
     for (let step = nowStep - window; step <= nowStep + window; step += 1) {
-      if (step <= lastStep) continue
+      if (step < 0 || step <= lastStep) continue
       const candidate = hotp(secret, step)
       // Constant-time over equal-length hashes (section 5.4): compares the hash of both 6-digit strings.
       const a = Buffer.from(createHash('sha256').update(Buffer.from(candidate, 'utf8')).digest())
