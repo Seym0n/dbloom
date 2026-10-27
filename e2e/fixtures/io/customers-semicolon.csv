@@ -1,0 +1,6 @@
+name;note;amount
+alice;"line one
+line two";1.50
+bob;"'); DROP TABLE customer; --";2.00
+carol;extra;3.00;surplus
+dave;plain;4.00

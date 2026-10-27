@@ -18,11 +18,13 @@ export function TableView({
   table,
   hooks,
   initialFilter,
+  onExport,
 }: {
   db: string
   table: string
   hooks?: RowsGridHooks
   initialFilter?: FilterNode
+  onExport?: (db: string, table: string) => void
 }) {
   const router = useRouter()
   /** A real link to a table filtered by key equalities; the router encodes each name once. */
@@ -31,6 +33,7 @@ export function TableView({
   const editing = useRowEditing({
     db,
     table,
+    ...(onExport ? { onExport } : {}),
     fkHref: (fk, values) =>
       linkTo(
         fk.refDb,

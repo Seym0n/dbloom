@@ -7,11 +7,17 @@ import { TableView } from '~/components/grid/table-view'
 import { SessionEndedDialog } from '~/components/session-ended-dialog'
 import { SqlTab, type SqlTabMeta } from '~/components/sql/sql-tab'
 import { getSqlLimits } from '~/components/sql/server-api'
+import { DropTarget, UploadStatusPanel } from '~/components/io/drop-overlay'
+import { ExportTab } from '~/components/io/export-tab'
+import { ImportTab, type UploadedFile } from '~/components/io/import-tab'
+import { wireIoCatalog } from '~/components/io/wire'
 import { StructureDialogs, type StructureAction } from '~/components/structure/db-dialogs'
 import { TableDesigner } from '~/components/structure/table-designer'
 import { Button } from '~/components/ui/button'
 import { Dialog } from '~/components/ui/dialog'
 import { setCsrfToken } from '~/lib/csrf'
+import { ioApi } from '~/lib/io/api'
+import { useUploadQueue } from '~/lib/io/use-uploads'
 import { cn } from '~/lib/utils'
 import { t } from '~/i18n'
 import { getDatabases } from '~/server/browse.functions'
@@ -31,7 +37,7 @@ export type SessionInfo = {
 /** A table grid, the designer of an existing table, or the designer of a table that does not exist yet. */
 type ShellTab = {
   id: string
-  kind: 'table' | 'designer' | 'sql'
+  kind: 'table' | 'designer' | 'sql' | 'io'
   /** The database of the tab; for an SQL tab '' means none. */
   db: string
   /** Running number of an SQL tab, for its title. */
@@ -42,6 +48,12 @@ type ShellTab = {
   table?: string
   /** A table tab opened from a link: rows whose columns equal these values (FR-ROW-014). */
   key?: [string, string][]
+  /** Export or import page (kind `io`); the scope is `db` and `table`, none of them meaning the server. */
+  ioMode?: 'export' | 'import'
+  /** A file already uploaded by a drop; the import page starts with its analysis. */
+  upload?: UploadedFile
+  /** An export of one SQL result set (kind `io`, mode export). */
+  result?: { db?: string; text: string; statementIndex: number }
 }
 
 const SEP = '\u0000'
@@ -73,15 +85,22 @@ const designTab = (db: string, table: string): ShellTab => ({
   db,
   table,
 })
+const ioName = (tab: ShellTab) =>
+  tab.result ? t('io.export.resultName') : (tab.table ?? (tab.db || t('io.tab.serverName')))
 const tabLabel = (tab: ShellTab) =>
-  tab.kind === 'sql'
-    ? t('sql.tab.title', { n: tab.seq ?? 1 })
-    : tab.kind === 'table'
-      ? (tab.table as string)
-      : tab.table
-        ? t('structure.tab.design', { name: tab.table })
-        : t('structure.tab.new')
+  tab.kind === 'io'
+    ? t(tab.ioMode === 'import' ? 'io.tab.import' : 'io.tab.export', { name: ioName(tab) })
+    : tab.kind === 'sql'
+      ? t('sql.tab.title', { n: tab.seq ?? 1 })
+      : tab.kind === 'table'
+        ? (tab.table as string)
+        : tab.table
+          ? t('structure.tab.design', { name: tab.table })
+          : t('structure.tab.new')
 const targetLabel = (s: SessionInfo['target']) => `${s.host}:${s.port}`
+
+// The io screens read databases, tables and columns through the shell's own server functions.
+wireIoCatalog()
 
 function AssistantPanel({ onClose }: { onClose: () => void }) {
   return (
@@ -128,6 +147,19 @@ export function AppShell({ session, open: link }: { session: SessionInfo; open?:
   const sqlSeq = useRef(0)
   const [sqlMeta, setSqlMeta] = useState<Record<string, SqlTabMeta>>({})
   const [closing, setClosing] = useState<ShellTab | null>(null)
+  const ioSeq = useRef(0)
+  const ioCaps = useQuery({
+    queryKey: ['io', 'caps'],
+    queryFn: () => ioApi().getCapabilities(),
+    staleTime: 60_000,
+    retry: false,
+  })
+  const ioPrefs = useQuery({
+    queryKey: ['io', 'prefs'],
+    queryFn: () => ioApi().getPrefs(),
+    staleTime: 60_000,
+    retry: false,
+  })
   const limits = useQuery({
     queryKey: ['sql', 'limits'],
     queryFn: () => getSqlLimits(),
@@ -172,6 +204,46 @@ export function AppShell({ session, open: link }: { session: SessionInfo; open?:
       db: db ?? '',
       seq: sqlSeq.current,
       ...(initialText ? { initialText } : {}),
+    })
+  }
+
+  /** Export and import pages are tabs; one per mode and scope, an import with a dropped file is always new. */
+  function openIo(
+    mode: 'export' | 'import',
+    scope: { db?: string; table?: string },
+    upload?: UploadedFile,
+  ) {
+    ioSeq.current += 1
+    const unique = upload ? SEP + ioSeq.current : ''
+    open({
+      id: 'i' + SEP + mode + SEP + (scope.db ?? '') + SEP + (scope.table ?? '') + unique,
+      kind: 'io',
+      ioMode: mode,
+      db: scope.db ?? '',
+      ...(scope.table ? { table: scope.table } : {}),
+      ...(upload ? { upload } : {}),
+    })
+  }
+
+  const uploads = useUploadQueue({
+    limitBytes: ioCaps.data?.limits.uploadBytes,
+    onDone: (item) =>
+      openIo('import', active?.db ? { db: active.db } : {}, {
+        uploadId: item.uploadId,
+        name: item.name,
+        bytes: item.bytes,
+        format: item.format,
+      }),
+  })
+
+  function openResultExport(result: { db?: string; text: string; statementIndex: number }) {
+    ioSeq.current += 1
+    open({
+      id: 'i' + SEP + 'result' + SEP + ioSeq.current,
+      kind: 'io',
+      ioMode: 'export',
+      db: result.db ?? '',
+      result,
     })
   }
 
@@ -309,39 +381,55 @@ export function AppShell({ session, open: link }: { session: SessionInfo; open?:
           menuOpen ? 'flex' : 'hidden',
         )}
       >
-        <div className="flex h-12 shrink-0 items-center px-2">
-          <BrandName />
-        </div>
-        <div className="rounded-lg bg-active/60 px-3 py-2">
-          <p className="truncate text-sm font-medium" title={targetLabel(session.target)}>
-            {targetLabel(session.target)}
-          </p>
-          <p className="truncate text-xs text-muted">
-            {session.target.username}
-            {databases.data ? ` · ${databases.data.length} databases` : ''}
-          </p>
-        </div>
-        <div className="min-h-0 flex-1 overflow-y-auto">
-          <SidebarTree
-            active={activeTable}
-            onOpen={(tab) => open(tableTab(tab.db, tab.table))}
-            reveal={reveal}
-            structure={{
-              readOnly,
-              onAction: (a) => {
-                setMenuOpen(false)
-                setAction(a)
-              },
-              onNewTable: openNewTable,
-              onDesign: (tab) => open(designTab(tab.db, tab.table)),
-            }}
-            sql={sqlEnabled ? { onNew: (db) => openSql(db) } : undefined}
-          />
-        </div>
-        <Button variant="ghost" className="justify-start" onClick={() => void signOut()}>
-          <LogOut size={14} strokeWidth={1.5} aria-hidden />
-          {t('nav.logout')}
-        </Button>
+        <DropTarget
+          enabled={ioPrefs.data?.dragDrop ?? true}
+          onFiles={(files) => uploads.add(files)}
+          className="flex min-h-0 flex-1 flex-col gap-4"
+        >
+          <div className="flex h-12 shrink-0 items-center px-2">
+            <BrandName />
+          </div>
+          <div className="rounded-lg bg-active/60 px-3 py-2">
+            <p className="truncate text-sm font-medium" title={targetLabel(session.target)}>
+              {targetLabel(session.target)}
+            </p>
+            <p className="truncate text-xs text-muted">
+              {session.target.username}
+              {databases.data ? ` · ${databases.data.length} databases` : ''}
+            </p>
+          </div>
+          <div className="min-h-0 flex-1 overflow-y-auto">
+            <SidebarTree
+              active={activeTable}
+              onOpen={(tab) => open(tableTab(tab.db, tab.table))}
+              reveal={reveal}
+              structure={{
+                readOnly,
+                onAction: (a) => {
+                  setMenuOpen(false)
+                  setAction(a)
+                },
+                onNewTable: openNewTable,
+                onDesign: (tab) => open(designTab(tab.db, tab.table)),
+              }}
+              sql={sqlEnabled ? { onNew: (db) => openSql(db) } : undefined}
+              io={{
+                onExport: (scope) => {
+                  setMenuOpen(false)
+                  openIo('export', scope)
+                },
+                onImport: (scope) => {
+                  setMenuOpen(false)
+                  openIo('import', scope)
+                },
+              }}
+            />
+          </div>
+          <Button variant="ghost" className="justify-start" onClick={() => void signOut()}>
+            <LogOut size={14} strokeWidth={1.5} aria-hidden />
+            {t('nav.logout')}
+          </Button>
+        </DropTarget>
       </aside>
 
       <header className="col-start-1 row-start-1 flex items-center gap-3 bg-ground px-3 md:col-start-2">
@@ -358,14 +446,20 @@ export function AppShell({ session, open: link }: { session: SessionInfo; open?:
           {active ? (
             <>
               {targetLabel(session.target)} /{' '}
-              {active.kind === 'sql'
-                ? (sqlMeta[active.id]?.db ?? active.db) || t('sql.status.noDatabase')
-                : active.db}{' '}
-              /{' '}
+              {active.kind === 'io' && !active.db ? null : (
+                <>
+                  {active.kind === 'sql'
+                    ? (sqlMeta[active.id]?.db ?? active.db) || t('sql.status.noDatabase')
+                    : active.db}{' '}
+                  /{' '}
+                </>
+              )}
               <span className="text-ink">
-                {active.kind === 'sql'
-                  ? t('sql.tab.crumb')
-                  : (active.table ?? t('structure.tab.new'))}
+                {active.kind === 'io'
+                  ? t(active.ioMode === 'import' ? 'io.crumb.import' : 'io.crumb.export')
+                  : active.kind === 'sql'
+                    ? t('sql.tab.crumb')
+                    : (active.table ?? t('structure.tab.new'))}
               </span>
             </>
           ) : (
@@ -461,7 +555,46 @@ export function AppShell({ session, open: link }: { session: SessionInfo; open?:
                   readOnly={readOnly}
                   active={tab.id === activeKey}
                   onMeta={(m) => setSqlMeta((cur) => ({ ...cur, [tab.id]: m }))}
+                  onExport={openResultExport}
                 />
+              </div>
+            ))}
+          {/* Export and import pages stay mounted while hidden: a running upload, mapping or job view survives a tab switch. */}
+          {tabs
+            .filter((tab) => tab.kind === 'io')
+            .map((tab) => (
+              <div
+                key={tab.id}
+                className={cn('min-h-0 flex-1 flex-col', tab.id === activeKey ? 'flex' : 'hidden')}
+              >
+                {tab.ioMode === 'import' ? (
+                  <ImportTab
+                    target={{
+                      ...(tab.db ? { db: tab.db } : {}),
+                      ...(tab.table ? { table: tab.table } : {}),
+                    }}
+                    serverLabel={targetLabel(session.target)}
+                    readOnly={readOnly}
+                    {...(tab.upload ? { initialUpload: tab.upload } : {})}
+                    onOpenTable={(db, table) => open(tableTab(db, table))}
+                    onDropTable={(db, table) =>
+                      setAction({ type: 'dropTable', db, table, view: false })
+                    }
+                  />
+                ) : (
+                  <ExportTab
+                    target={
+                      tab.result
+                        ? { kind: 'result', ...tab.result }
+                        : tab.table
+                          ? { kind: 'table', db: tab.db, table: tab.table }
+                          : tab.db
+                            ? { kind: 'database', db: tab.db }
+                            : { kind: 'server' }
+                    }
+                    serverLabel={targetLabel(session.target)}
+                  />
+                )}
               </div>
             ))}
           {/* Designer tabs stay mounted while hidden, so unsaved edits survive a tab switch. */}
@@ -485,6 +618,7 @@ export function AppShell({ session, open: link }: { session: SessionInfo; open?:
               key={active.id}
               db={active.db}
               table={active.table}
+              onExport={(db, table) => openIo('export', { db, table })}
               {...(active.key ? { initialFilter: keyFilter(active.key) } : {})}
             />
           ) : active ? null : (
@@ -502,6 +636,15 @@ export function AppShell({ session, open: link }: { session: SessionInfo; open?:
         </div>
         {assistantOpen && <AssistantPanel onClose={() => setAssistantOpen(false)} />}
       </main>
+      <UploadStatusPanel
+        items={uploads.items}
+        limitText={
+          ioCaps.data ? `${Math.round(ioCaps.data.limits.uploadBytes / 1048576)} MiB` : undefined
+        }
+        onCancel={uploads.cancel}
+        onRemove={uploads.remove}
+        onClose={uploads.clear}
+      />
     </div>
   )
 }

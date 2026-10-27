@@ -1,3 +1,4 @@
+import { resolve } from 'node:path'
 import { defineConfig } from '@playwright/test'
 import type { StructureOptions } from './e2e/fixtures/scratch-db'
 
@@ -7,9 +8,11 @@ const READ_ONLY_PORT = 3101
 
 // Run once per product (SCN-022, SCN-024 to SCN-036): `--project=mysql` or `--project=mariadb`.
 // sql-smoke stays with the walking-skeleton specs in the chromium project.
-const perProductSpecs = /(structure-.*|rows-.*|sql-(?!smoke).*)\.spec\.ts/
+const perProductSpecs = /(structure-.*|rows-.*|io-.*|sql-(?!smoke).*)\.spec\.ts/
 // Fourth server: low limits (2 s statement timeout, 1 000 row cap) for the timeout and cap scenarios.
 const LIMITS_PORT = 3102
+// Fifth server for module io: 1 MiB upload limit and a server import folder (SCN-059, SCN-062).
+const IO_PORT = 3103
 
 const env = {
   DBLOOM_DIRECT_FREE_FORM_ACK: 'true',
@@ -73,6 +76,20 @@ export default defineConfig<StructureOptions>({
         DBLOOM_DATA_DIR: './test-results/data-limits',
         DBLOOM_STATEMENT_TIMEOUT_SECONDS: '2',
         DBLOOM_SQL_ROW_CAP: '1000',
+        WAIT_FOR_URL: `http://localhost:${PORT}/api/health`,
+      },
+    },
+    {
+      command: 'node e2e/fixtures/start-read-only.mjs',
+      url: `http://localhost:${IO_PORT}/api/health`,
+      reuseExistingServer: Boolean(process.env.E2E_REUSE_SERVERS),
+      timeout: 240_000,
+      env: {
+        ...env,
+        PORT: String(IO_PORT),
+        DBLOOM_DATA_DIR: './test-results/data-io',
+        DBLOOM_IMPORT_MAX_MIB: '1',
+        DBLOOM_IMPORT_DIR: resolve('e2e/fixtures/io/import-dir'),
         WAIT_FOR_URL: `http://localhost:${PORT}/api/health`,
       },
     },

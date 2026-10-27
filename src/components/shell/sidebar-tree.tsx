@@ -1,6 +1,9 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import {
+  ArrowDownToLine,
+  ArrowUpFromLine,
+  ArrowUpDown,
   ChevronRight,
   Database,
   Eraser,
@@ -26,6 +29,34 @@ export type SqlHandlers = {
   /** Opens a new SQL tab, on this database when one is given. */
   onNew: (db?: string) => void
 }
+
+export type IoTarget = { db?: string; table?: string }
+
+export type IoHandlers = {
+  /** Opens an export tab for the server (no fields), a database or a table (FR-IO-026). */
+  onExport: (target: IoTarget) => void
+  /** Opens an import tab; a read-only session still analyses a file, Start is what stays disabled. */
+  onImport: (target: IoTarget) => void
+}
+
+const ioItems = (io: IoHandlers, target: IoTarget, view = false): MenuItem[] => [
+  {
+    key: 'export',
+    label: t('io.menu.export'),
+    icon: <ArrowUpFromLine size={14} strokeWidth={1.5} />,
+    onSelect: () => io.onExport(target),
+  },
+  ...(view
+    ? []
+    : [
+        {
+          key: 'import',
+          label: t('io.menu.import'),
+          icon: <ArrowDownToLine size={14} strokeWidth={1.5} />,
+          onSelect: () => io.onImport(target),
+        },
+      ]),
+]
 
 export type StructureHandlers = {
   /** True when the session cannot change structure: every action is shown disabled with the reason. */
@@ -55,12 +86,14 @@ function TableList({
   onOpen,
   structure,
   writable,
+  io,
 }: {
   db: string
   active: OpenTable | undefined
   onOpen: (t: OpenTable) => void
   structure: StructureHandlers
   writable: boolean
+  io?: IoHandlers
 }) {
   const { data, isPending, isError } = useQuery({
     queryKey: ['tables', db],
@@ -78,6 +111,7 @@ function TableList({
         const Icon = isView ? Eye : Table2
         const target = { db, table: tbl.name }
         const items: MenuItem[] = [
+          ...(io ? ioItems(io, target, isView) : []),
           ...(isView
             ? []
             : [
@@ -158,6 +192,7 @@ function DatabaseRow({
   structure,
   reveal,
   sql,
+  io,
 }: {
   name: string
   active: OpenTable | undefined
@@ -165,6 +200,7 @@ function DatabaseRow({
   structure: StructureHandlers
   reveal: string | undefined
   sql?: SqlHandlers
+  io?: IoHandlers
 }) {
   const [open, setOpen] = useState(active?.db === name)
   const system = SYSTEM_SCHEMAS.has(name.toLowerCase())
@@ -175,6 +211,7 @@ function DatabaseRow({
 
   const reason = structure.readOnly ? t('structure.readOnly') : undefined
   const items: MenuItem[] = [
+    ...(io ? ioItems(io, { db: name }) : []),
     {
       key: 'new-table',
       label: t('structure.menu.newTable'),
@@ -257,6 +294,7 @@ function DatabaseRow({
           onOpen={onOpen}
           structure={structure}
           writable={!system}
+          io={io}
         />
       )}
     </li>
@@ -269,12 +307,14 @@ export function SidebarTree({
   structure,
   reveal,
   sql,
+  io,
 }: {
   active: OpenTable | undefined
   onOpen: (t: OpenTable) => void
   structure: StructureHandlers
   reveal?: string
   sql?: SqlHandlers
+  io?: IoHandlers
 }) {
   const { data, isPending, isError, refetch } = useQuery({
     queryKey: ['databases'],
@@ -316,6 +356,14 @@ export function SidebarTree({
               {t('sql.menu.new')}
             </button>
           )}
+          {io && (
+            <ActionsMenu
+              label={t('io.menu.server')}
+              items={ioItems(io, {})}
+              className="-mt-0.5 text-muted"
+              trigger={<ArrowUpDown size={14} aria-hidden />}
+            />
+          )}
           <button
             type="button"
             aria-disabled={structure.readOnly || undefined}
@@ -340,6 +388,7 @@ export function SidebarTree({
               structure={structure}
               reveal={reveal}
               sql={sql}
+              io={io}
             />
           ))}
         </ul>
@@ -357,6 +406,7 @@ export function SidebarTree({
                 structure={structure}
                 reveal={reveal}
                 sql={sql}
+                io={io}
               />
             ))}
           </ul>

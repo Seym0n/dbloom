@@ -17,6 +17,18 @@ import type {
   NewHistoryEntry,
   SqlStateStore,
 } from '../sql/types'
+import {
+  IO_PREF_KEYS,
+  checkTemplate,
+  IoStoreError,
+  type IoPrefKey,
+  type IoPrefValues,
+  type IoPrefsStore,
+  type IoTemplate,
+  type IoTemplateStore,
+  type TemplateKind,
+} from '../io/store'
+import { MAX_TEMPLATES } from '../io/types'
 import type { SessionRecord, Store } from './store'
 
 const SESSIONS_SCHEMA = `
@@ -75,6 +87,17 @@ const UI_PREFS_SCHEMA = `
   ) STRICT;
 `
 
+const IO_TEMPLATES_SCHEMA = `
+  CREATE TABLE io_templates (
+    owner_key    TEXT NOT NULL,
+    kind         TEXT NOT NULL,
+    name         TEXT NOT NULL,
+    options_json TEXT NOT NULL,
+    updated_at   INTEGER NOT NULL,
+    PRIMARY KEY (owner_key, kind, name)
+  ) STRICT;
+`
+
 /** Migration n+1 is MIGRATIONS[n]; `PRAGMA user_version` holds the number applied (FR-SQL-020). */
 export const MIGRATIONS: ((db: DatabaseSync) => void)[] = [
   // 1: the skeleton schema, unchanged. Idempotent, because files made before versions existed
@@ -84,6 +107,8 @@ export const MIGRATIONS: ((db: DatabaseSync) => void)[] = [
   (db) => db.exec(SQL_STATE_SCHEMA),
   // 3: display preferences of module rows (FR-ROW-010, spec 24 section 5.9)
   (db) => db.exec(UI_PREFS_SCHEMA),
+  // 4: named export templates of module io (FR-IO-011, spec 25 section 5.9); io defaults use ui_prefs
+  (db) => db.exec(IO_TEMPLATES_SCHEMA),
 ]
 
 /** Applies pending migrations in one transaction; refuses a database newer than the code. */
@@ -117,7 +142,12 @@ type Row = {
   expires_at: number
 }
 
-export type SqliteStore = Store & { sql: SqlStateStore; prefs: PrefsStore }
+export type SqliteStore = Store & {
+  sql: SqlStateStore
+  prefs: PrefsStore
+  ioPrefs: IoPrefsStore
+  ioTemplates: IoTemplateStore
+}
 
 export function openSqliteStore(path: string, options: Partial<SqlStateOptions> = {}): SqliteStore {
   const db = new DatabaseSync(path)
@@ -130,6 +160,8 @@ export function openSqliteStore(path: string, options: Partial<SqlStateOptions> 
   }
   const sql = createSqliteSqlState(db, { ...DEFAULT_STATE_OPTIONS, ...options })
   const prefs = createSqlitePrefs(db)
+  const ioPrefs = createSqliteIoPrefs(db)
+  const ioTemplates = createSqliteIoTemplates(db)
 
   const insert = db.prepare(
     'INSERT INTO sessions (id_hash, target_key, user_name, created_at, last_seen_at, expires_at) VALUES (?, ?, ?, ?, ?, ?)',
@@ -159,6 +191,8 @@ export function openSqliteStore(path: string, options: Partial<SqlStateOptions> 
     purgeSessions: (before) => Number(purge.run(before).changes),
     sql,
     prefs,
+    ioPrefs,
+    ioTemplates,
     close: () => db.close(),
   }
 }
@@ -440,5 +474,93 @@ export function createSqlitePrefs(
     tableScopeCount(ownerKey, targetKey) {
       return (count.get(ownerKey, targetKey) as { n: number }).n
     },
+  }
+}
+
+// ---- Module io: defaults and templates --------------------------------------------------------------------
+
+const IO_SCOPE = 'io'
+const isIoKey = (k: string): k is IoPrefKey => (IO_PREF_KEYS as readonly string[]).includes(k)
+
+/** `io.*` keys of `ui_prefs` under the scope `io`; every statement carries owner and target (FR-IO-011). */
+export function createSqliteIoPrefs(db: DatabaseSync, now: () => number = Date.now): IoPrefsStore {
+  const sel = db.prepare(
+    'SELECT key, value FROM ui_prefs WHERE owner_key = ? AND target_key = ? AND scope = ?',
+  )
+  const upsert = db.prepare(
+    `INSERT INTO ui_prefs (owner_key, target_key, scope, key, value, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?)
+     ON CONFLICT (owner_key, target_key, scope, key)
+     DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at`,
+  )
+  return {
+    get(ownerKey, targetKey) {
+      const out: IoPrefValues = {}
+      for (const row of sel.all(ownerKey, targetKey, IO_SCOPE) as {
+        key: string
+        value: string
+      }[]) {
+        if (!isIoKey(row.key)) continue
+        try {
+          out[row.key] = JSON.parse(row.value) as unknown
+        } catch {
+          // a damaged value is treated as absent
+        }
+      }
+      return out
+    },
+    set(ownerKey, targetKey, key, value) {
+      if (!isIoKey(key)) throw new IoStoreError('invalid-value', 'Unknown preference')
+      upsert.run(ownerKey, targetKey, IO_SCOPE, key, JSON.stringify(value), now())
+    },
+  }
+}
+
+type TemplateRow = { kind: TemplateKind; name: string; options_json: string; updated_at: number }
+
+/** SQLite `IoTemplateStore`: at most `MAX_TEMPLATES` per owner and kind, owner in every statement. */
+export function createSqliteIoTemplates(
+  db: DatabaseSync,
+  now: () => number = Date.now,
+  maxTemplates: number = MAX_TEMPLATES,
+): IoTemplateStore {
+  const has = db.prepare(
+    'SELECT 1 AS x FROM io_templates WHERE owner_key = ? AND kind = ? AND name = ?',
+  )
+  const count = db.prepare(
+    'SELECT COUNT(*) AS n FROM io_templates WHERE owner_key = ? AND kind = ?',
+  )
+  const upsert = db.prepare(
+    `INSERT INTO io_templates (owner_key, kind, name, options_json, updated_at) VALUES (?, ?, ?, ?, ?)
+     ON CONFLICT (owner_key, kind, name)
+     DO UPDATE SET options_json = excluded.options_json, updated_at = excluded.updated_at`,
+  )
+  const listAll = db.prepare('SELECT * FROM io_templates WHERE owner_key = ? ORDER BY kind, name')
+  const listKind = db.prepare(
+    'SELECT * FROM io_templates WHERE owner_key = ? AND kind = ? ORDER BY name',
+  )
+  const del = db.prepare('DELETE FROM io_templates WHERE owner_key = ? AND kind = ? AND name = ?')
+  const toTemplate = (r: TemplateRow): IoTemplate => ({
+    kind: r.kind,
+    name: r.name,
+    options: JSON.parse(r.options_json) as Record<string, unknown>,
+    updatedAt: r.updated_at,
+  })
+  return {
+    save(ownerKey, kind, name, options) {
+      const t = checkTemplate(kind, name, options)
+      if (!has.get(ownerKey, t.kind, t.name)) {
+        const { n } = count.get(ownerKey, t.kind) as { n: number }
+        if (n >= maxTemplates) throw new IoStoreError('template-limit', 'Too many templates')
+      }
+      const at = now()
+      upsert.run(ownerKey, t.kind, t.name, JSON.stringify(t.options), at)
+      return { ...t, updatedAt: at }
+    },
+    list(ownerKey, kind) {
+      const rows = (kind ? listKind.all(ownerKey, kind) : listAll.all(ownerKey)) as TemplateRow[]
+      return rows.map(toTemplate)
+    },
+    delete: (ownerKey, kind, name) => Number(del.run(ownerKey, kind, name).changes) > 0,
   }
 }

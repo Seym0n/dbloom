@@ -8,7 +8,7 @@
  *   <RowsGrid ... hooks={editing.hooks} />{editing.dialogs}
  */
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import { Copy, Link2, Pencil, Plus, Trash2 } from 'lucide-react'
+import { ArrowUpFromLine, Copy, Link2, Pencil, Plus, Trash2 } from 'lucide-react'
 import { Button } from '~/components/ui/button'
 import { t } from '~/i18n'
 import {
@@ -44,6 +44,8 @@ export type RowEditingOptions = {
    */
   groupHref?: (group: ReferencingGroup, values: Record<string, string>) => string
   onOpenGroup?: (group: ReferencingGroup, values: Record<string, string>) => void
+  /** Opens the export page of this table (module io, FR-IO-026); allowed in read-only mode. */
+  onExport?: (db: string, table: string) => void
   /** A write was applied: the grid has been refreshed already; use it for toasts or counters. */
   onChanged?: (response: DoneResponse) => void
 }
@@ -210,6 +212,14 @@ export function useRowEditing(options: RowEditingOptions): {
               danger
               onClick={() => setRequest({ kind: 'delete', snapshot, rows: selectedRows(snapshot) })}
             />
+            {opts.current.onExport && (
+              <ToolbarButton
+                reason={null}
+                icon={<ArrowUpFromLine size={14} strokeWidth={1.5} aria-hidden />}
+                label={t('io.rows.export')}
+                onClick={() => opts.current.onExport?.(snapshot.db, snapshot.table)}
+              />
+            )}
           </>
         )
       },

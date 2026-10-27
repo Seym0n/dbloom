@@ -15,7 +15,7 @@ import { codeTokens, scanToken, tokenError } from './lexer'
 
 const DEFAULT_DELIMITER = ';'
 
-function atLineStart(input: string, i: number): boolean {
+export function atLineStart(input: string, i: number): boolean {
   let p = i - 1
   while (p >= 0) {
     const c = input.charCodeAt(p)
@@ -26,10 +26,10 @@ function atLineStart(input: string, i: number): boolean {
   return true
 }
 
-type DelimiterCommand = { delimiter: string; next: number }
+export type DelimiterCommand = { delimiter: string; next: number }
 
 /** Parse `DELIMITER <token>` whose keyword token ends at `from`; undefined when it is not a valid command. */
-function parseDelimiterCommand(input: string, from: number): DelimiterCommand | undefined {
+export function parseDelimiterCommand(input: string, from: number): DelimiterCommand | undefined {
   const n = input.length
   let eol = from
   while (eol < n && input.charCodeAt(eol) !== 10 && input.charCodeAt(eol) !== 13) eol++

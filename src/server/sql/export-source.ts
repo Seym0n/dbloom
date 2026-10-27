@@ -16,10 +16,14 @@ export type ExportRequest = {
   statementIndex: number
   /** The row and byte caps of the grid are ignored; the timeout and the cell cap apply. */
   limits?: Partial<Pick<SqlLimits, 'timeoutMs' | 'cellBytes'>>
+  /** Module io: rows are delivered as the driver reads them (no cell cap, bytes kept), typed by `fields`. */
+  raw?: boolean
 }
 
 export type ResultStream = {
   columns: SqlColumnMeta[]
+  /** Wire type and binary flag per column (module io types the values with them). */
+  fields?: { columnType: number; binary: boolean }[]
   /** Rows with back pressure; ends the run (connection destroyed) when exhausted, broken or closed. */
   rows: AsyncGenerator<Cell[], void, void>
   close(): Promise<void>
@@ -70,15 +74,18 @@ export async function openResultStream(env: SqlRunEnv, req: ExportRequest): Prom
       ended = true
     }) as never)
 
+    let fieldInfo: { columnType: number; binary: boolean }[] = []
     const columns = await new Promise<SqlColumnMeta[]>((resolve) => {
-      stream.once('fields', ((f: FieldPacket[] | undefined) =>
+      stream.once('fields', ((f: FieldPacket[] | undefined) => {
+        fieldInfo = (f ?? []).map((x) => ({ columnType: x.columnType, binary: x.characterSet === 63 }))
         resolve(
           (f ?? []).map((x) => ({
             name: x.name,
             type: String(x.columnType),
             ...(x.table ? { table: x.table } : {}),
           })),
-        )) as never)
+        )
+      }) as never)
       stream.once('end', (() => resolve([])) as never)
       stream.once('error', (() => resolve([])) as never)
     })
@@ -108,7 +115,9 @@ export async function openResultStream(env: SqlRunEnv, req: ExportRequest): Prom
     async function* rows(): AsyncGenerator<Cell[], void, void> {
       try {
         for await (const row of stream) {
-          yield row.map((v) => toCell(v, limits.cellBytes).cell)
+          yield req.raw
+            ? (row as unknown as Cell[])
+            : row.map((v) => toCell(v, limits.cellBytes).cell)
         }
         if (wd.timedOut) throw new StructureRefusal('timeout', 'The export hit the time limit')
       } catch (error) {
@@ -118,7 +127,7 @@ export async function openResultStream(env: SqlRunEnv, req: ExportRequest): Prom
         await close()
       }
     }
-    return { columns, rows: rows(), close }
+    return { columns, fields: fieldInfo, rows: rows(), close }
   } catch (error) {
     conn?.destroy()
     if (handle) (env.registry ?? runRegistry).finish(handle)

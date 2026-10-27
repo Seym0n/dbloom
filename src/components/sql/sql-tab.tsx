@@ -88,6 +88,7 @@ export function SqlTab({
   readOnly,
   active,
   onMeta,
+  onExport,
 }: {
   tabId: string
   initialDb: string
@@ -95,6 +96,8 @@ export function SqlTab({
   readOnly: boolean
   active: boolean
   onMeta: (meta: SqlTabMeta) => void
+  /** Opens the export page for one result set: the run's text, the statement's index and the database it ran in. */
+  onExport?: (request: { db?: string; text: string; statementIndex: number }) => void
 }) {
   const queryClient = useQueryClient()
   const api = useRef<EditorApi>(null)
@@ -765,6 +768,16 @@ export function SqlTab({
               product={product}
               dimmed={running}
               onReveal={(r) => revealError(r)}
+              {...(onExport
+                ? {
+                    onExport: (r: SqlStatementResult) =>
+                      onExport({
+                        ...(view.snapshot.db ? { db: view.snapshot.db } : {}),
+                        text: view.snapshot.text,
+                        statementIndex: r.index,
+                      }),
+                  }
+                : {})}
             />
           ) : !running && !runError ? (
             <p className="text-sm text-muted">{t('sql.results.empty', { key: modKey() })}</p>

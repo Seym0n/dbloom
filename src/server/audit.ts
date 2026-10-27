@@ -138,3 +138,68 @@ export function auditRowsRefused(event: RowsRefusedAuditEvent): void {
     code: event.code,
   })
 }
+
+export type IoAuditFields = {
+  user: string
+  target: string
+  jobId?: string
+  uploadId?: string
+  kind?: 'export' | 'import'
+  scope?: string
+  format?: string
+  compression?: string
+  /** Database and object names are identifiers, not row values. */
+  db?: string
+  objects?: string
+  fileName?: string
+  bytes?: number
+  rows?: number
+  statements?: number
+  /** Statement counts by class, e.g. "none:10,soft:3,hard:1". */
+  classCounts?: string
+  state?: string
+  errorCode?: string
+  errno?: number
+  durationMs?: number
+  /** Hash of a failing statement; never its text. */
+  statementHash?: string
+  statementNumber?: number
+}
+
+export type IoAuditEventName =
+  | 'io.export.start'
+  | 'io.export.end'
+  | 'io.import.start'
+  | 'io.import.end'
+  | 'io.import.analyse'
+  | 'io.job.cancel'
+  | 'io.job.resume'
+  | 'io.upload'
+  | 'io.upload.refused'
+
+/** One line per io event: names, counts and outcome only; no row values, statement text or credentials (FR-IO-021). */
+export function auditIo(event: IoAuditEventName, fields: IoAuditFields): void {
+  audit(event, {
+    user: fields.user,
+    target: fields.target,
+    jobId: fields.jobId,
+    uploadId: fields.uploadId,
+    kind: fields.kind,
+    scope: fields.scope,
+    format: fields.format,
+    compression: fields.compression,
+    db: fields.db,
+    objects: fields.objects,
+    fileName: fields.fileName,
+    bytes: fields.bytes,
+    rows: fields.rows,
+    statements: fields.statements,
+    classCounts: fields.classCounts,
+    state: fields.state,
+    errorCode: fields.errorCode,
+    errno: fields.errno,
+    durationMs: fields.durationMs,
+    statementHash: fields.statementHash,
+    statementNumber: fields.statementNumber,
+  })
+}

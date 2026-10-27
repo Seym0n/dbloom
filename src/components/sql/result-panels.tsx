@@ -1,5 +1,5 @@
 import { useEffect, useId, useMemo, useState } from 'react'
-import { Ban, Check, Minus } from 'lucide-react'
+import { ArrowUpFromLine, Ban, Check, Minus } from 'lucide-react'
 import { Button } from '~/components/ui/button'
 import { numberFormat } from '~/components/grid/cell-view'
 import type { SqlRunResponse, SqlStatementResult, SqlWarning } from '~/server/sql/types'
@@ -86,10 +86,12 @@ function Panel({
   result,
   product,
   onReveal,
+  onExport,
 }: {
   result: Result
   product?: Product
   onReveal: (r: Result) => void
+  onExport?: (r: Result) => void
 }) {
   if (result.status === 'not-run') {
     return (
@@ -166,6 +168,16 @@ function Panel({
             : t('sql.result.rows', { count: numberFormat.format(result.rowCount) })}
         </span>
         <span>{formatDuration(result.durationMs)}</span>
+        {onExport && (
+          <Button
+            className="ml-auto h-7 pointer-coarse:h-11"
+            onClick={() => onExport(result)}
+            aria-label={t('io.result.export')}
+          >
+            <ArrowUpFromLine size={14} strokeWidth={1.5} aria-hidden />
+            {t('io.rows.export')}
+          </Button>
+        )}
       </Meta>
       {cut && (
         <Notice role="status">
@@ -223,11 +235,14 @@ export function ResultPanels({
   product,
   dimmed,
   onReveal,
+  onExport,
 }: {
   response: DoneResponse
   product?: Product
   dimmed?: boolean
   onReveal: (r: Result) => void
+  /** Export of a result set (module io): the caller knows the statement text and the database. */
+  onExport?: (r: Result) => void
 }) {
   const groups = useMemo(() => groupByIndex(response.results), [response])
   const firstFailed = groups.findIndex((g) => g.some((r) => r.status === 'failed'))
@@ -301,7 +316,7 @@ export function ResultPanels({
         className="flex min-h-0 flex-col gap-4"
       >
         {current.map((r, k) => (
-          <Panel key={k} result={r} product={product} onReveal={onReveal} />
+          <Panel key={k} result={r} product={product} onReveal={onReveal} onExport={onExport} />
         ))}
       </div>
     </section>

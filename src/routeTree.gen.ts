@@ -11,7 +11,9 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
+import { Route as ApiIoUploadRouteImport } from './routes/api/io/upload'
 import { Route as ApiRowsUploadRouteImport } from './routes/api/rows/upload'
+import { Route as ApiIoDownloadIdRouteImport } from './routes/api/io/download.$id'
 import { Route as ApiRowsCellIdRouteImport } from './routes/api/rows/cell.$id'
 
 const IndexRoute = IndexRouteImport.update({
@@ -24,9 +26,19 @@ const ApiHealthRoute = ApiHealthRouteImport.update({
   path: '/api/health',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiIoUploadRoute = ApiIoUploadRouteImport.update({
+  id: '/api/io/upload',
+  path: '/api/io/upload',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiRowsUploadRoute = ApiRowsUploadRouteImport.update({
   id: '/api/rows/upload',
   path: '/api/rows/upload',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiIoDownloadIdRoute = ApiIoDownloadIdRouteImport.update({
+  id: '/api/io/download/$id',
+  path: '/api/io/download/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiRowsCellIdRoute = ApiRowsCellIdRouteImport.update({
@@ -38,35 +50,61 @@ const ApiRowsCellIdRoute = ApiRowsCellIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/api/health': typeof ApiHealthRoute
+  '/api/io/upload': typeof ApiIoUploadRoute
   '/api/rows/upload': typeof ApiRowsUploadRoute
+  '/api/io/download/$id': typeof ApiIoDownloadIdRoute
   '/api/rows/cell/$id': typeof ApiRowsCellIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/api/health': typeof ApiHealthRoute
+  '/api/io/upload': typeof ApiIoUploadRoute
   '/api/rows/upload': typeof ApiRowsUploadRoute
+  '/api/io/download/$id': typeof ApiIoDownloadIdRoute
   '/api/rows/cell/$id': typeof ApiRowsCellIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/api/health': typeof ApiHealthRoute
+  '/api/io/upload': typeof ApiIoUploadRoute
   '/api/rows/upload': typeof ApiRowsUploadRoute
+  '/api/io/download/$id': typeof ApiIoDownloadIdRoute
   '/api/rows/cell/$id': typeof ApiRowsCellIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/health' | '/api/rows/upload' | '/api/rows/cell/$id'
+  fullPaths:
+    | '/'
+    | '/api/health'
+    | '/api/io/upload'
+    | '/api/rows/upload'
+    | '/api/io/download/$id'
+    | '/api/rows/cell/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/health' | '/api/rows/upload' | '/api/rows/cell/$id'
+  to:
+    | '/'
+    | '/api/health'
+    | '/api/io/upload'
+    | '/api/rows/upload'
+    | '/api/io/download/$id'
+    | '/api/rows/cell/$id'
   id:
-    '__root__' | '/' | '/api/health' | '/api/rows/upload' | '/api/rows/cell/$id'
+    | '__root__'
+    | '/'
+    | '/api/health'
+    | '/api/io/upload'
+    | '/api/rows/upload'
+    | '/api/io/download/$id'
+    | '/api/rows/cell/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ApiHealthRoute: typeof ApiHealthRoute
+  ApiIoUploadRoute: typeof ApiIoUploadRoute
   ApiRowsUploadRoute: typeof ApiRowsUploadRoute
+  ApiIoDownloadIdRoute: typeof ApiIoDownloadIdRoute
   ApiRowsCellIdRoute: typeof ApiRowsCellIdRoute
 }
 
@@ -86,11 +124,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiHealthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/io/upload': {
+      id: '/api/io/upload'
+      path: '/api/io/upload'
+      fullPath: '/api/io/upload'
+      preLoaderRoute: typeof ApiIoUploadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/rows/upload': {
       id: '/api/rows/upload'
       path: '/api/rows/upload'
       fullPath: '/api/rows/upload'
       preLoaderRoute: typeof ApiRowsUploadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/io/download/$id': {
+      id: '/api/io/download/$id'
+      path: '/api/io/download/$id'
+      fullPath: '/api/io/download/$id'
+      preLoaderRoute: typeof ApiIoDownloadIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/rows/cell/$id': {
@@ -106,7 +158,9 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ApiHealthRoute: ApiHealthRoute,
+  ApiIoUploadRoute: ApiIoUploadRoute,
   ApiRowsUploadRoute: ApiRowsUploadRoute,
+  ApiIoDownloadIdRoute: ApiIoDownloadIdRoute,
   ApiRowsCellIdRoute: ApiRowsCellIdRoute,
 }
 export const routeTree = rootRouteImport

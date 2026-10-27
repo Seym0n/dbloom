@@ -140,3 +140,10 @@ Ideas that were discussed and deliberately postponed. They are **not requirement
 **Why deferred:** Large or niche features, not needed to replace the daily work of LegacyAdmin; each needs its own design. Several overlap with ideas for the AI sidebar (`OPEN.md` item 19).
 
 **Related:** `18-scope-triage.md` section 3, FU-009.
+
+## FU-011 — Faster CSV import with LOAD DATA
+**Idea:** Offer CSV import through `LOAD DATA [LOCAL] INFILE` as a speed option next to the batched parameterised INSERT path (FR-IOX-046, 092, DATA-ISS-137 of module `io`). Needs: `local_infile` enabled on the server (off by default on MySQL 8.4), the driver's local-file stream hook limited to the one staged upload, field and line terminators from fixed allow-lists, no compressed or charset-converted input, and a benchmark that shows the gain (NFR-ISS-102).
+
+**Why deferred:** Owner decision, 2026-10-27: not in the first slice. The INSERT path works on every server and exposes no server-side file reading.
+
+**Related:** `25-module-io.md` Q2.
