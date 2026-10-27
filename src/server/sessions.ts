@@ -98,7 +98,12 @@ export class SessionManager {
     // history and bookmarks of stateless mode (owner key = session id hash) go with the session.
     if (runtime?.pool) await runRegistry.cancelSession(runtime.pool, idHash).catch(() => undefined)
     memorySqlState.dropOwner(idHash)
-    if (runtime?.pool) await runtime.pool.end().catch(() => undefined)
+    await runtime?.pool?.end().catch(() => undefined)
+    // Account sessions: close every connection pool and wipe the vault key (best effort in a GC runtime).
+    const account = runtime as { connections?: Map<string, { pool: { end(): Promise<unknown> } }>; vaultKey?: Buffer } | undefined
+    account?.vaultKey?.fill(0)
+    for (const entry of account?.connections?.values() ?? []) await entry.pool.end().catch(() => undefined)
+    account?.connections?.clear()
   }
 
   async sweep(): Promise<void> {
@@ -120,9 +125,10 @@ export class SessionManager {
         const token = randomBytes(32).toString('base64url'), csrf = randomBytes(32).toString('base64url'), now = this.now(), idHash = hash(token)
         const accounts = (this.store as any).accounts
         const limit = user.role === 'admin' ? 2 : 5
-        const existing = accounts.listUserSessions(user.id)
-        const evicted = existing.slice(0, Math.max(0, existing.length - limit + 1)).map((r: AccountSessionRecord) => r.idHash)
-        for (const id of evicted) { accounts.deleteUserSessions(user.id, id); this.live.delete(id) }
+        const existing = (accounts.listUserSessions(user.id) as AccountSessionRecord[]).sort((a, b) => a.lastSeenAt - b.lastSeenAt)
+        const evicted = existing.slice(0, Math.max(0, existing.length - limit + 1)).map((r) => r.idHash)
+        // `end` removes the row and the live entry and closes pools; it touches only the evicted session.
+        for (const id of evicted) void this.end(id)
         this.store.createSession({ idHash, targetKey: '', userName: '', createdAt: now, lastSeenAt: now, expiresAt: now + this.config.sessionAbsoluteMs })
         accounts.createAccountSession({ idHash, targetKey: '', userName: '', createdAt: now, lastSeenAt: now, expiresAt: now + this.config.sessionAbsoluteMs, kind: 'account', userId: user.id, state, mfaAt: null, stepupAt: null, securityVersion: user.securityVersion, clientHint: meta.clientHint, address: meta.address })
         this.live.set(idHash, { csrf, target: { host: '', port: 0, username: '' } as TargetKey, pool: undefined as any, readOnly: false })

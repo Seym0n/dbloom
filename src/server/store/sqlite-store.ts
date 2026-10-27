@@ -213,6 +213,10 @@ export function openSqliteStore(path: string, options: Partial<SqlStateOptions> 
     webauthnUserId: r.webauthn_user_id, createdAt: r.created_at, updatedAt: r.updated_at,
     createdBy: r.created_by, lastSignInAt: r.last_sign_in_at,
   })
+  const tokenFrom = (r: any): LinkTokenRecord => ({
+    id: r.id, kind: r.kind, tokenHash: r.token_hash, userId: r.user_id, role: r.role, createdBy: r.created_by,
+    createdAt: r.created_at, expiresAt: r.expires_at, usedAt: r.used_at, revokedAt: r.revoked_at,
+  })
   const sessionFrom = (r: any): AccountSessionRecord => ({
     idHash: r.id_hash, targetKey: r.target_key, userName: r.user_name, createdAt: r.created_at,
     lastSeenAt: r.last_seen_at, expiresAt: r.expires_at, kind: r.kind, userId: r.user_id,
@@ -257,10 +261,10 @@ export function openSqliteStore(path: string, options: Partial<SqlStateOptions> 
       consumeRecoveryCode: (uid,mac) => db.prepare('DELETE FROM recovery_codes WHERE user_id=? AND code_mac=?').run(uid,mac).changes===1,
       countRecoveryCodes: (uid) => Number((db.prepare('SELECT count(*) n FROM recovery_codes WHERE user_id=?').get(uid) as any).n),
       deleteRecoveryCodes: (uid) => Number(db.prepare('DELETE FROM recovery_codes WHERE user_id=?').run(uid).changes),
-      addToken: (r) => void db.prepare('INSERT INTO tokens VALUES(?,?,?,?,?,?,?,?,?,?,?)').run(r.id,r.kind,r.tokenHash,r.userId,r.role,r.createdBy,r.createdAt,r.expiresAt,r.usedAt,r.revokedAt),
-      getTokenByHash: (h) => db.prepare('SELECT * FROM tokens WHERE token_hash=?').get(h) as any,
-      listOpenInvites: (now) => db.prepare("SELECT * FROM tokens WHERE kind='invite' AND used_at IS NULL AND revoked_at IS NULL AND expires_at>?").all(now) as any,
-      markTokenUsed: (id,now,uid) => db.prepare('UPDATE tokens SET used_at=?,user_id=COALESCE(?,user_id) WHERE id=? AND used_at IS NULL AND revoked_at IS NULL AND expires_at>?').run(now,uid as any,id,now).changes===1,
+      addToken: (r) => void db.prepare('INSERT INTO tokens VALUES(?,?,?,?,?,?,?,?,?,?)').run(r.id,r.kind,r.tokenHash,r.userId,r.role,r.createdBy,r.createdAt,r.expiresAt,r.usedAt,r.revokedAt),
+      getTokenByHash: (h) => { const r=db.prepare('SELECT * FROM tokens WHERE token_hash=?').get(h) as any; return r && tokenFrom(r) },
+      listOpenInvites: (now) => (db.prepare("SELECT * FROM tokens WHERE kind='invite' AND used_at IS NULL AND revoked_at IS NULL AND expires_at>? ORDER BY created_at").all(now) as any[]).map(tokenFrom),
+      markTokenUsed: (id,now,uid) => db.prepare('UPDATE tokens SET used_at=?,user_id=COALESCE(?,user_id) WHERE id=? AND used_at IS NULL AND revoked_at IS NULL AND expires_at>?').run(now,(uid ?? null) as any,id,now).changes===1,
       revokeToken: (id,now) => db.prepare('UPDATE tokens SET revoked_at=? WHERE id=? AND used_at IS NULL AND revoked_at IS NULL').run(now,id).changes===1,
       purgeTokens: (before) => Number(db.prepare('DELETE FROM tokens WHERE expires_at<?').run(before).changes),
       getVault: (uid) => { const r=db.prepare('SELECT * FROM vaults WHERE user_id=?').get(uid) as any; return r&&{userId:r.user_id,kdfParams:JSON.parse(r.kdf_params),kdfSalt:r.kdf_salt,wrapPassphrase:r.wrap_passphrase,recoverySalt:r.recovery_salt,wrapRecovery:r.wrap_recovery,createdAt:r.created_at,updatedAt:r.updated_at} as VaultRecord },
