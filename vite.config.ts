@@ -10,6 +10,15 @@ export default defineConfig({
   // The SQL parser loads its WASM file relative to its own module, so it stays an external package. reflect-metadata must
   // run before the bundled tsyringe (see server/auth/webauthn.ts); inside the bundle the chunk order puts it after.
   ssr: { external: ['@guanmingchiu/sqlparser-ts', 'reflect-metadata'] },
+  // "use client" directives in react-router, react-query and lucide are meaningless here (no RSC); drop the warnings.
+  build: {
+    rolldownOptions: {
+      onLog(level, log, defaultHandler) {
+        if (log.code === 'MODULE_LEVEL_DIRECTIVE') return
+        defaultHandler(level, log)
+      },
+    },
+  },
   plugins: [
     tanstackStart(),
     nitro({
