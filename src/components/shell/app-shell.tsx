@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useRouter } from '@tanstack/react-router'
-import { LogOut, Menu, MessageSquare, Plus, X } from 'lucide-react'
+import { Link, useRouter } from '@tanstack/react-router'
+import { LogOut, Menu, MessageSquare, Plus, UserRound, X } from 'lucide-react'
 import { BrandName } from '~/components/brand'
 import { TableView } from '~/components/grid/table-view'
 import { SessionEndedDialog } from '~/components/session-ended-dialog'
@@ -13,7 +13,7 @@ import { ImportTab, type UploadedFile } from '~/components/io/import-tab'
 import { wireIoCatalog } from '~/components/io/wire'
 import { StructureDialogs, type StructureAction } from '~/components/structure/db-dialogs'
 import { TableDesigner } from '~/components/structure/table-designer'
-import { Button } from '~/components/ui/button'
+import { Button, buttonClass } from '~/components/ui/button'
 import { Dialog } from '~/components/ui/dialog'
 import { setCsrfToken } from '~/lib/csrf'
 import { ioApi } from '~/lib/io/api'
@@ -131,7 +131,19 @@ function AssistantPanel({ onClose }: { onClose: () => void }) {
 
 const tabButtonId = (id: string) => `tab-${id.replace(/[^A-Za-z0-9_-]/g, '_')}`
 
-export function AppShell({ session, open: link }: { session: SessionInfo; open?: OpenSearch }) {
+export function AppShell({
+  session,
+  open: link,
+  connectionSlot,
+  account,
+}: {
+  session: SessionInfo
+  open?: OpenSearch
+  /** Account mode: the connection switcher under the server card. Direct mode passes nothing. */
+  connectionSlot?: ReactNode
+  /** Account mode: sign-out and session-ended lead to the account sign-in, and the shell links to /account. */
+  account?: { onSignOut: () => void | Promise<void> }
+}) {
   // The CSRF token lives in memory only; set while rendering so the first requests already carry it.
   if (typeof window !== 'undefined') setCsrfToken(session.csrf)
 
@@ -314,7 +326,8 @@ export function AppShell({ session, open: link }: { session: SessionInfo; open?:
   }
 
   async function signOut() {
-    await logout().catch(() => undefined)
+    if (account) await Promise.resolve(account.onSignOut()).catch(() => undefined)
+    else await logout().catch(() => undefined)
     setCsrfToken(undefined)
     queryClient.clear()
     await router.invalidate()
@@ -323,6 +336,7 @@ export function AppShell({ session, open: link }: { session: SessionInfo; open?:
   return (
     <div className="grid h-full grid-cols-1 grid-rows-[48px_minmax(0,1fr)] md:grid-cols-[var(--sidebar-width)_minmax(0,1fr)]">
       <SessionEndedDialog
+        {...(account ? { onAccountSignIn: () => void signOut() } : {})}
         defaults={{ server: targetLabel(session.target), username: session.target.username }}
         onSignedIn={(target) => {
           // Work typed by someone else is not handed to a different sign-in (G3).
@@ -398,6 +412,7 @@ export function AppShell({ session, open: link }: { session: SessionInfo; open?:
               {databases.data ? ` · ${databases.data.length} databases` : ''}
             </p>
           </div>
+          {connectionSlot}
           <div className="min-h-0 flex-1 overflow-y-auto">
             <SidebarTree
               active={activeTable}
@@ -425,6 +440,12 @@ export function AppShell({ session, open: link }: { session: SessionInfo; open?:
               }}
             />
           </div>
+          {account && (
+            <Link to="/account" className={cn(buttonClass({ variant: 'ghost' }), 'justify-start')}>
+              <UserRound size={14} strokeWidth={1.5} aria-hidden />
+              {t('nav.account')}
+            </Link>
+          )}
           <Button variant="ghost" className="justify-start" onClick={() => void signOut()}>
             <LogOut size={14} strokeWidth={1.5} aria-hidden />
             {t('nav.logout')}

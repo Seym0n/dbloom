@@ -16,7 +16,7 @@ import {
   type HistoryRecord,
   type SqlRunEnv,
 } from './deps'
-import { getSqlState, isStateless, ownerKeyOf, SqlStateError } from './state'
+import { getSqlState, isStateless, ownerKeyFor, SqlStateError } from './state'
 import {
   cancelSqlInput,
   completionSchemaInput,
@@ -65,9 +65,7 @@ const tokens = createTokenIssuer()
 
 export const targetKeyOf = (t: LiveSession['target']) => `${t.host}${t.zone ?? ''}:${t.port}`
 
-export function ownerKeyFor(session: Pick<LiveSession, 'idHash' | 'target'>): string {
-  return isStateless() ? session.idHash : ownerKeyOf(session.target)
-}
+export { ownerKeyFor }
 
 /** FR-SQL-028: `DBLOOM_SQL_DISABLED=true` turns the whole module off. */
 export const isSqlDisabled = (env: NodeJS.ProcessEnv = process.env): boolean =>

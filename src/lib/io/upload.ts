@@ -1,5 +1,5 @@
 /** Client side of `PUT /api/io/upload` (FR-IO-012, FR-IO-025): raw body, progress and abort through XMLHttpRequest. */
-import { CSRF_HEADER, getCsrfToken } from '~/lib/csrf'
+import { CSRF_HEADER, CONNECTION_HEADER, getConnectionId, getCsrfToken } from '~/lib/csrf'
 import type { IoErrorCode, IoFormat } from '~/server/io/types'
 import { IO_ERROR_CODES } from '~/server/io/types'
 
@@ -82,6 +82,8 @@ export function uploadFile(
     xhr.open('PUT', `${UPLOAD_URL}?${query}`)
     const csrf = getCsrfToken()
     if (csrf) xhr.setRequestHeader(CSRF_HEADER, csrf)
+    const connection = getConnectionId()
+    if (connection) xhr.setRequestHeader(CONNECTION_HEADER, connection)
     xhr.setRequestHeader('content-type', 'application/octet-stream')
     xhr.upload.onprogress = (e) => {
       if (e.lengthComputable) options.onProgress?.(e.loaded, e.total)

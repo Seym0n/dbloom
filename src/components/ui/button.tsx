@@ -17,6 +17,9 @@ const button = cva(
   },
 )
 
+/** Class string of a button, for links that look like one. */
+export const buttonClass = (options?: VariantProps<typeof button>) => button(options)
+
 type Props = ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<typeof button>
 
 export function Button({ className, variant, size, type = 'button', ...props }: Props) {

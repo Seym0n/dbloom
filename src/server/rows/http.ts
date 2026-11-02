@@ -1,5 +1,6 @@
-import { CSRF_HEADER } from '../../lib/csrf'
+import { CONNECTION_HEADER, CONNECTION_PARAM, CSRF_HEADER } from '../../lib/csrf'
 import { SESSION_COOKIE } from '../middleware'
+import { resolveTargetSession } from '../session-context'
 import type { Runtime } from '../runtime'
 import type { LiveSession } from '../sessions'
 import {
@@ -41,20 +42,22 @@ const neutral = (status: number) =>
     headers: { 'cache-control': 'no-store' },
   })
 
-function sessionOf(
+async function sessionOf(
   request: Request,
   runtime: RuntimeLike,
   requireCsrf: boolean,
-): LiveSession | undefined {
+): Promise<LiveSession | undefined> {
   if (!sameOrigin(request)) return undefined
-  const session = runtime.sessions.resolve(cookieOf(request, SESSION_COOKIE))
-  if (!session) return undefined
-  if (
-    requireCsrf &&
-    !runtime.sessions.verifyCsrf(session, request.headers.get(CSRF_HEADER) ?? undefined)
-  ) {
-    return undefined
-  }
+  // Account mode: the connection comes in a header, or in a query parameter where a link cannot set one (FR-AUT-018).
+  const connectionId = request.headers.get(CONNECTION_HEADER) ?? new URL(request.url).searchParams.get(CONNECTION_PARAM) ?? undefined
+  const csrf = request.headers.get(CSRF_HEADER) ?? undefined
+  const session = await resolveTargetSession(runtime, {
+    token: cookieOf(request, SESSION_COOKIE),
+    connectionId,
+    csrf,
+    requireCsrf,
+    background: false,
+  })
   return session
 }
 
@@ -65,7 +68,7 @@ export async function handleCellGet(
   runtime: RuntimeLike,
   env: (session: LiveSession) => RowsEnv = rowsEnvOf,
 ): Promise<Response> {
-  const session = sessionOf(request, runtime, false)
+  const session = await sessionOf(request, runtime, false)
   if (!session) return neutral(404)
   try {
     return await cellDownloadResponse(env(session), id)
@@ -126,7 +129,7 @@ export async function handleUpload(
   runtime: RuntimeLike,
   env: (session: LiveSession) => RowsEnv = rowsEnvOf,
 ): Promise<Response> {
-  const session = sessionOf(request, runtime, true)
+  const session = await sessionOf(request, runtime, true)
   if (!session) return neutral(403)
   try {
     const rowsEnv = env(session)

@@ -149,3 +149,12 @@ export async function breachedListService(operatorPath: string | null): Promise<
     source: (): BreachedSource => ({ kind: loaded.kind, entries: loaded.entries }),
   }
 }
+
+/** A list that loads on first use, from the operator path as the settings say it then (one load per process). */
+export function lazyBreachedList(path: () => string | null): BreachedList {
+  let list: Promise<BreachedList> | undefined
+  return {
+    contains: async (password) => (await (list ??= breachedListService(path()))).contains(password),
+    source: () => ({ kind: 'none', entries: 0 }),
+  }
+}

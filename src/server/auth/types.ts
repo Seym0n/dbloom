@@ -103,6 +103,7 @@ export const NOTICE_KINDS = [
   'factor_added',
   'factor_removed',
   'password_changed',
+  'sessions_revoked',
 ] as const
 export type NoticeKind = (typeof NOTICE_KINDS)[number]
 
@@ -417,6 +418,8 @@ export const AUTH_ERROR_CODES = [
   'profile_test_failed',
   'connection_unknown',
   'connection_limit',
+  'profile_name_taken',
+  'profile_limit',
   'target_policy',
   'setup_pending',
 ] as const
@@ -1098,7 +1101,7 @@ export const vaultUnlockInput = z.object({ passphrase: passphraseInput }).strict
 export const vaultChangePassphraseInput = z.object({ currentPassphrase: passphraseInput, newPassphrase: passphraseInput }).strict()
 export const vaultUseRecoveryKeyInput = z.object({ recoveryKey: vaultRecoveryKeyInput, newPassphrase: passphraseInput }).strict()
 export const vaultRegenerateRecoveryKeyInput = empty
-export const vaultRotateKeyInput = empty
+export const vaultRotateKeyInput = z.object({ passphrase: passphraseInput }).strict()
 export const vaultLockInput = empty
 
 // Profiles (FR-AUT-022)
@@ -1390,6 +1393,8 @@ export interface AccountStore {
   addToken(record: LinkTokenRecord): void
   getTokenByHash(tokenHash: string): LinkTokenRecord | undefined
   listOpenInvites(now: number): LinkTokenRecord[]
+  /** Open (unused, unrevoked, unexpired) recovery tokens of one user. */
+  listOpenRecoveryTokens(userId: UserId, now: number): LinkTokenRecord[]
   /** Sets `used_at` when the token is open (not used, revoked or expired); false otherwise. */
   markTokenUsed(id: string, now: number, userId?: UserId): boolean
   revokeToken(id: string, now: number): boolean
@@ -1463,7 +1468,7 @@ export interface AccountSessions {
   createAccount(user: User, state: SessionState, meta: { clientHint: string; address: string }): { token: string; csrf: string; evicted: string[] }
   resolveAccount(token: string | undefined, opts: { background: boolean }): AccountContext | undefined
   /** New token and id hash, same row (SEC-TGT-040). */
-  transition(token: string, patch: { state?: SessionState; mfaAt?: number; stepupAt?: number }): { token: string }
+  transition(token: string, patch: { state?: SessionState; mfaAt?: number; stepupAt?: number }): { token: string; evicted?: string[] }
   addConnection(idHash: string, entry: ConnectionEntry): void
   getConnection(idHash: string, connectionId: ConnectionId): ConnectionEntry | undefined
   listConnections(idHash: string): ConnectionEntry[]
@@ -1473,6 +1478,10 @@ export interface AccountSessions {
   setVaultKey(idHash: string, key: Buffer | undefined): void
   /** Returns the key and counts as vault activity (ST-089). */
   getVaultKey(idHash: string, now: number): Buffer | undefined
+  /** Same expiry rules as `getVaultKey` but does not count as vault activity (status polling must not keep the vault open). */
+  peekVaultKey(idHash: string, now: number): Buffer | undefined
+  /** Epoch ms at which the vault key auto-locks, or undefined when locked. */
+  vaultLockAt(idHash: string): number | undefined
   listUserSessions(userId: UserId, currentIdHash: string): SessionInfo[]
   endSession(idHash: string, reason: 'signout' | 'evicted' | 'security' | 'expired' | 'revoked'): Promise<void>
 }
@@ -1493,7 +1502,7 @@ export interface SetupService {
   prepareToken(now: number): void
   verifyToken(token: string, address: string): { cookie: string } // throws AuthError('auth_throttled') or a fixed failure
   state(cookie: string): { draft: SetupDraft; env: SetupEnvStatus } | undefined
-  saveStep(cookie: string, input: z.infer<typeof setupSaveStepInput>): SetupDraft
+  saveStep(cookie: string, input: z.infer<typeof setupSaveStepInput>): Promise<SetupDraft>
   passkeyOptions(cookie: string): Promise<PublicKeyCredentialCreationOptionsJSON>
   passkeyVerify(cookie: string, response: RegistrationResponseJSON, name: string): Promise<void>
   totpStart(cookie: string): { uri: string; secret: string; qrSvg: string }
@@ -1587,7 +1596,8 @@ export interface VaultService {
   /** Forces a new passphrase and a new recovery key. */
   useRecoveryKey(ctx: AccountContext, recoveryKey: string, newPassphrase: string): Promise<{ recoveryKey: string }>
   regenerateRecoveryKey(ctx: AccountContext): { recoveryKey: string }
-  rotateKey(ctx: AccountContext): void
+  /** Needs the passphrase (re-wrap) and returns the new recovery key. */
+  rotateKey(ctx: AccountContext, passphrase: string): Promise<{ recoveryKey: string }>
 }
 
 export interface ProfileService {

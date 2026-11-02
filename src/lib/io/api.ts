@@ -4,7 +4,7 @@
  * interface below. The app wires it once with `setIoApi(createServerIoApi({...}))`; until then a mock
  * (`mock-api.ts`) answers, and tests install fakes with `setIoApi`.
  */
-import { CSRF_HEADER, getCsrfToken } from '~/lib/csrf'
+import { withConnectionParam, withSessionHeaders } from '~/lib/csrf'
 import type {
   Compression,
   ExportRequest,
@@ -100,13 +100,10 @@ export type ServerIoFns = {
   previewNewTable: ServerFn<TableDefinition, { statements: string[] }>
 }
 
-export const downloadUrl = (jobId: string) => `/api/io/download/${encodeURIComponent(jobId)}`
+export const downloadUrl = (jobId: string) => withConnectionParam(`/api/io/download/${encodeURIComponent(jobId)}`)
 
 async function fetchText(jobId: string): Promise<{ text: string; truncated: boolean }> {
-  const headers: Record<string, string> = {}
-  const csrf = getCsrfToken()
-  if (csrf) headers[CSRF_HEADER] = csrf
-  const response = await fetch(downloadUrl(jobId), { headers })
+  const response = await fetch(downloadUrl(jobId), { headers: withSessionHeaders() })
   if (!response.ok) throw new Error(`export_failed: download failed (${response.status})`)
   const text = await response.text()
   return { text, truncated: new TextEncoder().encode(text).length >= TEXT_VIEW_MAX_BYTES }

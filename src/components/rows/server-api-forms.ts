@@ -4,7 +4,7 @@
  * small typed interface below; the app wires it once with `setFormsApi(createServerFormsApi({...}))`
  * and tests install a fake with `setFormsApi`.
  */
-import { CSRF_HEADER, getCsrfToken } from '~/lib/csrf'
+import { withSessionHeaders } from '~/lib/csrf'
 import { t, type MessageKey } from '~/i18n'
 import type {
   ChangeRowsInput,
@@ -60,12 +60,10 @@ export type ServerFormsFns = {
 
 /** Transport of the upload; kept as one small function so the route contract is easy to adjust. */
 export async function postUpload(file: File): Promise<UploadResponse> {
-  const headers: Record<string, string> = {
+  const headers = withSessionHeaders({
     'content-type': file.type || 'application/octet-stream',
     'x-file-name': encodeURIComponent(file.name),
-  }
-  const csrf = getCsrfToken()
-  if (csrf) headers[CSRF_HEADER] = csrf
+  })
   const response = await fetch('/api/rows/upload', { method: 'POST', headers, body: file })
   if (!response.ok) {
     const body = (await response.json().catch(() => null)) as { error?: string } | null

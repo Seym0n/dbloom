@@ -10,7 +10,15 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AccountRouteImport } from './routes/account'
+import { Route as InviteRouteImport } from './routes/invite'
+import { Route as RecoverRouteImport } from './routes/recover'
+import { Route as SetupRouteImport } from './routes/setup'
+import { Route as AccountIndexRouteImport } from './routes/account.index'
+import { Route as AccountPreferencesRouteImport } from './routes/account.preferences'
+import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
+import { Route as ApiStartupRouteImport } from './routes/api/startup'
 import { Route as ApiIoUploadRouteImport } from './routes/api/io/upload'
 import { Route as ApiRowsUploadRouteImport } from './routes/api/rows/upload'
 import { Route as ApiIoDownloadIdRouteImport } from './routes/api/io/download.$id'
@@ -21,9 +29,49 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AccountRoute = AccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InviteRoute = InviteRouteImport.update({
+  id: '/invite',
+  path: '/invite',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RecoverRoute = RecoverRouteImport.update({
+  id: '/recover',
+  path: '/recover',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SetupRoute = SetupRouteImport.update({
+  id: '/setup',
+  path: '/setup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccountIndexRoute = AccountIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AccountRoute,
+} as any)
+const AccountPreferencesRoute = AccountPreferencesRouteImport.update({
+  id: '/preferences',
+  path: '/preferences',
+  getParentRoute: () => AccountRoute,
+} as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/admin/users',
+  path: '/admin/users',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiHealthRoute = ApiHealthRouteImport.update({
   id: '/api/health',
   path: '/api/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiStartupRoute = ApiStartupRouteImport.update({
+  id: '/api/startup',
+  path: '/api/startup',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiIoUploadRoute = ApiIoUploadRouteImport.update({
@@ -49,7 +97,15 @@ const ApiRowsCellIdRoute = ApiRowsCellIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/account': typeof AccountRouteWithChildren
+  '/invite': typeof InviteRoute
+  '/recover': typeof RecoverRoute
+  '/setup': typeof SetupRoute
+  '/account/preferences': typeof AccountPreferencesRoute
+  '/admin/users': typeof AdminUsersRoute
   '/api/health': typeof ApiHealthRoute
+  '/api/startup': typeof ApiStartupRoute
+  '/account/': typeof AccountIndexRoute
   '/api/io/upload': typeof ApiIoUploadRoute
   '/api/rows/upload': typeof ApiRowsUploadRoute
   '/api/io/download/$id': typeof ApiIoDownloadIdRoute
@@ -57,7 +113,14 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/invite': typeof InviteRoute
+  '/recover': typeof RecoverRoute
+  '/setup': typeof SetupRoute
+  '/account/preferences': typeof AccountPreferencesRoute
+  '/admin/users': typeof AdminUsersRoute
   '/api/health': typeof ApiHealthRoute
+  '/api/startup': typeof ApiStartupRoute
+  '/account': typeof AccountIndexRoute
   '/api/io/upload': typeof ApiIoUploadRoute
   '/api/rows/upload': typeof ApiRowsUploadRoute
   '/api/io/download/$id': typeof ApiIoDownloadIdRoute
@@ -66,7 +129,15 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/account': typeof AccountRouteWithChildren
+  '/invite': typeof InviteRoute
+  '/recover': typeof RecoverRoute
+  '/setup': typeof SetupRoute
+  '/account/preferences': typeof AccountPreferencesRoute
+  '/admin/users': typeof AdminUsersRoute
   '/api/health': typeof ApiHealthRoute
+  '/api/startup': typeof ApiStartupRoute
+  '/account/': typeof AccountIndexRoute
   '/api/io/upload': typeof ApiIoUploadRoute
   '/api/rows/upload': typeof ApiRowsUploadRoute
   '/api/io/download/$id': typeof ApiIoDownloadIdRoute
@@ -76,7 +147,15 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/account'
+    | '/invite'
+    | '/recover'
+    | '/setup'
+    | '/account/preferences'
+    | '/admin/users'
     | '/api/health'
+    | '/api/startup'
+    | '/account/'
     | '/api/io/upload'
     | '/api/rows/upload'
     | '/api/io/download/$id'
@@ -84,7 +163,14 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/invite'
+    | '/recover'
+    | '/setup'
+    | '/account/preferences'
+    | '/admin/users'
     | '/api/health'
+    | '/api/startup'
+    | '/account'
     | '/api/io/upload'
     | '/api/rows/upload'
     | '/api/io/download/$id'
@@ -92,7 +178,15 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/account'
+    | '/invite'
+    | '/recover'
+    | '/setup'
+    | '/account/preferences'
+    | '/admin/users'
     | '/api/health'
+    | '/api/startup'
+    | '/account/'
     | '/api/io/upload'
     | '/api/rows/upload'
     | '/api/io/download/$id'
@@ -101,7 +195,13 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AccountRoute: typeof AccountRouteWithChildren
+  InviteRoute: typeof InviteRoute
+  RecoverRoute: typeof RecoverRoute
+  SetupRoute: typeof SetupRoute
+  AdminUsersRoute: typeof AdminUsersRoute
   ApiHealthRoute: typeof ApiHealthRoute
+  ApiStartupRoute: typeof ApiStartupRoute
   ApiIoUploadRoute: typeof ApiIoUploadRoute
   ApiRowsUploadRoute: typeof ApiRowsUploadRoute
   ApiIoDownloadIdRoute: typeof ApiIoDownloadIdRoute
@@ -117,11 +217,67 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/account': {
+      id: '/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AccountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/invite': {
+      id: '/invite'
+      path: '/invite'
+      fullPath: '/invite'
+      preLoaderRoute: typeof InviteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/recover': {
+      id: '/recover'
+      path: '/recover'
+      fullPath: '/recover'
+      preLoaderRoute: typeof RecoverRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/setup': {
+      id: '/setup'
+      path: '/setup'
+      fullPath: '/setup'
+      preLoaderRoute: typeof SetupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/account/': {
+      id: '/account/'
+      path: '/'
+      fullPath: '/account/'
+      preLoaderRoute: typeof AccountIndexRouteImport
+      parentRoute: typeof AccountRoute
+    }
+    '/account/preferences': {
+      id: '/account/preferences'
+      path: '/preferences'
+      fullPath: '/account/preferences'
+      preLoaderRoute: typeof AccountPreferencesRouteImport
+      parentRoute: typeof AccountRoute
+    }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/admin/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/health': {
       id: '/api/health'
       path: '/api/health'
       fullPath: '/api/health'
       preLoaderRoute: typeof ApiHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/startup': {
+      id: '/api/startup'
+      path: '/api/startup'
+      fullPath: '/api/startup'
+      preLoaderRoute: typeof ApiStartupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/io/upload': {
@@ -155,9 +311,28 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AccountRouteChildren {
+  AccountPreferencesRoute: typeof AccountPreferencesRoute
+  AccountIndexRoute: typeof AccountIndexRoute
+}
+
+const AccountRouteChildren: AccountRouteChildren = {
+  AccountPreferencesRoute: AccountPreferencesRoute,
+  AccountIndexRoute: AccountIndexRoute,
+}
+
+const AccountRouteWithChildren =
+  AccountRoute._addFileChildren(AccountRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AccountRoute: AccountRouteWithChildren,
+  InviteRoute: InviteRoute,
+  RecoverRoute: RecoverRoute,
+  SetupRoute: SetupRoute,
+  AdminUsersRoute: AdminUsersRoute,
   ApiHealthRoute: ApiHealthRoute,
+  ApiStartupRoute: ApiStartupRoute,
   ApiIoUploadRoute: ApiIoUploadRoute,
   ApiRowsUploadRoute: ApiRowsUploadRoute,
   ApiIoDownloadIdRoute: ApiIoDownloadIdRoute,

@@ -11,7 +11,7 @@ import {
 import { WriteGuardError } from '../guard/write-guard'
 import { getRuntime } from '../runtime'
 import type { LiveSession } from '../sessions'
-import { isStateless, ownerKeyOf } from '../sql/state'
+import { isStateless, ownerKeyFor } from '../sql/state'
 import { RunRegistry } from '../sql/registry'
 import { mapMysqlError, StructureRefusal, toClientError } from '../structure/errors'
 import { planStore as defaultPlans, type PlanStore, type StoredPlan } from '../structure/plans'
@@ -141,7 +141,7 @@ function defaultPorts(): RowsPorts {
 
 export const targetLabel = (t: RowsEnv['session']['target']) => `${t.host}${t.zone ?? ''}:${t.port}`
 
-export function rowsEnvOf(session: LiveSession): RowsEnv {
+export function rowsEnvOf(session: LiveSession & { ownerKey?: string }): RowsEnv {
   const runtime = getRuntime()
   const stateless = isStateless()
   return {
@@ -150,8 +150,8 @@ export function rowsEnvOf(session: LiveSession): RowsEnv {
     tokens,
     statementTimeoutMs: runtime.config.statementTimeoutMs,
     ports: defaultPorts(),
-    prefs: stateless ? memoryPrefs : runtime.store.prefs,
-    ownerKey: stateless ? session.idHash : ownerKeyOf(session.target),
+    prefs: stateless ? (runtime.statelessPrefs?.rows ?? memoryPrefs) : runtime.store.prefs,
+    ownerKey: ownerKeyFor(session),
     targetKey: targetLabel(session.target),
     stateless,
   }

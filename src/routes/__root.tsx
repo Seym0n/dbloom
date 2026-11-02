@@ -2,7 +2,10 @@ import { useState, type ReactNode } from 'react'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { Outlet, createRootRoute, HeadContent, Scripts } from '@tanstack/react-router'
 import { createQueryClient } from '~/lib/session-state'
+import { THEME_STORAGE_KEY } from '~/lib/auth/account-logic'
 import appCss from '~/styles.css?url'
+
+const THEME_BOOT_SCRIPT = `try{var t=localStorage.getItem('${THEME_STORAGE_KEY}');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}`
 
 export const Route = createRootRoute({
   head: () => ({
@@ -12,6 +15,8 @@ export const Route = createRootRoute({
       { title: 'DBLoom' },
     ],
     links: [{ rel: 'stylesheet', href: appCss }],
+    // Last chosen theme, set before the first paint (the session info corrects it once it arrives).
+    scripts: [{ children: THEME_BOOT_SCRIPT }],
   }),
   component: RootComponent,
 })
@@ -29,7 +34,7 @@ function RootComponent() {
 
 function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>

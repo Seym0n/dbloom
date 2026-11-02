@@ -45,10 +45,8 @@ export async function runArgon2<T>(task: () => Promise<T>): Promise<T> {
       grab()
       return
     }
-    waiting.push(() => {
-      active += 1
-      grab()
-    })
+    // The releasing job hands its slot over, so `active` is not incremented here (it leaked a slot per queued job).
+    waiting.push(grab)
   })
   try {
     return await task()

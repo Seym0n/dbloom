@@ -8,12 +8,13 @@ import { Download, Eye, FileUp, Undo2 } from 'lucide-react'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { t } from '~/i18n'
+import { withConnectionParam } from '~/lib/csrf'
 import type { Cell, PreviewType, RowColumn, UploadResponse } from '~/server/rows/types'
 import { RowFormContext, formatBytes, initialWire, wireEqual } from './form-core'
 import { describeRowsRefusal, formsApi } from './server-api-forms'
 import type { ValueEditorProps } from './registry'
 
-const cellUrl = (id: string) => `/api/rows/cell/${encodeURIComponent(id)}`
+const cellUrl = (id: string) => withConnectionParam(`/api/rows/cell/${encodeURIComponent(id)}`)
 
 /** Starts a download without leaving the page; the id is single use and short lived. */
 function startDownload(id: string, fileName: string) {

@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { type BreachedList } from '../src/server/auth/types'
 import { checkPasswordPolicy } from '../src/server/auth/password'
-import { loadBreachedList, breachedListService, BUNDLED_FILE_NAME } from '../src/server/auth/breached'
+import { loadBreachedList, breachedListService, lazyBreachedList, BUNDLED_FILE_NAME } from '../src/server/auth/breached'
 
 const dir = mkdtempSync(path.join(tmpdir(), 'dbloom-breached-'))
 afterAll(() => rmSync(dir, { recursive: true, force: true }))
@@ -100,6 +100,21 @@ describe('service wrapper', () => {
       failClosed: false,
     })
     expect(result).toEqual({ reason: null, breachedListUnavailable: true })
+  })
+})
+
+describe('lazy list', () => {
+  it('loads the operator list on first use from the path the settings give at that moment', async () => {
+    let path: string | null = null
+    const list = lazyBreachedList(() => path)
+    path = operatorFile
+    expect(await list.contains('hunter2000danger')).toBe(true)
+    expect(await list.contains('r9!QkeL2sXvN')).toBe(false)
+  })
+
+  it('answers unavailable without any list, which a fail-closed policy turns into a refusal (the bug of a stub list)', async () => {
+    const list = lazyBreachedList(() => null)
+    expect(await list.contains('r9!QkeL2sXvN')).toBe('unavailable')
   })
 })
 

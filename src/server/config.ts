@@ -84,11 +84,15 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
   if (config.importDir !== undefined && !isAbsolute(config.importDir)) {
     throw new Error('DBLOOM_IMPORT_DIR must be an absolute path')
   }
-  // SEC-TGT-018: free-form targets need a named allow-list or an explicit acknowledgement.
-  if (config.allowedTargets.length === 0 && !config.freeFormAck) {
-    throw new Error(
-      'Direct mode needs DBLOOM_DIRECT_TARGETS (host:port list) or DBLOOM_DIRECT_FREE_FORM_ACK=true',
-    )
-  }
   return config
+}
+
+/**
+ * SEC-TGT-018: direct mode needs a named allow-list or an explicit free-form acknowledgement. Called by the runtime
+ * once the login mode is known; account mode (FR-AUT-001) has per-user profiles and does not use these variables.
+ */
+export function assertDirectTargets(config: Pick<Config, 'allowedTargets' | 'freeFormAck'>): void {
+  if (config.allowedTargets.length === 0 && !config.freeFormAck) {
+    throw new Error('Direct mode needs DBLOOM_DIRECT_TARGETS (host:port list) or DBLOOM_DIRECT_FREE_FORM_ACK=true')
+  }
 }

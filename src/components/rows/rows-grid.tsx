@@ -761,7 +761,7 @@ function RowsGridLoaded({
           <SelectionSummary count={chosen.length} onClear={() => setSelection(clearSelection())} />
           {hooks.toolbar?.(snapshot)}
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="ml-auto flex flex-wrap items-center gap-2">
           {model && (
             <ColumnMenu
               columns={model.columns}

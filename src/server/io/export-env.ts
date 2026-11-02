@@ -20,7 +20,7 @@ export function exportEnvOf(session: LiveSession, httpHost?: string): ExportServ
     owner: base.owner,
     limits: base.limits,
     mayDisableFormulaNeutralisation: ioBoundsFromConfig(runtime.config).formulaOptOut,
-    prefs: stateless ? memoryIoPrefs : runtime.store.ioPrefs,
+    prefs: stateless ? (runtime.statelessPrefs?.io ?? memoryIoPrefs) : runtime.store.ioPrefs,
     templates: stateless ? memoryIoTemplates : runtime.store.ioTemplates,
     targetLabel: base.targetLabel,
     serverName: session.target.host,

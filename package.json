@@ -8,13 +8,15 @@
   },
   "scripts": {
     "dev": "vite dev",
-    "build": "vite build",
+    "build": "vite build && vite build --config vite.cli.config.ts",
     "start": "node .output/server/index.mjs",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
     "test": "vitest run",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:e2e:auth-ui": "playwright test -c playwright.auth-ui.config.ts",
+    "test:e2e:auth-live": "playwright test -c playwright.account.config.ts"
   },
   "dependencies": {
     "@codemirror/autocomplete": "6.20.4",
@@ -46,6 +48,7 @@
     "nitro": "3.0.260903-beta",
     "react": "19.3.1",
     "react-dom": "19.3.1",
+    "reflect-metadata": "0.2.2",
     "stream-json": "3.7.0",
     "tailwind-merge": "3.7.0",
     "uqr": "0.1.3",

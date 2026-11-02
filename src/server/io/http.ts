@@ -1,8 +1,9 @@
-import { CSRF_HEADER } from '../../lib/csrf'
+import { CONNECTION_HEADER, CONNECTION_PARAM, CSRF_HEADER } from '../../lib/csrf'
 import { SESSION_COOKIE } from '../middleware'
+import { resolveTargetSession } from '../session-context'
 import type { Runtime } from '../runtime'
 import type { LiveSession } from '../sessions'
-import { isStateless, ownerKeyOf } from '../sql/state'
+import { isStateless, ownerKeyFor } from '../sql/state'
 import { auditIo } from '../audit'
 import { JobRegistry, isDone, isTerminal, type JobOwner } from './jobs'
 import { limitsFor, uploadLimitNote, type IoLimitsResolved } from './limits'
@@ -19,7 +20,7 @@ import type { Readable } from 'node:stream'
  * configuration files (FR-IOX-095).
  */
 
-type RuntimeLike = Pick<Runtime, 'sessions' | 'config' | 'store'>
+type RuntimeLike = Pick<Runtime, 'sessions' | 'config' | 'store'> & Partial<Pick<Runtime, 'setup' | 'statelessPrefs'>>
 
 export type IoHttpEnv = {
   temp: TempStore
@@ -62,9 +63,9 @@ export function resetIoServices(): void {
 
 export function ioEnvOf(session: LiveSession, runtime: RuntimeLike): IoHttpEnv {
   const stateless = isStateless()
-  const ownerKey = stateless ? session.idHash : ownerKeyOf(session.target)
+  const ownerKey = ownerKeyFor(session)
   const targetLabel = `${session.target.host}${session.target.zone ?? ''}:${session.target.port}`
-  const prefs = stateless ? memoryIoPrefs : runtime.store.ioPrefs
+  const prefs = stateless ? (runtime.statelessPrefs?.io ?? memoryIoPrefs) : runtime.store.ioPrefs
   return {
     ...getIoServices(runtime.config),
     owner: { sessionId: session.idHash, user: ownerKey },
@@ -92,20 +93,22 @@ function sameOrigin(request: Request): boolean {
   return !site || site === 'same-origin' || site === 'none'
 }
 
-function sessionOf(
+async function sessionOf(
   request: Request,
   runtime: RuntimeLike,
   requireCsrf: boolean,
-): LiveSession | undefined {
+): Promise<LiveSession | undefined> {
   if (!sameOrigin(request)) return undefined
-  const session = runtime.sessions.resolve(cookieOf(request, SESSION_COOKIE))
-  if (!session) return undefined
-  if (
-    requireCsrf &&
-    !runtime.sessions.verifyCsrf(session, request.headers.get(CSRF_HEADER) ?? undefined)
-  ) {
-    return undefined
-  }
+  // Account mode: the connection comes in a header, or in a query parameter where a link cannot set one (FR-AUT-018).
+  const connectionId = request.headers.get(CONNECTION_HEADER) ?? new URL(request.url).searchParams.get(CONNECTION_PARAM) ?? undefined
+  const csrf = request.headers.get(CSRF_HEADER) ?? undefined
+  const session = await resolveTargetSession(runtime, {
+    token: cookieOf(request, SESSION_COOKIE),
+    connectionId,
+    csrf,
+    requireCsrf,
+    background: false,
+  })
   return session
 }
 
@@ -164,7 +167,7 @@ export async function handleIoUpload(
   runtime: RuntimeLike,
   env: (session: LiveSession) => IoHttpEnv = (s) => ioEnvOf(s, runtime),
 ): Promise<Response> {
-  const session = sessionOf(request, runtime, true)
+  const session = await sessionOf(request, runtime, true)
   if (!session) return neutral(403)
   let e: IoHttpEnv
   try {
@@ -312,7 +315,7 @@ export async function handleIoDownload(
   runtime: RuntimeLike,
   env: (session: LiveSession) => IoHttpEnv = (s) => ioEnvOf(s, runtime),
 ): Promise<Response> {
-  const session = sessionOf(request, runtime, false)
+  const session = await sessionOf(request, runtime, false)
   if (!session) return neutral(404)
   let e: IoHttpEnv
   try {

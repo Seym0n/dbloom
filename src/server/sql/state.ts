@@ -46,7 +46,15 @@ export function ownerKeyOf(target: TargetKey): string {
   return `${target.host}${target.zone ?? ''}:${target.port}|${target.username}`
 }
 
-/** Stateless mode (`DBLOOM_STORE=none`): history and bookmarks live in memory for the session. */
+/**
+ * The one owner key of per-user data (SPEC/26 5.2): stateless mode the session id hash, account mode  * (set by ), direct mode .
+ */
+export function ownerKeyFor(session: { idHash: string; target: TargetKey; ownerKey?: string }): string {
+  if (isStateless()) return session.idHash
+  return session.ownerKey ?? ownerKeyOf(session.target)
+}
+
+/** Stateless mode (): history and bookmarks live in memory for the session. */
 export const isStateless = (): boolean => process.env.DBLOOM_STORE === 'none'
 
 /** The store enforces only the size limit; redaction is the caller's job (spec 5.8, 5.10). */
