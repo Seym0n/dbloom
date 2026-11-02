@@ -16,6 +16,8 @@ const IO_PORT = 3103
 
 const env = {
   DBLOOM_DIRECT_FREE_FORM_ACK: 'true',
+  // Direct mode without the wizard (Q8): the first start completes the setup itself.
+  DBLOOM_AUTO_SETUP: 'direct',
   DBLOOM_ALLOW_LOOPBACK: 'true',
   DBLOOM_TARGET_TLS: 'off',
 }
@@ -30,7 +32,7 @@ export default defineConfig<StructureOptions>({
   use: { baseURL: `http://localhost:${PORT}`, trace: 'retain-on-failure' },
   projects: [
     // The walking-skeleton specs run against the seeded MySQL 8.4 only.
-    { name: 'chromium', testIgnore: perProductSpecs, use: { browserName: 'chromium' } },
+    { name: 'chromium', testIgnore: [perProductSpecs, /auth-ui-.*.spec.ts/, /auth-live-.*.spec.ts/], use: { browserName: 'chromium' } },
     // The structure specs run once per product (SCN-022): `--project=mysql` or `--project=mariadb`.
     {
       name: 'mysql',
@@ -45,7 +47,7 @@ export default defineConfig<StructureOptions>({
   ],
   webServer: [
     {
-      command: 'npm run build && node .output/server/index.mjs',
+      command: 'node e2e/fixtures/build.mjs && node .output/server/index.mjs',
       url: `http://localhost:${PORT}/api/health`,
       reuseExistingServer: Boolean(process.env.E2E_REUSE_SERVERS),
       timeout: 180_000,

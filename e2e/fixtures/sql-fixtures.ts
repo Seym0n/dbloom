@@ -260,6 +260,7 @@ export async function startDbloom(
     env: {
       ...process.env,
       DBLOOM_DIRECT_FREE_FORM_ACK: 'true',
+      DBLOOM_AUTO_SETUP: 'direct',
       DBLOOM_ALLOW_LOOPBACK: 'true',
       DBLOOM_TARGET_TLS: 'off',
       PORT: String(port),
