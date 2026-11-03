@@ -1,0 +1,70 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`exposure report > snapshot: behind proxy 1`] = `
+"bind             0.0.0.0:3000
+public origin    https://db.example.com
+scheme           https
+allowed hosts    db.example.com
+trusted proxies  172.18.0.0/16
+proxy hops       (unused)
+hsts             on, max-age 31536000
+probe hosts      localhost, 127.0.0.1
+probe allow      127.0.0.0/8, ::1/128
+login mode       account
+store            sqlite in ./data
+direct targets   (not used)
+temp dir         ./data/tmp
+import dir       (disabled)
+target tls       verify
+diagnostics      log level info
+
+Warnings: none
+"
+`;
+
+exports[`exposure report > snapshot: local default 1`] = `
+"bind             127.0.0.1:3000 (loopback)
+public origin    (unset)
+scheme           http (loopback only)
+allowed hosts    localhost, 127.0.0.1, [::1], localhost:3000, 127.0.0.1:3000, [::1]:3000
+trusted proxies  (none)
+proxy hops       (unused)
+hsts             on, max-age 31536000
+probe hosts      localhost, 127.0.0.1
+probe allow      127.0.0.0/8, ::1/128
+login mode       chosen by setup wizard
+store            sqlite in ./data
+direct targets   (not used)
+temp dir         ./data/tmp
+import dir       (disabled)
+target tls       verify
+diagnostics      log level info
+
+Warnings: none
+"
+`;
+
+exports[`exposure report > snapshot: risky stateless 1`] = `
+"bind             127.0.0.1:3000 (loopback)
+public origin    (unset)
+scheme           http (loopback only)
+allowed hosts    localhost, 127.0.0.1, [::1], localhost:3000, 127.0.0.1:3000, [::1]:3000
+trusted proxies  (none)
+proxy hops       (unused)
+hsts             on, max-age 31536000
+probe hosts      localhost, 127.0.0.1
+probe allow      127.0.0.0/8, ::1/128
+login mode       direct
+store            none (stateless)
+direct targets   free-form (acknowledged)
+temp dir         ./data/tmp
+import dir       (disabled)
+target tls       skip-verify
+diagnostics      log level info
+
+Warnings:
+  - Direct mode accepts any database target (free-form)
+  - Target TLS is skip-verify
+  - Targets on loopback or private networks are allowed
+"
+`;

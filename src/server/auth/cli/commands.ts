@@ -28,7 +28,8 @@ export const CLI_USAGE = `Usage: dbloom <command>
   setup-token                  print the pending setup token
   recover <username>           print a recovery link
   sessions revoke <username>   end all sessions of a user
-  rotate-secret                re-seal TOTP secrets under the current server key`
+  rotate-secret                re-seal TOTP secrets under the current server key
+  exposure                     print the effective exposure and its warnings`
 
 const done = (exitCode: CliResult['exitCode'], ...lines: string[]): CliResult => ({ exitCode, stdout: lines.join('\n') + '\n' })
 

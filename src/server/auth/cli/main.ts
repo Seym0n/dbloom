@@ -8,6 +8,7 @@ import { tokens } from '../tokens'
 import { createUserService } from '../users'
 import { AuthError } from '../types'
 import { openSqliteStore } from '../../store/sqlite-store'
+import { exposureCommand } from '../../exposure'
 import { CLI_USAGE, runCli } from './commands'
 
 /** Runs `argv` (after the program name) against the store in `DBLOOM_DATA_DIR`; returns the exit code. */
@@ -19,6 +20,11 @@ export async function main(
   if (argv.length === 0 || argv[0] === '--help' || argv[0] === '-h') {
     write(CLI_USAGE + '\n')
     return argv.length === 0 ? 2 : 0
+  }
+  if (argv[0] === 'exposure') {
+    const r = exposureCommand(env)
+    write(r.stdout)
+    return r.exitCode
   }
   const dataDir = env.DBLOOM_DATA_DIR ?? './data'
   const store = openSqliteStore(join(dataDir, 'dbloom.db'))

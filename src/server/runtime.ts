@@ -13,6 +13,7 @@ import { evaluateStart } from './auth/start-gate'
 import { createThrottle } from './auth/throttle'
 import { AUTH_SETTINGS, type ResolvedAuthSettings, type Throttle } from './auth/types'
 import type { SetupApi } from './auth/setup'
+import { buildExposure } from './exposure'
 import { assertDirectTargets, loadConfigWithWarnings, type Config } from './config'
 import type { IoPrefsStore } from './io/store'
 import type { PrefsStore } from './rows/prefs'
@@ -57,7 +58,9 @@ export function getRuntime(): Runtime {
     // no .env file (containers pass real variables)
   }
   const { config, warnings: configWarnings } = loadConfigWithWarnings()
-  for (const w of configWarnings) log.warn('DBLoom config warning', { warning: w })
+  const exposure = buildExposure(config, process.env, configWarnings)
+  log.info('exposure', Object.fromEntries(exposure.lines.map(([k, v]) => [k.replace(/ /g, '_'), v])))
+  for (const w of exposure.warnings) log.warn('DBLoom config warning', { warning: w })
   void readyClassifier() // loads the SQL parser once; a failure leaves the classifier on `parser-off`
   mkdirSync(config.dataDir, { recursive: true })
   const store = openSqliteStore(join(config.dataDir, 'dbloom.db'))
