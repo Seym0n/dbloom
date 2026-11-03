@@ -18,6 +18,7 @@ import { Route as AccountIndexRouteImport } from './routes/account.index'
 import { Route as AccountPreferencesRouteImport } from './routes/account.preferences'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
+import { Route as ApiReadyRouteImport } from './routes/api/ready'
 import { Route as ApiStartupRouteImport } from './routes/api/startup'
 import { Route as ApiIoUploadRouteImport } from './routes/api/io/upload'
 import { Route as ApiRowsUploadRouteImport } from './routes/api/rows/upload'
@@ -69,6 +70,11 @@ const ApiHealthRoute = ApiHealthRouteImport.update({
   path: '/api/health',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiReadyRoute = ApiReadyRouteImport.update({
+  id: '/api/ready',
+  path: '/api/ready',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiStartupRoute = ApiStartupRouteImport.update({
   id: '/api/startup',
   path: '/api/startup',
@@ -104,6 +110,7 @@ export interface FileRoutesByFullPath {
   '/account/preferences': typeof AccountPreferencesRoute
   '/admin/users': typeof AdminUsersRoute
   '/api/health': typeof ApiHealthRoute
+  '/api/ready': typeof ApiReadyRoute
   '/api/startup': typeof ApiStartupRoute
   '/account/': typeof AccountIndexRoute
   '/api/io/upload': typeof ApiIoUploadRoute
@@ -119,6 +126,7 @@ export interface FileRoutesByTo {
   '/account/preferences': typeof AccountPreferencesRoute
   '/admin/users': typeof AdminUsersRoute
   '/api/health': typeof ApiHealthRoute
+  '/api/ready': typeof ApiReadyRoute
   '/api/startup': typeof ApiStartupRoute
   '/account': typeof AccountIndexRoute
   '/api/io/upload': typeof ApiIoUploadRoute
@@ -136,6 +144,7 @@ export interface FileRoutesById {
   '/account/preferences': typeof AccountPreferencesRoute
   '/admin/users': typeof AdminUsersRoute
   '/api/health': typeof ApiHealthRoute
+  '/api/ready': typeof ApiReadyRoute
   '/api/startup': typeof ApiStartupRoute
   '/account/': typeof AccountIndexRoute
   '/api/io/upload': typeof ApiIoUploadRoute
@@ -154,6 +163,7 @@ export interface FileRouteTypes {
     | '/account/preferences'
     | '/admin/users'
     | '/api/health'
+    | '/api/ready'
     | '/api/startup'
     | '/account/'
     | '/api/io/upload'
@@ -169,6 +179,7 @@ export interface FileRouteTypes {
     | '/account/preferences'
     | '/admin/users'
     | '/api/health'
+    | '/api/ready'
     | '/api/startup'
     | '/account'
     | '/api/io/upload'
@@ -185,6 +196,7 @@ export interface FileRouteTypes {
     | '/account/preferences'
     | '/admin/users'
     | '/api/health'
+    | '/api/ready'
     | '/api/startup'
     | '/account/'
     | '/api/io/upload'
@@ -201,6 +213,7 @@ export interface RootRouteChildren {
   SetupRoute: typeof SetupRoute
   AdminUsersRoute: typeof AdminUsersRoute
   ApiHealthRoute: typeof ApiHealthRoute
+  ApiReadyRoute: typeof ApiReadyRoute
   ApiStartupRoute: typeof ApiStartupRoute
   ApiIoUploadRoute: typeof ApiIoUploadRoute
   ApiRowsUploadRoute: typeof ApiRowsUploadRoute
@@ -273,6 +286,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiHealthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/ready': {
+      id: '/api/ready'
+      path: '/api/ready'
+      fullPath: '/api/ready'
+      preLoaderRoute: typeof ApiReadyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/startup': {
       id: '/api/startup'
       path: '/api/startup'
@@ -332,6 +352,7 @@ const rootRouteChildren: RootRouteChildren = {
   SetupRoute: SetupRoute,
   AdminUsersRoute: AdminUsersRoute,
   ApiHealthRoute: ApiHealthRoute,
+  ApiReadyRoute: ApiReadyRoute,
   ApiStartupRoute: ApiStartupRoute,
   ApiIoUploadRoute: ApiIoUploadRoute,
   ApiRowsUploadRoute: ApiRowsUploadRoute,

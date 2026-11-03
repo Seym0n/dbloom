@@ -4,6 +4,7 @@
  * Order: Host (003), OPTIONS (008), scheme (004), allow/deny slot (hardening), origin (006). The client address
  * (005) is computed once and returned.
  */
+import { BODY_REFUSAL, checkBodyLimit, type Limits } from '../http/limits'
 import { CidrList } from './cidr'
 import { clientAddress, UNKNOWN_ADDRESS } from './client-address'
 import { effectiveScheme, isHostAllowed, parsePublicOrigin, type OriginConfig } from './origin'
@@ -11,6 +12,8 @@ import { effectiveScheme, isHostAllowed, parsePublicOrigin, type OriginConfig } 
 export type GateConfig = OriginConfig & {
   probeHosts: readonly string[]
   probeAllow: readonly string[]
+  /** Body caps (FR-SVR-009); absent in tests that do not exercise them. */
+  limits?: Pick<Limits, 'functionBodyKiB' | 'otherBodyKiB'>
 }
 
 export type RouteClass = 'function' | 'route' | 'asset' | 'page'
@@ -25,15 +28,15 @@ export type GateRequest = {
   urlScheme: 'http' | 'https'
 }
 
-export type DenyReason = 'host' | 'method' | 'scheme' | 'origin' | 'rule'
+export type DenyReason = 'host' | 'method' | 'scheme' | 'origin' | 'rule' | 'body' | 'probe'
 export type GateOk = { ok: true; clientAddress: string; scheme: 'http' | 'https'; routeClass: RouteClass }
 export type GateDeny = { ok: false; status: number; body: string; reason: DenyReason }
 export type GateResult = GateOk | GateDeny
 
 /** Server functions are served under this prefix (TanStack Start `serverFns.base`). */
 export const SERVER_FN_BASE = '/_serverFn/'
-/** Liveness probes: reachable under a probe host (FR-SVR-010). `/api/ready` joins in the health task. */
-export const PROBE_PATHS: readonly string[] = ['/api/health']
+/** Liveness and readiness probes: reachable under a probe host, from probe peers only (FR-SVR-010). */
+export const PROBE_PATHS: readonly string[] = ['/api/health', '/api/ready']
 
 /**
  * Server functions that carry a credential (password, one-time code, passkey assertion, recovery key, vault
@@ -171,6 +174,12 @@ export function evaluateGate(req: GateRequest, cfg: GateConfig): GateResult {
 
   // 2. CORS is off: no preflight is ever answered (FR-SVR-008).
   if (req.method === 'OPTIONS') return deny(405, 'method')
+
+  // 2a. Probe paths answer probe peers only (SEC-TGT-132). Anyone else gets a bare 404, as if the route did not exist.
+  if (PROBE_PATHS.includes(req.pathname) && !listOf(cfg.probeAllow).contains(req.peer)) return deny(404, 'probe')
+
+  // 2b. Body cap by route class (FR-SVR-009): declared length, or an unbounded (chunked) body on a capped route.
+  if (cfg.limits && checkBodyLimit(req.pathname, req.headers, cfg.limits)) return deny(413, 'body', BODY_REFUSAL)
 
   // 3. Effective scheme (FR-SVR-004).
   const eff = effectiveScheme(req.peer, req.headers, cfg, req.urlScheme)

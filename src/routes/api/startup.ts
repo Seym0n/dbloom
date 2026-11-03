@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { log } from '~/server/log'
 import { getRuntime } from '~/server/runtime'
 
 /**
@@ -14,9 +15,7 @@ export const Route = createFileRoute('/api/startup')({
           getRuntime()
           return Response.json({ ok: true })
         } catch (error) {
-          console.error(
-            `DBLoom cannot start: ${error instanceof Error ? error.message : String(error)}`,
-          )
+          log.error('DBLoom cannot start', { error: error instanceof Error ? error.message : String(error) })
           return Response.json({ ok: false }, { status: 500 })
         }
       },

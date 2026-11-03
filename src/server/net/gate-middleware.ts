@@ -1,4 +1,6 @@
+import { randomUUID } from 'node:crypto'
 import { defineMiddleware } from 'nitro'
+import { log, redactUrl } from '../log'
 import { evaluateGate } from './gate'
 import { gateConfig } from './gate-config'
 import { peerAddress } from './peer'
@@ -18,6 +20,9 @@ export default defineMiddleware((event) => {
   const config = gateConfig()
   if (!config) return new Response(null, { status: 500 })
   const url = new URL(request.url)
+  const requestId = randomUUID()
+  const meta = ((context.dbloom as Record<string, unknown> | undefined) ??= {})
+  Object.assign(meta, { requestId, startedAt: Date.now() })
   const result = evaluateGate(
     {
       method: request.method.toUpperCase(),
@@ -29,10 +34,11 @@ export default defineMiddleware((event) => {
     config,
   )
   if (!result.ok) {
+    log.warn('gate.refused', { requestId, status: result.status, reason: result.reason, method: request.method, path: redactUrl(url.pathname) })
     return new Response(result.body === '' ? null : result.body, {
       status: result.status,
       headers: result.body === '' ? {} : { 'content-type': 'text/plain; charset=utf-8' },
     })
   }
-  context.dbloom = { clientAddress: result.clientAddress, scheme: result.scheme, routeClass: result.routeClass }
+  Object.assign(meta, { clientAddress: result.clientAddress, scheme: result.scheme, routeClass: result.routeClass })
 })

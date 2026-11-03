@@ -70,7 +70,7 @@ async function start(env: Record<string, string>): Promise<Srv> {
   }
 }
 
-const VOLATILE = new Set(['date', 'etag', 'last-modified', 'content-length', 'connection', 'keep-alive', 'transfer-encoding', 'content-type'])
+const VOLATILE = new Set(['date', 'etag', 'last-modified', 'content-length', 'connection', 'keep-alive', 'transfer-encoding', 'content-type', 'x-request-id'])
 const stable = (h: Record<string, string>) =>
   Object.fromEntries(Object.entries(h).filter(([k]) => !VOLATILE.has(k)).sort(([a], [b]) => a.localeCompare(b)))
 
@@ -168,6 +168,8 @@ describe.skipIf(!built)('gate against the built server', () => {
         expect(r.headers['cross-origin-opener-policy'], name).toBe('same-origin')
         expect(r.headers['permissions-policy'], name).toContain('camera=()')
         expect(r.headers['cache-control'], name).toBeTruthy()
+        // Existing public files are served by Nitro's static handler before the middleware chain: no request id.
+        if (name !== 'asset') expect(r.headers['x-request-id'], name).toMatch(/^[0-9a-f-]{36}$/)
         expect(Object.keys(r.headers).some((k) => k.startsWith('access-control-')), name).toBe(false)
       }
     }

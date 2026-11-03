@@ -1,6 +1,7 @@
 import { mkdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { DirectAuth } from './auth'
+import { log } from './log'
 import { createSqlitePrefsBackend, type PrefsBackend } from './auth/prefs/backend'
 import { createTargetConnectRules } from './auth/connections'
 import { configurePrefsService, getPrefsService } from './auth/prefs/runtime'
@@ -54,7 +55,7 @@ export function getRuntime(): Runtime {
     // no .env file (containers pass real variables)
   }
   const { config, warnings: configWarnings } = loadConfigWithWarnings()
-  for (const w of configWarnings) console.warn(`DBLoom config warning: ${w}`)
+  for (const w of configWarnings) log.warn('DBLoom config warning', { warning: w })
   void readyClassifier() // loads the SQL parser once; a failure leaves the classifier on `parser-off`
   mkdirSync(config.dataDir, { recursive: true })
   const store = openSqliteStore(join(config.dataDir, 'dbloom.db'))

@@ -56,7 +56,7 @@ describe('route inventory: every registered route passes through the gate', () =
   const functions = serverFunctions()
 
   it('finds the known routes (the inventory is not empty)', () => {
-    expect(paths).toEqual(expect.arrayContaining(['/', '/setup', '/api/health', '/api/startup', '/api/rows/upload', '/api/io/upload']))
+    expect(paths).toEqual(expect.arrayContaining(['/', '/setup', '/api/health', '/api/ready', '/api/startup', '/api/rows/upload', '/api/io/upload']))
     expect(functions.length).toBeGreaterThan(80)
   })
 

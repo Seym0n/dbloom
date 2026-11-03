@@ -54,10 +54,6 @@ export const ENV_VARS: readonly EnvVar[] = [
 
   v(C, 'Limits', 'DBLOOM_BODY_LIMIT_FUNCTIONS_KIB', 'int', '1024', 'Request body cap of server functions in KiB.', { min: 16, max: 65_536 }),
   v(C, 'Limits', 'DBLOOM_BODY_LIMIT_OTHER_KIB', 'int', '64', 'Request body cap of every other route in KiB.', { min: 1, max: 1024 }),
-  v(C, 'Limits', 'DBLOOM_MAX_HEADER_KIB', 'int', '16', 'Request header size cap in KiB.', { min: 4, max: 64 }),
-  v(C, 'Limits', 'DBLOOM_REQUEST_TIMEOUT_SECONDS', 'int', '60', 'Whole-request timeout in seconds.', { min: 5, max: 600 }),
-  v(C, 'Limits', 'DBLOOM_KEEPALIVE_TIMEOUT_SECONDS', 'int', '5', 'Keep-alive timeout in seconds.', { min: 1, max: 120 }),
-  v(C, 'Limits', 'DBLOOM_MAX_CONNECTIONS', 'int', '1000', 'Maximum simultaneous connections.', { min: 10, max: 100_000 }),
 
   v(C, 'Store', 'DBLOOM_STORE', 'string', 'sqlite', '`none` runs stateless (direct mode only, nothing persisted).'),
   v(C, 'Store', 'DBLOOM_DATA_DIR', 'path', './data', 'Store directory (the compose file mounts a volume at /data).'),

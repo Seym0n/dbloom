@@ -27,3 +27,9 @@ export function currentRequestOrigin(): string {
   const host = request.headers.get('host') ?? new URL(request.url).host
   return `${scheme}://${host}`
 }
+
+/** Request id set by the gate (FR-SVR-020), for log lines written while serving the current request. */
+export function currentRequestId(): string | undefined {
+  const request = getRequest()
+  return (request as { context?: { dbloom?: { requestId?: string } } }).context?.dbloom?.requestId
+}

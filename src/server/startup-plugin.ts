@@ -1,4 +1,5 @@
 import { definePlugin } from 'nitro'
+import { log } from './log'
 import { INTERNAL_REQUEST } from './net/gate-middleware'
 
 /**
@@ -15,9 +16,7 @@ export default definePlugin((nitro) => {
         request.context = { [INTERNAL_REQUEST]: true }
         ok = (await nitro.fetch(request)).ok
       } catch (error) {
-        console.error(
-          `DBLoom cannot start: ${error instanceof Error ? error.message : String(error)}`,
-        )
+        log.error('DBLoom cannot start', { error: error instanceof Error ? error.message : String(error) })
       }
       // In dev the error stays visible in the log and on each request; killing the worker only hangs the socket.
       if (!ok && process.env.NODE_ENV === 'production') process.exit(1)

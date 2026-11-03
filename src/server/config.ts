@@ -64,14 +64,10 @@ export type Config = {
   allowDebug: boolean
   probeHosts: string[]
   probeAllow: string[]
-  /** FR-SVR-009 placeholders: parsed and range checked here, enforced by task 4. */
+  /** FR-SVR-009: body caps only; the rest is left to Node defaults and the reverse proxy. */
   limits: {
     functionBodyKiB: number
     otherBodyKiB: number
-    headerKiB: number
-    requestTimeoutSeconds: number
-    keepAliveTimeoutSeconds: number
-    maxConnections: number
   }
 }
 
@@ -341,10 +337,6 @@ export function loadConfigWithWarnings(env: NodeJS.ProcessEnv = process.env): Lo
     limits: {
       functionBodyKiB: n('DBLOOM_BODY_LIMIT_FUNCTIONS_KIB', 1024),
       otherBodyKiB: n('DBLOOM_BODY_LIMIT_OTHER_KIB', 64),
-      headerKiB: n('DBLOOM_MAX_HEADER_KIB', 16),
-      requestTimeoutSeconds: n('DBLOOM_REQUEST_TIMEOUT_SECONDS', 60),
-      keepAliveTimeoutSeconds: n('DBLOOM_KEEPALIVE_TIMEOUT_SECONDS', 5),
-      maxConnections: n('DBLOOM_MAX_CONNECTIONS', 1000),
     },
   }
   if (config.importDir !== undefined && !isAbsolute(config.importDir)) {
