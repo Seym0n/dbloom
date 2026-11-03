@@ -1,5 +1,5 @@
 import { definePlugin } from 'nitro'
-import { log, redactUrl } from '../log'
+import { levelFromEnv, log, redactUrl } from '../log'
 import { gateConfig } from '../net/gate-config'
 import { applySecurityHeaders } from './headers'
 
@@ -32,6 +32,8 @@ export default definePlugin((nitro) => {
       path: redactUrl(`${url.pathname}${url.search}`),
       status: res.status,
       ms: meta.startedAt ? Date.now() - meta.startedAt : undefined,
+      // Personal data: the effective client address is logged at debug level only (proxy suite reads it from there).
+      client: levelFromEnv() === 'debug' ? meta.clientAddress : undefined,
     }
     if (quiet) log.debug('request', fields)
     else log.info('request', fields)

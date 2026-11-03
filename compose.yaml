@@ -1,10 +1,11 @@
+# Reference deployment (SPEC/27 FR-SVR-013): one instance, one volume, no published port. A reverse proxy (Coolify's
+# Traefik) routes to container port 3000. For a local run add compose.local.yaml.
 services:
   dbloom:
     build: .
-    # The image binds 0.0.0.0 and refuses to start without a public origin and the proxy network (SPEC/27 FR-SVR-002).
-    # TODO(server task 7): drop the published port (Coolify routes to the container) and add compose.local.yaml.
-    ports:
-      - '3000:3000'
+    init: false
+    expose:
+      - '3000'
     env_file:
       - path: .env
         required: false
@@ -13,7 +14,13 @@ services:
       DBLOOM_TRUST_PROXY: ${DBLOOM_TRUST_PROXY:?set DBLOOM_TRUST_PROXY (CIDR of the reverse proxy network) in .env}
     volumes:
       - dbloom-data:/data
+    read_only: true
+    tmpfs:
+      - /tmp
     restart: unless-stopped
+    stop_grace_period: 30s
+    deploy:
+      replicas: 1
 
 volumes:
   dbloom-data:

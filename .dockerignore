@@ -7,3 +7,16 @@ SPEC
 legacy-release
 data
 test-results
+.env
+.env.*
+!.env.example
+tests
+e2e
+.cursor
+.codex
+.gemini
+.grok
+.github
+.concord
+tasks
+reviews

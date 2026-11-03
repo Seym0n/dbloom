@@ -1,0 +1,30 @@
+# Reference Traefik config, the shape Coolify generates. Test additions are marked.
+http:
+  routers:
+    app:
+      rule: HostRegexp(`.+`) # test: forward every Host, so the app's own 421 is exercised
+      entryPoints: [websecure]
+      service: app
+      middlewares: [limit]
+      tls: {}
+    force-http:
+      # test: simulates a proxy that reports the wrong scheme (FR-SVR-004)
+      rule: HostRegexp(`.+`) && Header(`X-Test-Force-Http`, `1`)
+      priority: 100
+      entryPoints: [websecure]
+      service: app
+      middlewares: [limit, proto-http]
+      tls: {}
+  middlewares:
+    limit:
+      buffering:
+        maxRequestBodyBytes: 4194304 # 4 MiB; the body-limit lives in the proxy (owner decision 2026-11-03)
+    proto-http:
+      headers:
+        customRequestHeaders:
+          X-Forwarded-Proto: http
+  services:
+    app:
+      loadBalancer:
+        servers:
+          - url: http://172.30.0.2:3000

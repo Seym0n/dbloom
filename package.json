@@ -16,6 +16,7 @@
     "format": "prettier --write .",
     "test": "vitest run",
     "test:e2e": "playwright test",
+    "test:e2e:proxy": "vitest run -c vitest.proxy.config.ts",
     "test:e2e:auth-ui": "playwright test -c playwright.auth-ui.config.ts",
     "test:e2e:auth-live": "playwright test -c playwright.account.config.ts"
   },

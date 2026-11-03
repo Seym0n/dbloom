@@ -1,12 +1,23 @@
-FROM node:24-slim AS build
+# Node 24 LTS line, pinned by digest (FR-SVR-012). Update the digest on purpose: `docker buildx imagetools inspect node:24-slim`.
+ARG NODE_IMAGE=node:24-slim@sha256:c86ecead9e55a5210ac1727de38a4ca840bf03dcaf34dc9749addbf383b1920c
+
+FROM ${NODE_IMAGE} AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci
+# Lifecycle scripts stay off; the allow-list (scripts/check-lifecycle-scripts.mjs) is empty because the lock file has none for linux.
+RUN npm ci --ignore-scripts
 COPY . .
 RUN npm run build
 
-FROM node:24-slim
+FROM ${NODE_IMAGE}
+ARG VERSION=dev
+ARG SOURCE=
+LABEL org.opencontainers.image.title="DBLoom" \
+      org.opencontainers.image.version="${VERSION}" \
+      org.opencontainers.image.source="${SOURCE}"
 # Listens on all interfaces (container); the start rule then requires DBLOOM_PUBLIC_ORIGIN and DBLOOM_TRUST_PROXY.
+# The Nitro output bundles its dependencies, so the runtime stage holds only `.output`. Node is PID 1 and srvx handles
+# SIGTERM/SIGINT itself (SPEC/27 FR-SVR-014); `CI` and `TEST` must stay unset.
 ENV NODE_ENV=production PORT=3000 DBLOOM_DATA_DIR=/data DBLOOM_HOST=0.0.0.0
 WORKDIR /app
 COPY --from=build /app/.output ./.output

@@ -18,10 +18,13 @@ jobs:
         ports: ['33061:3306']
         options: --health-cmd="healthcheck.sh --connect --innodb_initialized" --health-interval=3s --health-retries=40
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with: { node-version: '${{ matrix.node }}', cache: npm }
-      - run: npm ci
+      - run: npm ci --ignore-scripts
+      - run: node scripts/check-pinned-deps.mjs
+      - run: node scripts/check-lifecycle-scripts.mjs
+      - run: npm audit --omit=dev --audit-level=high
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test
@@ -30,5 +33,25 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      # Build, non-root check, read-only start, health, second-instance refusal, restart on the same volume.
+      - run: bash scripts/docker-smoke.sh
       - run: docker build -t dbloom .
+      - name: Image size and layers
+        run: docker image inspect dbloom --format 'size={{.Size}} layers={{len .RootFS.Layers}}' && docker history dbloom
+      - uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0
+        with:
+          image-ref: dbloom
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: '1'
+  proxy:
+    # FR-SVR-015: Traefik full suite and Caddy subset against the built image; on main only.
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with: { node-version: '24', cache: npm }
+      - run: npm ci --ignore-scripts
+      - run: npm run test:e2e:proxy

@@ -1,0 +1,10 @@
+{
+	auto_https disable_redirects
+	local_certs
+}
+
+# evil.example is listed so the forged-Host test reaches the app instead of being stopped by Caddy's SNI check.
+dbloom.test, evil.example {
+	tls internal
+	reverse_proxy 172.30.0.2:3000
+}

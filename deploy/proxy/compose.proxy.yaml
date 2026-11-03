@@ -1,0 +1,56 @@
+# Proxy suite (SPEC/27 FR-SVR-015). Test only: the DBLoom image never contains a proxy. `npm run test:e2e:proxy` builds
+# the image, starts it behind Traefik (full suite) and Caddy (header/forwarding subset), and runs e2e/proxy/*.
+# Fixed addresses so DBLOOM_TRUST_PROXY can name exactly the proxies. Published ports are loopback only.
+name: dbloom-proxy
+services:
+  app:
+    build: ../..
+    environment:
+      DBLOOM_PUBLIC_ORIGIN: https://dbloom.test
+      DBLOOM_TRUST_PROXY: 172.30.0.10/32,172.30.0.11/32
+      DBLOOM_STORE: none
+      DBLOOM_DIRECT_FREE_FORM_ACK: 'true'
+      DBLOOM_LOG_LEVEL: debug
+      DBLOOM_ALLOW_DEBUG: 'true'
+    ports:
+      - '127.0.0.1:3300:3000' # direct access to the app port (must not honour forwarded headers)
+    networks:
+      default:
+        ipv4_address: 172.30.0.2
+
+  traefik:
+    image: traefik:v3.6
+    command:
+      - --entrypoints.web.address=:80
+      - --entrypoints.web.http.redirections.entryPoint.to=websecure
+      - --entrypoints.web.http.redirections.entryPoint.scheme=https
+      - --entrypoints.websecure.address=:443
+      - --entrypoints.websecure.http.tls=true
+      - --providers.file.filename=/etc/traefik/dynamic.yml
+      - --log.level=INFO
+    volumes:
+      - ./traefik/dynamic.yml:/etc/traefik/dynamic.yml:ro
+    ports:
+      - '127.0.0.1:18080:80'
+      - '127.0.0.1:18443:443'
+    depends_on: [app]
+    networks:
+      default:
+        ipv4_address: 172.30.0.10
+
+  caddy:
+    image: caddy:2
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+    ports:
+      - '127.0.0.1:19443:443'
+    depends_on: [app]
+    networks:
+      default:
+        ipv4_address: 172.30.0.11
+
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 172.30.0.0/24

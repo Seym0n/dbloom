@@ -1,0 +1,5 @@
+# Local run: `docker compose -f compose.yaml -f compose.local.yaml up`. Publishes on loopback only.
+services:
+  dbloom:
+    ports:
+      - '127.0.0.1:3000:3000'
