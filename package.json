@@ -10,6 +10,7 @@
     "dev": "vite dev",
     "build": "vite build && vite build --config vite.cli.config.ts",
     "start": "node .output/server/index.mjs",
+    "docs:env": "node scripts/gen-env-docs.mjs",
     "exposure": "node .output/cli/dbloom.mjs exposure",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",

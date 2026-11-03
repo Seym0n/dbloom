@@ -24,6 +24,7 @@ jobs:
       - run: npm ci --ignore-scripts
       - run: node scripts/check-pinned-deps.mjs
       - run: node scripts/check-lifecycle-scripts.mjs
+      - run: node scripts/gen-env-docs.mjs --check
       - run: npm audit --omit=dev --audit-level=high
       - run: npm run lint
       - run: npm run typecheck

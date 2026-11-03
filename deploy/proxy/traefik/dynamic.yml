@@ -1,4 +1,4 @@
-# Reference Traefik config, the shape Coolify generates. Test additions are marked.
+# Reference Traefik config, approximating Coolify's proxy (not compared with a real Coolify). Test additions are marked.
 http:
   routers:
     app:
