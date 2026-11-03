@@ -1,6 +1,6 @@
 # Proxy suite and proxy verify items (FR-SVR-015, 018; task 8)
 
-Run 2026-11-03: `npm run test:e2e:proxy` (vitest, no browser), 21 tests green. Image from the repo Dockerfile; `traefik:v3.6`, `caddy:2`, `nginx:1-alpine`; app on a fixed address behind two proxies in `deploy/proxy/compose.proxy.yaml` (network 172.30.0.0/24, `DBLOOM_TRUST_PROXY` lists exactly the two proxy addresses, stateless store, debug log so the effective client address is visible). The proxies exist only in this test setup; the image never contains one.
+Run 2026-11-03: `npm run test:e2e:proxy` (vitest, no browser), 21 tests green. Image from the repo Dockerfile; `traefik:v3.6`, `caddy:2`, `nginx:1-alpine`; app on a fixed address behind three proxies in `deploy/proxy/compose.proxy.yaml` (network 172.30.0.0/24, `DBLOOM_TRUST_PROXY` lists exactly the three proxy addresses, stateless store, debug log so the effective client address is visible). The proxies exist only in this test setup; the image never contains one.
 
 ## Coverage
 | Topic | Traefik (full) | Caddy (subset) | Direct to app port | nginx (subset) |
@@ -24,5 +24,5 @@ Test-only deviations: the Traefik router forwards every `Host` (`HostRegexp`), s
 - **Scheme mismatch.** Verified with a second router that overwrites `X-Forwarded-Proto: http` for requests carrying a test header.
 
 ## Open
-- CI job runs the suite on `main` only (spec); Docker Hub pulls of the two proxy images are not pinned by digest yet.
-- Apache is not covered; nginx runs the subset with the reference config `deploy/proxy/nginx/default.conf` (sets `X-Forwarded-For` to `$remote_addr`, `X-Forwarded-Proto` to `$scheme`, clears `Forwarded` and `X-Forwarded-Host`, `client_max_body_size 4m`, 600 s read timeout; the nginx image installs openssl with `apk` at start to make a throw-away certificate). The guide lists what a proxy must overwrite (`Host` forwarded, `X-Forwarded-For` set from the peer, `X-Forwarded-Proto` set, client-sent copies replaced, body limit, read timeout), and an nginx subset is a cheap addition.
+- CI job runs the suite on `main` only (spec); Docker Hub pulls of the three proxy images are not pinned by digest yet.
+- Apache is not covered; nginx runs the subset with the reference config `deploy/proxy/nginx/default.conf` (sets `X-Forwarded-For` to `$remote_addr`, `X-Forwarded-Proto` to `$scheme`, clears `Forwarded` and `X-Forwarded-Host`, `client_max_body_size 4m`, 600 s read timeout; the nginx image installs openssl with `apk` at start to make a throw-away certificate). The guide lists what a proxy must overwrite (`Host` forwarded, `X-Forwarded-For` set from the peer, `X-Forwarded-Proto` set, client-sent copies replaced, body limit, read timeout).
