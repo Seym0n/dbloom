@@ -37,7 +37,7 @@ const NON_CREDENTIAL = new Set(
   [
     'listConnections closeConnection vaultStatus vaultLock listProfiles deleteProfile issueInvite listInvites revokeInvite',
     'issueRecovery getBootState getLoginPageInfo signOut listFactors passkeyRegisterOptions passkeyRename passkeyRemove totpStart',
-    'listSessions revokeSession listNotices listUsers setUserStatus setUserRole deleteUser revokeUserSessions getDatabases getTables',
+    'listSessions revokeSession listNotices dismissNotice listUsers setUserStatus setUserRole deleteUser revokeUserSessions getDatabases getTables',
     'getTableRows analyseImport startImport resumeImport listImportFolder getIoCapabilities startExport getJob cancelJob',
     'listTemplates saveTemplate deleteTemplate getIoPrefs setIoPrefs getPrefs setPref exportPrefs importPrefs resetPrefs getRows',
     'countRows cancelCount getRowLimits readRow readCell openCell lookupRows referencingRows previewRows changeRows confirmRows',

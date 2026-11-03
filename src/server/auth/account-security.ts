@@ -80,6 +80,8 @@ export interface AccountSecurityService {
   listSessions(ctx: AccountContext): SessionInfo[]
   revokeSession(ctx: AccountContext, ref: string): Promise<void>
   listNotices(ctx: AccountContext): UserNotice[]
+  /** Marks one of the caller's own notices read. An unknown or foreign id changes nothing and answers the same (SPEC/30 FR-AUS-003). */
+  dismissNotice(ctx: AccountContext, id: string): void
 }
 
 export function createAccountSecurity(d: SecurityDeps): AccountSecurityService {
@@ -351,6 +353,10 @@ export function createAccountSecurity(d: SecurityDeps): AccountSecurityService {
 
     listNotices(ctx) {
       return store.listNotices(userOf(ctx).id)
+    },
+
+    dismissNotice(ctx, id) {
+      store.markNoticeRead(userOf(ctx).id, id, now())
     },
   }
 }

@@ -10,6 +10,9 @@ import { loadHome } from '~/routes/index'
 /** `/admin/audit`: administrators only (SPEC/29 FR-AAU-007). Direct and stateless installs get a notice instead of the list. */
 export const Route = createFileRoute('/admin/audit')({
   head: () => ({ meta: [{ title: t('audit.pageTitle') }] }),
+  // `?actor=<user id>` comes from the Activity action on the Users page.
+  validateSearch: (search: Record<string, unknown>): { actor?: string } =>
+    typeof search.actor === 'string' && search.actor.length > 0 && search.actor.length <= 200 ? { actor: search.actor } : {},
   loader: async () => {
     const boot = await loadHome()
     if (boot.kind === 'account' && !boot.session) throw redirect({ to: '/' })
@@ -20,6 +23,7 @@ export const Route = createFileRoute('/admin/audit')({
 
 function AdminAudit() {
   const boot = Route.useLoaderData()
+  const { actor } = Route.useSearch()
   const router = useRouter()
   useEffect(() => {
     // The mock layer keeps its state in the browser, so the server render defers and the browser loads it.
@@ -40,5 +44,5 @@ function AdminAudit() {
       </AuthFrame>
     )
   }
-  return <AuditPage mode="account" />
+  return <AuditPage mode="account" {...(actor ? { initialActor: actor } : {})} />
 }

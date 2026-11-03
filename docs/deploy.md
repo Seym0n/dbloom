@@ -93,7 +93,14 @@ Edge and serverless hosting are not supported. Every topology prints its warning
 - **Size.** About 150 to 200 bytes of payload per statement-level row, and `fields` is capped at 8 KiB. Rows live in the store volume: size the volume for your traffic and retention, and back it up as described below.
 - **Export.** Administrators export CSV or NDJSON from the viewer (needs a recent second factor; at most 1 000 000 rows, never older than the retention window). On the host: `docker exec <container> node .output/cli/dbloom.mjs audit export --since 2026-10-01 --format csv > audit.csv`. Both write an `audit.export` row before the first line.
 - **Administrators reach the admin pages from any address.** Restricting the administration pages (users, audit log) to named networks is not built yet (it is deferred; see `SPEC/FUTURE.md`). Until it ships, keep them behind your proxy's own access rules if you need that.
-- **Downgrade.** The audit table is schema version 6. An older program refuses to open a store of a newer version; restore the pre-upgrade backup to go back.
+- **Downgrade.** The audit table is schema version 6 and the notice memory schema version 7. An older program refuses to open a store of a newer version; restore the pre-upgrade backup to go back.
+
+## Security notices for administrators
+
+- **What raises one.** A burst of failed sign-in steps for one account or from one address (`DBLOOM_NOTICE_BURST_FAILURES` within `DBLOOM_NOTICE_BURST_MINUTES`), and a completed sign-in from a network the account has not used for `DBLOOM_NOTICE_LOCATION_DAYS`. Every active administrator gets the notice; it shows on the Users page, where it can be dismissed. Nothing is sent by email. The first sign-in of an account raises no new-location notice.
+- **What the server remembers.** For each account the /24 (IPv4) or /48 (IPv6) networks of completed sign-ins, for the configured number of days, in the store. The memory goes with the account and is purged daily. Failed-attempt counts live in memory only and start again after a restart. This is personal data of your users: mention it in your own privacy notice if you need one.
+- **Addresses in notices** follow `DBLOOM_AUDIT_ANONYMISE_IP`.
+- **Behind a proxy** the address is the one the proxy reports (`DBLOOM_TRUST_PROXY`); without a correct proxy setting every user looks like they come from the proxy and no new location is ever seen.
 
 ## Backup, upgrade, rollback
 
@@ -136,6 +143,11 @@ Generated from `src/server/env-registry.ts` by `node scripts/gen-env-docs.mjs`; 
 | **Audit** | | | |
 | `DBLOOM_AUDIT_SINK` | string | `stdout` | Extra audit destination: `stdout` (default, the audit JSON line always goes to stdout) or `file:/absolute/path` (append only, mode 0600, one JSON line per event). A failing file is buffered and retried; see the deploy guide. |
 | `DBLOOM_AUDIT_ANONYMISE_IP` | enum (off, truncate, hash) | `off` | Address in stored, exported and file-sink audit records: `off`, `truncate` (IPv4 /24, IPv6 /48) or `hash` (HMAC under a server key subkey). The stdout line keeps the address. |
+| **Notices** | | | |
+| `DBLOOM_NOTICE_BURST_FAILURES` | int (3 to 20) | `10` | Failed sign-in steps for one account or one address within the window that raise a notice to administrators. |
+| `DBLOOM_NOTICE_BURST_MINUTES` | int (1 to 60) | `10` | Window in minutes for the failed-attempt notice. |
+| `DBLOOM_NOTICE_LOCATION_DAYS` | int (7 to 365) | `90` | Days an account remembers the networks (/24 IPv4, /48 IPv6) it signed in from; a sign-in from another network raises a notice to administrators. |
+| **Audit** | | | |
 | `DBLOOM_AUDIT_RETENTION_DAYS` | int (90 to 1095) | `365` | Days the audit log keeps rows; older rows are purged daily (the purge is itself audited). |
 | **Targets** | | | |
 | `DBLOOM_DIRECT_TARGETS` | list |  | Direct mode: servers users may connect to, host:port list (SEC-TGT-018). |

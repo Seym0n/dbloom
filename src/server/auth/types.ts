@@ -104,6 +104,9 @@ export const NOTICE_KINDS = [
   'factor_removed',
   'password_changed',
   'sessions_revoked',
+  /** Administrator notices raised by the sign-in detector (SPEC/30). */
+  'new_location',
+  'failed_burst',
 ] as const
 export type NoticeKind = (typeof NOTICE_KINDS)[number]
 
@@ -171,6 +174,9 @@ export const AUTH_ENV = {
   loginWindowMinutes: 'DBLOOM_LOGIN_WINDOW_MINUTES',
   loginAddressFailures: 'DBLOOM_LOGIN_ADDRESS_FAILURES',
   auditRetentionDays: 'DBLOOM_AUDIT_RETENTION_DAYS',
+  noticeBurstFailures: 'DBLOOM_NOTICE_BURST_FAILURES',
+  noticeBurstMinutes: 'DBLOOM_NOTICE_BURST_MINUTES',
+  noticeLocationDays: 'DBLOOM_NOTICE_LOCATION_DAYS',
   inviteHours: 'DBLOOM_INVITE_HOURS',
   recoveryLinkHours: 'DBLOOM_RECOVERY_LINK_HOURS',
   vaultPassphraseMin: 'DBLOOM_VAULT_PASSPHRASE_MIN',
@@ -580,7 +586,8 @@ export type ProfileSecret = { user: string; password: string; clientKey?: string
 export type ProfileInfo = Omit<ProfileRecord, 'userId' | 'sealed'> & { targetUser?: string; hasClientKey?: boolean }
 
 /** `user_notices`. */
-export type UserNotice = { id: string; userId: UserId; kind: NoticeKind; createdAt: number; readAt: number | null }
+/** `detail` names the account or address prefix of a detector notice; never a secret (SPEC/30 assumption 5). */
+export type UserNotice = { id: string; userId: UserId; kind: NoticeKind; createdAt: number; readAt: number | null; detail?: string }
 
 /** `site` keys (FR-AUT-001). */
 export const SITE_KEYS = ['login_mode', 'setup_completed_at', 'site_name'] as const
@@ -871,6 +878,9 @@ export const AUTH_SETTINGS = {
   loginAutofocus: { st: 'UI-ISS-134', source: 'ui', default: false, schema: z.boolean() },
   loginRecall: { st: 'ST-074', source: 'env', env: AUTH_ENV.loginRecall, default: false, schema: z.boolean() },
   auditRetentionDays: { st: 'ST-204', source: 'ui_within_env', env: AUTH_ENV.auditRetentionDays, envUnit: 1, floor: 90, default: 365, ceiling: 1095, schema: z.number().int().min(90).max(1095) },
+  noticeBurstFailures: { st: 'ST-207', source: 'ui_within_env', env: AUTH_ENV.noticeBurstFailures, floor: 3, default: 10, ceiling: 20, schema: z.number().int().min(3).max(20) },
+  noticeBurstMinutes: { st: 'ST-207', source: 'ui_within_env', env: AUTH_ENV.noticeBurstMinutes, envUnit: 1, floor: 1, default: 10, ceiling: 60, schema: z.number().int().min(1).max(60) },
+  noticeLocationDays: { st: 'ST-207', source: 'ui_within_env', env: AUTH_ENV.noticeLocationDays, envUnit: 1, floor: 7, default: 90, ceiling: 365, schema: z.number().int().min(7).max(365) },
   stepUpWindowMs: { st: 'ST-034', source: 'env', env: AUTH_ENV.stepUpMinutes, floor: 1 * MINUTE_MS, default: STEPUP_WINDOW_DEFAULT_MS, ceiling: 15 * MINUTE_MS, schema: ms },
 } as const satisfies Record<string, SettingSpec<unknown>>
 
@@ -1051,6 +1061,7 @@ export const totpRemoveInput = empty
 export const recoveryCodesRegenerateInput = empty
 /** Switch 2FA off (only when not required for the user; step-up). Removes every factor and the codes. */
 export const disableMfaInput = z.object({ confirm: z.literal(true) }).strict()
+export const dismissNoticeInput = z.object({ id: z.string().min(8).max(64).regex(/^[A-Za-z0-9_-]+$/) }).strict()
 export const revokeSessionInput = z.object({ ref: z.string().min(8).max(128).regex(/^[A-Za-z0-9_-]+$/) }).strict()
 
 // Users (FR-AUT-014, 028)
@@ -1191,6 +1202,7 @@ export const AUTH_SERVER_FUNCTIONS = {
     'listSessions',
     'revokeSession',
     'listNotices',
+    'dismissNotice',
   ],
   audit: ['listAuditEvents', 'listOwnAuditEvents', 'getAuditStatus', 'startAuditExport'],
   users: ['listUsers', 'createUser', 'setUserStatus', 'setUserRole', 'deleteUser', 'revokeUserSessions'],
@@ -1419,6 +1431,12 @@ export interface AccountStore {
   addNotice(notice: UserNotice): void
   listNotices(userId: UserId): UserNotice[]
   markNoticeRead(userId: UserId, id: string, at: number): void
+
+  // sign-in locations (SPEC/30 FR-AUS-002): /24 or /48 prefixes an account signed in from
+  getSeenLocation(userId: UserId, prefix: string): number | undefined
+  countSeenLocations(userId: UserId): number
+  upsertSeenLocation(userId: UserId, prefix: string, at: number): void
+  purgeSeenLocations(before: number): number
 
   // account sessions (the sessions table with the migration-5 columns)
   createAccountSession(record: AccountSessionRecord): void

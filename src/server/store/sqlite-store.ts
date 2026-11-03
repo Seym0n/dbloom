@@ -58,7 +58,7 @@ type ProfileRow = {
   id: string; user_id: string; name: string; host: string; port: number; tls: ProfileRecord['tls']; options: string
   sealed: string; created_at: number; updated_at: number; last_used_at: number | null
 }
-type NoticeRow = { id: string; user_id: string; kind: UserNotice['kind']; created_at: number; read_at: number | null }
+type NoticeRow = { id: string; user_id: string; kind: UserNotice['kind']; created_at: number; read_at: number | null; detail: string | null }
 type VaultRow = {
   user_id: string; kdf_params: string; kdf_salt: string; wrap_passphrase: string; recovery_salt: string
   wrap_recovery: string; created_at: number; updated_at: number
@@ -200,6 +200,17 @@ export const MIGRATIONS: ((db: DatabaseSync) => void)[] = [
       BEGIN SELECT RAISE(ABORT, 'audit_log is append-only'); END;
     `)
   },
+  // 7: detail of detector notices and the networks an account signed in from (SPEC/30). Prefixes are /24 or /48 only.
+  (db) => {
+    db.exec(`
+      ALTER TABLE user_notices ADD COLUMN detail TEXT;
+      CREATE TABLE IF NOT EXISTS seen_locations (
+        user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE, prefix TEXT NOT NULL, last_seen_at INTEGER NOT NULL,
+        PRIMARY KEY (user_id, prefix)
+      ) STRICT;
+      CREATE INDEX IF NOT EXISTS seen_locations_at ON seen_locations(last_seen_at);
+    `)
+  },
 ]
 
 /** Applies pending migrations in one transaction; refuses a database newer than the code. */
@@ -287,7 +298,7 @@ export function openSqliteStore(path: string, options: Partial<SqlStateOptions> 
     options: JSON.parse(r.options) as ProfileRecord['options'], sealed: r.sealed,
     createdAt: r.created_at, updatedAt: r.updated_at, lastUsedAt: r.last_used_at,
   })
-  const noticeFrom = (r: NoticeRow): UserNotice => ({ id: r.id, userId: r.user_id, kind: r.kind, createdAt: r.created_at, readAt: r.read_at })
+  const noticeFrom = (r: NoticeRow): UserNotice => ({ id: r.id, userId: r.user_id, kind: r.kind, createdAt: r.created_at, readAt: r.read_at, ...(r.detail ? { detail: r.detail } : {}) })
   const vaultFrom = (r: VaultRow): VaultRecord => ({
     userId: r.user_id, kdfParams: JSON.parse(r.kdf_params) as VaultRecord['kdfParams'], kdfSalt: r.kdf_salt,
     wrapPassphrase: r.wrap_passphrase, recoverySalt: r.recovery_salt, wrapRecovery: r.wrap_recovery,
@@ -374,9 +385,14 @@ export function openSqliteStore(path: string, options: Partial<SqlStateOptions> 
       saveProfile: (r) => void run('INSERT INTO connection_profiles VALUES(?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,host=excluded.host,port=excluded.port,tls=excluded.tls,options=excluded.options,sealed=excluded.sealed,updated_at=excluded.updated_at,last_used_at=excluded.last_used_at', r.id, r.userId, r.name, r.host, r.port, r.tls, JSON.stringify(r.options), r.sealed, r.createdAt, r.updatedAt, r.lastUsedAt),
       deleteProfile: (uid, id) => run('DELETE FROM connection_profiles WHERE user_id=? AND id=?', uid, id).changes === 1,
       countProfiles: (uid) => count('SELECT count(*) n FROM connection_profiles WHERE user_id=?', uid),
-      addNotice: (n) => void run('INSERT INTO user_notices VALUES(?,?,?,?,?)', n.id, n.userId, n.kind, n.createdAt, n.readAt),
+      addNotice: (n) => void run('INSERT INTO user_notices (id, user_id, kind, created_at, read_at, detail) VALUES(?,?,?,?,?,?)', n.id, n.userId, n.kind, n.createdAt, n.readAt, n.detail ?? null),
       listNotices: (uid) => many<NoticeRow>('SELECT * FROM user_notices WHERE user_id=? ORDER BY created_at DESC', uid).map(noticeFrom),
-      markNoticeRead: (uid, id, at) => void run('UPDATE user_notices SET read_at=? WHERE user_id=? AND id=?', at, uid, id),
+      markNoticeRead: (uid, id, at) => void run('UPDATE user_notices SET read_at=? WHERE user_id=? AND id=? AND read_at IS NULL', at, uid, id),
+      getSeenLocation: (uid, prefix) => one<{ last_seen_at: number }>('SELECT last_seen_at FROM seen_locations WHERE user_id=? AND prefix=?', uid, prefix)?.last_seen_at,
+      countSeenLocations: (uid) => one<{ n: number }>('SELECT COUNT(*) AS n FROM seen_locations WHERE user_id=?', uid)?.n ?? 0,
+      upsertSeenLocation: (uid, prefix, at) =>
+        void run('INSERT INTO seen_locations (user_id, prefix, last_seen_at) VALUES(?,?,?) ON CONFLICT(user_id, prefix) DO UPDATE SET last_seen_at = excluded.last_seen_at', uid, prefix, at),
+      purgeSeenLocations: (before) => Number(db.prepare('DELETE FROM seen_locations WHERE last_seen_at < ?').run(before).changes),
       createAccountSession: (r) => void run('UPDATE sessions SET kind=?,user_id=?,state=?,mfa_at=?,stepup_at=?,security_version=?,client_hint=?,address=? WHERE id_hash=?', r.kind, r.userId, r.state, r.mfaAt, r.stepupAt, r.securityVersion, r.clientHint, r.address, r.idHash),
       getAccountSession: (id) => { const r = one<SessionRow>('SELECT * FROM sessions WHERE id_hash=?', id); return r && sessionFrom(r) },
       updateAccountSession: (id, p) => patchRow('sessions', SESSION_COLUMNS, 'id_hash', id, p),

@@ -60,6 +60,9 @@ export const ENV_VARS: readonly EnvVar[] = [
 
   v(C, 'Audit', 'DBLOOM_AUDIT_SINK', 'string', 'stdout', 'Extra audit destination: `stdout` (default, the audit JSON line always goes to stdout) or `file:/absolute/path` (append only, mode 0600, one JSON line per event). A failing file is buffered and retried; see the deploy guide.'),
   v(C, 'Audit', 'DBLOOM_AUDIT_ANONYMISE_IP', 'enum', 'off', 'Address in stored, exported and file-sink audit records: `off`, `truncate` (IPv4 /24, IPv6 /48) or `hash` (HMAC under a server key subkey). The stdout line keeps the address.', { values: ['off', 'truncate', 'hash'] }),
+  v(C, 'Notices', 'DBLOOM_NOTICE_BURST_FAILURES', 'int', '10', 'Failed sign-in steps for one account or one address within the window that raise a notice to administrators.', { min: 3, max: 20 }),
+  v(C, 'Notices', 'DBLOOM_NOTICE_BURST_MINUTES', 'int', '10', 'Window in minutes for the failed-attempt notice.', { min: 1, max: 60 }),
+  v(C, 'Notices', 'DBLOOM_NOTICE_LOCATION_DAYS', 'int', '90', 'Days an account remembers the networks (/24 IPv4, /48 IPv6) it signed in from; a sign-in from another network raises a notice to administrators.', { min: 7, max: 365 }),
   v(C, 'Audit', 'DBLOOM_AUDIT_RETENTION_DAYS', 'int', '365', 'Days the audit log keeps rows; older rows are purged daily (the purge is itself audited).', { min: 90, max: 1095 }),
 
   v(C, 'Targets', 'DBLOOM_DIRECT_TARGETS', 'list', '', 'Direct mode: servers users may connect to, host:port list (SEC-TGT-018).'),

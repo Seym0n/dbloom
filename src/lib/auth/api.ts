@@ -147,6 +147,7 @@ export interface AuthApi {
   listSessions(): Promise<SessionInfo[]>
   revokeSession(ref: string): Promise<{ ok: true }>
   listNotices(): Promise<UserNotice[]>
+  dismissNotice(id: string): Promise<{ ok: true }>
 
   // ---- users (admin module, FR-AUT-014, 028); not on the server yet --------------------------------------
   listUsers(): Promise<UserSummary[]>
@@ -283,6 +284,7 @@ export function createServerAuthApi(): AuthApi {
     listSessions: () => tryAuth('listSessions', empty),
     revokeSession: (ref) => tryAuth('revokeSession', { ref }),
     listNotices: () => tryAuth('listNotices', empty),
+    dismissNotice: (id) => tryAuth('dismissNotice', { id }),
 
     listUsers: () => tryAuth('listUsers', empty),
     createUser: (input) => tryAuth('createUser', input),

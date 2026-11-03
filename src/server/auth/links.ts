@@ -64,9 +64,9 @@ export function passkeyRecord(
 }
 
 /** One notice per active administrator (plus the extra user ids), without duplicates. */
-export function notify(store: AccountStore, kind: NoticeKind, at: number, extra: string[] = []): void {
+export function notify(store: AccountStore, kind: NoticeKind, at: number, extra: string[] = [], detail?: string): void {
   const ids = new Set([...store.listUsers().filter((u) => u.role === 'admin' && u.status === 'active').map((u) => u.id), ...extra])
-  for (const userId of ids) store.addNotice({ id: randomUUID(), userId, kind, createdAt: at, readAt: null })
+  for (const userId of ids) store.addNotice({ id: randomUUID(), userId, kind, createdAt: at, readAt: null, ...(detail ? { detail } : {}) })
 }
 
 export type { LinkTokenRecord }

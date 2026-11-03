@@ -86,7 +86,10 @@ export function NoticesSection() {
           {sorted.map((notice) => (
             <li key={notice.id}>
               <Row>
-                <p className="min-w-0">{t(`account.notice.${notice.kind}` as MessageKey)}</p>
+                <p className="min-w-0">
+                  {t(`account.notice.${notice.kind}` as MessageKey)}
+                  {notice.detail ? ` ${notice.detail}` : ''}
+                </p>
                 <Muted>
                   <WhenText ts={notice.createdAt} />
                 </Muted>

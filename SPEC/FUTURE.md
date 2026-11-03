@@ -155,3 +155,20 @@ Ideas that were discussed and deliberately postponed. They are **not requirement
 **Why deferred:** Owner decision, 2026-11-03: not in the first admin release. Admin pages are protected by the admin role and step-up only; `docs/deploy.md` must say that administrators reach them from any address until this ships.
 
 **Related:** `28-admin-capability-map.md`, `29-module-admin-audit.md` assumption 6.
+
+## FU-user-notices: new-location notice to the affected user
+
+**Idea:** Once the notice detector of `admin-users` exists, also tell the user about a sign-in from a new location on their own account.
+
+**Why deferred:** FR-TGT-149 names administrators only (owner decision 2026-11-03, `30-module-admin-users.md` Q2).
+
+**Related:** `30-module-admin-users.md`.
+
+## FU-ready-switch: readiness detail switch and metrics (ST-021)
+
+**Idea:** ENV switch (default off) for readiness detail, metrics and version, content for loopback or an administrator session.
+
+**Why deferred:** Owner decision 2026-11-03: `admin-exposure` adds only the administrator-session branch of `/api/ready`; the switch and metrics belong with `hardening` (`31-module-admin-exposure.md` Q4).
+
+**Related:** `27-module-server.md` FR-SVR-010.
+

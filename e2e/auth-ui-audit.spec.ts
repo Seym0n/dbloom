@@ -21,7 +21,7 @@ async function auditPage(page: Page, username = 'alice', path = '/admin/audit') 
   await openMock(page, 'login')
   await signInAs(page, username)
   await expect(h1(page)).toHaveText('Connect to a database')
-  await page.goto(`${path}?authMock=login`)
+  await page.goto(`${path}${path.includes('?') ? '&' : '?'}authMock=login`)
 }
 
 async function apply(page: Page, fill: (p: Page) => Promise<unknown>) {
@@ -105,6 +105,18 @@ test.describe('paging and filters', () => {
     await expect(panel).toContainText('"note": "row 130"')
     await panel.getByRole('button', { name: 'Close details' }).click()
     await expect(panel).toBeHidden()
+  })
+})
+
+test.describe('actor parameter', () => {
+  test('?actor= fills the actor filter and applies it on load; reset clears it', async ({ page }) => {
+    await auditPage(page, 'alice', '/admin/audit?actor=cli')
+    await expect(page.getByLabel('Actor')).toHaveValue('cli')
+    await expect(entries(page).first()).toBeVisible()
+    for (const li of await entries(page).all()) await expect(li).toContainText('Host command line')
+    await page.getByRole('button', { name: 'Reset' }).click()
+    await expect(page.getByLabel('Actor')).toHaveValue('')
+    await expect(entries(page)).toHaveCount(50)
   })
 })
 

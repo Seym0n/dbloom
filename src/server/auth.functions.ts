@@ -14,6 +14,7 @@ import {
   changePasswordInput,
   createUserInput,
   disableMfaInput,
+  dismissNoticeInput,
   passkeyRegisterOptionsInput,
   passkeyRegisterVerifyInput,
   passkeyRemoveInput,
@@ -369,6 +370,18 @@ export const listNotices = createServerFn({ method: 'POST' })
   .handler(({ context }) => {
     try {
       return getSecurityServices().security.listNotices(context.account)
+    } catch (error) {
+      return boundary(error, 'auth_failed')
+    }
+  })
+
+export const dismissNotice = createServerFn({ method: 'POST' })
+  .middleware([accountMiddleware])
+  .validator(dismissNoticeInput)
+  .handler(({ context, data }) => {
+    try {
+      getSecurityServices().security.dismissNotice(context.account, data.id)
+      return { ok: true as const }
     } catch (error) {
       return boundary(error, 'auth_failed')
     }

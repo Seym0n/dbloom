@@ -61,6 +61,9 @@ export type Config = {
   hsts: { enabled: boolean; maxAgeSeconds: number; includeSubDomains: boolean }
   shutdownSeconds: number
   auditRetentionDays: number
+  noticeBurstFailures: number
+  noticeBurstMinutes: number
+  noticeLocationDays: number
   /** Absolute path of the external audit file, or undefined for stdout only. */
   auditFile: string | undefined
   auditAnonymiseIp: 'off' | 'truncate' | 'hash'
@@ -343,6 +346,9 @@ export function loadConfigWithWarnings(env: NodeJS.ProcessEnv = process.env): Lo
     },
     shutdownSeconds: n('DBLOOM_SHUTDOWN_SECONDS', 25),
     auditRetentionDays: n('DBLOOM_AUDIT_RETENTION_DAYS', 365),
+    noticeBurstFailures: n('DBLOOM_NOTICE_BURST_FAILURES', 10),
+    noticeBurstMinutes: n('DBLOOM_NOTICE_BURST_MINUTES', 10),
+    noticeLocationDays: n('DBLOOM_NOTICE_LOCATION_DAYS', 90),
     auditFile: auditSinkFile(env),
     auditAnonymiseIp: ((strict(env, 'DBLOOM_AUDIT_ANONYMISE_IP') as string | undefined) ?? 'off') as Config['auditAnonymiseIp'],
     logLevel,

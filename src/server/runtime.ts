@@ -96,6 +96,7 @@ export function getRuntime(): Runtime {
     const purge = () => {
       try {
         purgeAudit(store.db, config.auditRetentionDays)
+        store.accounts.purgeSeenLocations(Date.now() - config.noticeLocationDays * 86_400_000)
       } catch (error) {
         log.warn('audit.purge_failed', { error: error instanceof Error ? error.message : 'failed' })
       }

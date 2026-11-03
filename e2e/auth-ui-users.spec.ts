@@ -37,6 +37,59 @@ async function stepUp(page: Page) {
   await expect(d).toBeHidden()
 }
 
+test.describe('security notices', () => {
+  const unread = (page: Page) => page.getByRole('list', { name: 'Unread notices' }).getByRole('listitem')
+
+  test('unread notices of the administrator, detail text, dismiss, earlier ones behind a button', async ({ page }) => {
+    await usersPage(page)
+    await expect(unread(page)).toHaveCount(4)
+    await expect(unread(page).first()).toContainText('A burst of failed sign-in attempts was seen.')
+    await expect(unread(page).first()).toContainText('account bob: 10 failed sign-in steps in 10 min')
+    await expect(unread(page).filter({ hasText: 'new location' })).toContainText('account bob from 198.51.100.0')
+    await expect(page.getByRole('button', { name: /Show earlier notices/ })).toBeHidden()
+
+    await unread(page).first().getByRole('button', { name: /^Dismiss the notice/ }).click()
+    await expect(unread(page)).toHaveCount(3)
+    await page.getByRole('button', { name: 'Show earlier notices (1)' }).click()
+    const earlier = page.getByRole('list', { name: 'Earlier notices' }).getByRole('listitem')
+    await expect(earlier).toHaveCount(1)
+    await expect(earlier.first()).toContainText('failed sign-in attempts')
+    await expect(earlier.first().getByRole('button')).toHaveCount(0)
+    await page.getByRole('button', { name: 'Hide earlier notices' }).click()
+    await expect(earlier).toHaveCount(0)
+  })
+
+  test('dismissing the last one shows the empty text; the dismissal survives a reload', async ({ page }) => {
+    await usersPage(page)
+    for (let left = 4; left > 0; left--) {
+      await unread(page).first().getByRole('button', { name: /^Dismiss the notice/ }).click()
+      await expect(unread(page)).toHaveCount(left - 1)
+    }
+    await expect(page.getByText('No unread notices.')).toBeVisible()
+    await page.reload()
+    await expect(page.getByText('No unread notices.')).toBeVisible()
+  })
+
+  test('the activity action opens the audit viewer with that user as the actor filter', async ({ page }) => {
+    await usersPage(page)
+    await page.getByRole('button', { name: 'Actions for bob' }).click()
+    await page.getByRole('menuitem', { name: 'Activity' }).click()
+    await expect(page).toHaveURL(/\/admin\/audit\?actor=mock-bob/)
+    await expect(h1(page)).toHaveText('Audit log')
+    await expect(page.getByLabel('Actor')).toHaveValue('mock-bob')
+    const entries = page.getByRole('list', { name: 'Audit entries' }).getByRole('listitem')
+    await expect(entries.first()).toBeVisible()
+    for (const li of await entries.all()) await expect(li).toContainText('by bob')
+  })
+
+  test('the own row has the activity action too', async ({ page }) => {
+    await usersPage(page)
+    await page.getByRole('button', { name: 'Actions for alice' }).click()
+    await page.getByRole('menuitem', { name: 'Activity' }).click()
+    await expect(page.getByLabel('Actor')).toHaveValue('mock-alice')
+  })
+})
+
 test.describe('access', () => {
   test('an administrator sees the list, the own row has no actions', async ({ page }) => {
     await usersPage(page)
@@ -45,7 +98,10 @@ test.describe('access', () => {
     await expect(row(page, 'alice')).toContainText('Administrator')
     await expect(row(page, 'bob')).toContainText('authenticator app')
     await expect(row(page, 'alice').getByRole('combobox')).toBeDisabled()
-    await expect(page.getByRole('button', { name: 'Actions for alice' })).toBeHidden()
+    // The own row offers no account actions, only the activity link.
+    await page.getByRole('button', { name: 'Actions for alice' }).click()
+    await expect(page.getByRole('menuitem')).toHaveText(['Activity'])
+    await page.keyboard.press('Escape')
     await expect(row(page, 'erin')).toContainText('never signed in')
   })
 

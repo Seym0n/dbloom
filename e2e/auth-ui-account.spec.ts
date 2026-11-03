@@ -169,7 +169,7 @@ test.describe('security', () => {
     await change.getByRole('button', { name: 'Change password' }).click()
     await expect(page.getByText('Password changed.')).toBeVisible()
 
-    await expect(page.getByRole('list', { name: 'Recent security events' }).getByRole('listitem')).toHaveCount(2)
+    await expect(page.getByRole('list', { name: 'Recent security events' }).getByRole('listitem')).toHaveCount(4) // two own plus the two administrator notices of the mock
     const sessions = page.getByRole('list', { name: 'Where you are signed in' })
     await expect(sessions.getByRole('listitem')).toHaveCount(2)
     await expect(sessions.getByText('This session')).toBeVisible()

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Link } from '@tanstack/react-router'
-import { ArrowLeft, Ban, KeyRound, LogOut, Trash2, Undo2, UserPlus } from 'lucide-react'
+import { Link, useNavigate } from '@tanstack/react-router'
+import { ArrowLeft, Ban, History, KeyRound, LogOut, Trash2, Undo2, UserPlus } from 'lucide-react'
 import { t } from '~/i18n'
 import { BrandName } from '~/components/brand'
 import { Button } from '~/components/ui/button'
@@ -15,6 +15,7 @@ import { allowedUserActions, sortUsers } from '~/lib/auth/connections-logic'
 import { describeError } from '~/lib/auth/messages'
 import { useAction } from '~/lib/auth/use-action'
 import type { InviteInfo, Role, UserSummary } from '~/server/auth/types'
+import { NoticesPanel } from './notices-panel'
 import { CreateUserDialog, formatWhen, InviteDialog, LinkShownDialog, RoleSelect } from './user-dialogs'
 
 const USERS_KEY = ['auth', 'users'] as const
@@ -43,6 +44,7 @@ export function UsersPage({ meId }: { meId: string | undefined }) {
             </div>
           </header>
           <UsersSection meId={meId} />
+          <NoticesPanel />
           <InvitesSection />
         </div>
       </main>
@@ -54,6 +56,7 @@ function UsersSection({ meId }: { meId: string | undefined }) {
   const client = useQueryClient()
   const { guard } = useStepUp()
   const users = useQuery({ queryKey: USERS_KEY, queryFn: () => authApi().listUsers(), retry: false })
+  const navigate = useNavigate()
   const [dialog, setDialog] = useState<Dialog | null>(null)
   const [note, setNote] = useState<string | null>(null)
   const act = useAction()
@@ -70,7 +73,14 @@ function UsersSection({ meId }: { meId: string | undefined }) {
 
   function menuFor(u: UserSummary): MenuItem[] {
     const allowed = allowedUserActions(u, meId)
-    const items: MenuItem[] = []
+    const items: MenuItem[] = [
+      {
+        key: 'activity',
+        label: t('auth.users.activity'),
+        icon: <History size={14} aria-hidden />,
+        onSelect: () => void navigate({ to: '/admin/audit', search: { actor: u.id } }),
+      },
+    ]
     if (allowed.includes('revokeSessions'))
       items.push({
         key: 'sessions',
@@ -158,7 +168,7 @@ function UsersSection({ meId }: { meId: string | undefined }) {
                         disabled={self || act.busy}
                         onChange={(r: Role) => void run(() => authApi().setUserRole(u.id, r), () => t('auth.users.roleChanged', { name: u.username }))}
                       />
-                      <ActionsMenu label={t('auth.users.actionsFor', { name: u.username })} items={menuFor(u)} className={self ? 'invisible' : undefined} />
+                      <ActionsMenu label={t('auth.users.actionsFor', { name: u.username })} items={menuFor(u)} />
                     </div>
                   </Row>
                 </li>

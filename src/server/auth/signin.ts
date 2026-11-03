@@ -6,6 +6,7 @@
  */
 import { createHash, randomBytes } from 'node:crypto'
 import { audit } from '../audit'
+import { createNoticeDetector, type NoticeDetector } from './notices'
 import {
   AAD,
   CHALLENGE_MAX_TRIES,
@@ -47,6 +48,8 @@ export type SignInDeps = {
   ring: SecretKeyRing
   challenges: ChallengeStore
   webauthn: WebAuthnService
+  /** Notice detector; the service makes its own from the store and the settings when absent. */
+  notices?: NoticeDetector
   now?: () => number
 }
 
@@ -128,7 +131,20 @@ export function createSignInService(deps: SignInDeps): SignInService {
     }
   }
 
-  const markSignedIn = (user: User) => store.updateUser(user.id, { lastSignInAt: now() })
+  const notices =
+    deps.notices ??
+    createNoticeDetector({
+      store,
+      now,
+      settings: () => {
+        const s = deps.settings.resolve()
+        return { noticeBurstFailures: s.noticeBurstFailures, noticeBurstMinutes: s.noticeBurstMinutes, noticeLocationDays: s.noticeLocationDays }
+      },
+    })
+  const markSignedIn = (user: User, address?: string) => {
+    store.updateUser(user.id, { lastSignInAt: now() })
+    notices.completedSignIn(user, address)
+  }
 
   return {
     async passwordSignIn(input, meta) {
@@ -147,6 +163,7 @@ export function createSignInService(deps: SignInDeps): SignInService {
       const expired = !!user && user.tempPasswordExpiresAt !== null && at >= user.tempPasswordExpiresAt
       if (!user || !record || !verified || expired) {
         for (const key of keys) throttle.fail(key)
+        notices.failedAttempt({ ...(found ? { userId: found.id, username: found.username } : {}) }, meta.address)
         audit('auth.signin', { outcome: 'failed', method: 'password', ...(found ? { subject: found.id } : {}) })
         throw new AuthError('auth_failed')
       }
@@ -165,7 +182,7 @@ export function createSignInService(deps: SignInDeps): SignInService {
       if (state !== 'pending_mfa') throttle.reset(acctKey(user))
       const session = sessions.createAccount(user, state, { clientHint: meta.clientHint, address: meta.address })
       notifyEvicted(user, session.evicted)
-      if (state === 'full') markSignedIn(user)
+      if (state === 'full') markSignedIn(user, meta.address)
       audit('auth.signin', { outcome: 'ok', method: 'password', subject: user.id, state })
       return { token: session.token, csrf: session.csrf, state }
     },
@@ -203,6 +220,7 @@ export function createSignInService(deps: SignInDeps): SignInService {
       const failed = (reason: string): never => {
         // TOTP, recovery-code and passkey failures count on the account key (FR-AUT-007).
         throttle.fail(acctKey(user))
+        notices.failedAttempt({ userId: user.id, username: user.username })
         audit('auth.mfa', { outcome: 'failed', method: input.method, subject: user.id, reason })
         throw new AuthError('mfa_failed')
       }
@@ -222,6 +240,7 @@ export function createSignInService(deps: SignInDeps): SignInService {
         } catch (error) {
           if (!(error instanceof AuthError)) throw error
           throttle.fail(acctKey(user))
+          notices.failedAttempt({ userId: user.id, username: user.username })
           throw error // already audited by the WebAuthn service
         }
       } else {
@@ -258,7 +277,7 @@ export function createSignInService(deps: SignInDeps): SignInService {
       const next = sessions.transition(token, { state, mfaAt: at, stepupAt: at })
       notifyEvicted(user, next.evicted ?? [])
       challenges.dropOwner(ctx.idHash)
-      if (state === 'full') markSignedIn(user)
+      if (state === 'full') markSignedIn(user, store.getAccountSession(ctx.idHash)?.address)
       audit('auth.mfa', {
         outcome: 'ok',
         method: input.method,
@@ -282,6 +301,7 @@ export function createSignInService(deps: SignInDeps): SignInService {
       const at = now()
       const failedOut = (subject?: string): never => {
         throttle.fail(`ip:${meta.address}`)
+        notices.failedAttempt({ ...(subject ? { userId: subject } : {}) }, meta.address)
         audit('auth.signin', { outcome: 'failed', method: 'passkey', ...(subject ? { subject } : {}) })
         throw new AuthError('mfa_failed')
       }
@@ -302,6 +322,7 @@ export function createSignInService(deps: SignInDeps): SignInService {
       } catch (error) {
         if (error instanceof AuthError) {
           throttle.fail(`ip:${meta.address}`)
+          notices.failedAttempt({ userId: user.id, username: user.username }, meta.address)
           audit('auth.signin', { outcome: 'failed', method: 'passkey', subject: user.id })
         }
         throw error
@@ -313,7 +334,7 @@ export function createSignInService(deps: SignInDeps): SignInService {
       const session = sessions.createAccount(user, state, { clientHint: meta.clientHint, address: meta.address })
       notifyEvicted(user, session.evicted)
       const next = sessions.transition(session.token, { mfaAt: at, stepupAt: at })
-      if (state === 'full') markSignedIn(user)
+      if (state === 'full') markSignedIn(user, meta.address)
       audit('auth.signin', { outcome: 'ok', method: 'passkey', subject: user.id, state })
       return { token: next.token, csrf: session.csrf, state }
     },
@@ -337,6 +358,7 @@ export function createSignInService(deps: SignInDeps): SignInService {
 
   function exhausted(user: User, method: MfaMethod) {
     throttle.fail(acctKey(user))
+    notices.failedAttempt({ userId: user.id, username: user.username })
     audit('auth.mfa', { outcome: 'failed', method, subject: user.id, reason: 'tries_exhausted' })
   }
 }

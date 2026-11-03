@@ -294,6 +294,22 @@ export function createMockAuthApi(initial?: MockScenario): AuthApi {
     return out
   }
 
+  const DISMISSED_KEY = 'dbloom.authMock.dismissed'
+  const readDismissed = (): string[] => {
+    try {
+      return JSON.parse(window.sessionStorage.getItem(DISMISSED_KEY) ?? '[]') as string[]
+    } catch {
+      return []
+    }
+  }
+  const writeDismissed = (ids: string[]) => {
+    try {
+      window.sessionStorage.setItem(DISMISSED_KEY, JSON.stringify(ids))
+    } catch {
+      /* in-memory only */
+    }
+  }
+
   const loginInfo = (): LoginPageInfo => ({ mode: state.mode, siteName: 'DBLoom', passwordEnabled: true, passkeyEnabled: true, autofocus: false })
 
   const connectionApi = createMockConnectionApi({ fail, wait, flag, needStepUp, policy, state, makeUser: user, save })
@@ -595,10 +611,24 @@ export function createMockAuthApi(initial?: MockScenario): AuthApi {
     listNotices: async () => {
       const u = current().u
       const now = Date.now()
-      return wait([
-        { id: 'mock-notice-1', userId: `mock-${u.username}`, kind: 'password_changed' as const, createdAt: now - 2 * 86_400_000, readAt: null },
-        { id: 'mock-notice-2', userId: `mock-${u.username}`, kind: 'session_evicted' as const, createdAt: now - 3_600_000, readAt: null },
-      ])
+      const dismissed = readDismissed()
+      const mine = [
+        { id: 'mock-notice-1', userId: `mock-${u.username}`, kind: 'password_changed' as const, createdAt: now - 2 * 86_400_000 },
+        { id: 'mock-notice-2', userId: `mock-${u.username}`, kind: 'session_evicted' as const, createdAt: now - 3_600_000 },
+        ...(u.role === 'admin'
+          ? [
+              { id: 'mock-notice-burst', userId: `mock-${u.username}`, kind: 'failed_burst' as const, createdAt: now - 1_800_000, detail: 'account bob: 10 failed sign-in steps in 10 min' },
+              { id: 'mock-notice-location', userId: `mock-${u.username}`, kind: 'new_location' as const, createdAt: now - 7_200_000, detail: 'account bob from 198.51.100.0' },
+            ]
+          : []),
+      ]
+      return wait(mine.map((n) => ({ ...n, readAt: dismissed.includes(n.id) ? now : null })))
+    },
+    dismissNotice: async (id) => {
+      current()
+      const dismissed = readDismissed()
+      if (!dismissed.includes(id)) writeDismissed([...dismissed, id])
+      return wait({ ok: true as const })
     },
 
     // ---- users, invites and recovery links, connections, vault and profiles: mock-connections.ts

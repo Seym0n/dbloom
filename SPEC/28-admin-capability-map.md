@@ -8,7 +8,7 @@
 |---|---|---|---|
 | admin-audit | Audit store (SQLite table, retention, no UI delete or edit), audit write that can abort a change, viewer, export with step-up, external sink | C: NFR-TGT-090, NFR-TGT-107, FR-AUT-027 storage, ST-092, ST-204 to 206 | auth-account, server |
 | admin-plane (**deferred**, owner 2026-11-03) | Administration plane: admin routes and admin sign-in only from `DBLOOM_ADMIN_NETWORKS`; address allow/deny rules UI hook | F: SEC-TGT-147, ST-011 to 014 | auth-account, server (client address, gate slot) |
-| admin-users | Users screen completion (disable, delete, role change, issue recovery link, invites), notices for administrators, site notice and banner | D+E: FR-TGT-105, FR-AUT-028, FR-AUT-016 UI, ST-085 display, FR-TGT-149, ST-207, ST-216 to 219 | admin-audit, admin-plane |
+| admin-users | Notices for administrators (new-location and failed-burst detection, panel, activity link) and live coverage of the Users page, which already has disable, delete, role, recovery link and invites (see SPEC/30) | D+E: FR-TGT-105, FR-AUT-028, FR-AUT-016 UI, ST-085 display, FR-TGT-149, ST-207 (ST-216, ST-218, ST-219 moved to admin-settings, 2026-11-03) | admin-audit, admin-plane |
 | admin-exposure | Exposure and status page: exposure report and warnings from `buildExposure`, acknowledgement (audited, re-shown after restart), `/api/ready` detail for an administrator session | G: SEC-TGT-125, ST-032, FR-TGT-146, FR-SVR-010, ST-021 | admin-audit, admin-plane |
 | admin-settings | Settings editor: one generalised resolver over all ST rows, stored/effective/source display, write validation, locks, narrowing preview | A: FR-TGT-141, SEC-TGT-142, SEC-TGT-150, NFR-TGT-145, ST-056 preview, ST ranges for auth, target, io, display, site | admin-audit, admin-plane |
 | admin-protect | Change protection for settings: step-up set, lockout warning with affected-user count, auto-revert with persisted deadline (cooling-off deferred) | B: SEC-TGT-143, ST-093, ST-034, ST-035, SEC-TGT-144 | admin-settings, admin-audit |
@@ -52,6 +52,9 @@ Recommendations are the assistant's; 1 to 3, 5 and 8 change the map or module sc
 ## 5. Owner decisions (2026-11-03)
 - Q1: **No.** Administration-network enforcement (`admin-plane`, SEC-TGT-147, ST-011 to 014) is deferred out of the first admin release. Admin pages are protected by the admin role (and step-up where a spec says so) only. Consequences: `admin-plane` leaves the build order and the dependencies of the other modules; Q9 (ST-014 per-role rules) falls with it; the deploy guide must state that administrators reach admin pages from any address until it ships; FUTURE.md records the deferral. The module stays in this map as `deferred`.
 - Q2 to Q10: as recommended (one generalised resolver; audit table in account mode; 365 days; cooling-off deferred; `pending_settings` table; settings read-only in direct mode; FR-SRV-042 out of scope; ready detail and exposure page share `buildExposure`). The owner wrote "the other remaining five"; the assistant read it as all questions other than Q1 (the five map-changing ones were 1, 2, 3, 5, 8). Correct this if only some were meant.
+
+## 5a. Changes after the module specs (2026-11-03)
+- Gap analysis (SPEC/30): the Users page buttons already exist, so `admin-users` is mostly notices and verification. ST-216 (login notice), ST-218 (maintenance mode) and ST-219 (information banner) move to `admin-settings`, where the generic editor gives them step-up and old/new audit.
 
 ## 6. Build order after the decisions
 admin-audit, then admin-users and admin-exposure (independent), then admin-settings, then admin-protect. `admin-plane` deferred.

@@ -40,7 +40,7 @@ function actorLabel(r: AuditRow): string {
 }
 
 /** Administrator page: the audit log, newest first, read only (SPEC/29 FR-AAU-007, 008). */
-export function AuditPage({ mode }: { mode: 'account' | 'direct' }) {
+export function AuditPage({ mode, initialActor }: { mode: 'account' | 'direct'; initialActor?: string }) {
   return (
     <StepUpProvider>
       <main className="min-h-full bg-ground px-4 py-8">
@@ -56,7 +56,7 @@ export function AuditPage({ mode }: { mode: 'account' | 'direct' }) {
               <p className="max-w-[60ch] text-sm text-muted">{t('audit.lead')}</p>
             </div>
           </header>
-          {mode === 'direct' ? <DirectNotice /> : <AuditLog />}
+          {mode === 'direct' ? <DirectNotice /> : <AuditLog {...(initialActor ? { initialActor } : {})} />}
         </div>
       </main>
     </StepUpProvider>
@@ -72,9 +72,9 @@ function DirectNotice() {
   )
 }
 
-function AuditLog() {
-  const [draft, setDraft] = useState<Draft>(EMPTY)
-  const [applied, setApplied] = useState<AuditFilter>({})
+function AuditLog({ initialActor }: { initialActor?: string }) {
+  const [draft, setDraft] = useState<Draft>(initialActor ? { ...EMPTY, actor: initialActor } : EMPTY)
+  const [applied, setApplied] = useState<AuditFilter>(initialActor ? { actor: initialActor } : {})
   const [open, setOpen] = useState<AuditRow | null>(null)
   const status = useQuery({ queryKey: ['audit', 'status'], queryFn: () => authApi().getAuditStatus(), retry: false })
   const list = useInfiniteQuery({

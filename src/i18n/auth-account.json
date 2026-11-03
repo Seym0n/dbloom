@@ -97,6 +97,8 @@
   "account.notice.factor_removed": "A second factor was removed.",
   "account.notice.password_changed": "Your password was changed.",
   "account.notice.sessions_revoked": "An administrator signed out your sessions.",
+  "account.notice.new_location": "A sign-in from a new location was seen.",
+  "account.notice.failed_burst": "A burst of failed sign-in attempts was seen.",
   "account.prefs.title": "Preferences",
   "account.prefs.lead": "Changes are saved as you make them.",
   "account.prefs.stateless": "This server does not keep preferences. Changes last until you sign out.",
