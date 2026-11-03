@@ -23,6 +23,8 @@ export default defineConfig({
     timeout: 120_000,
     env: {
       VITE_DBLOOM_AUTH_MOCK: 'true',
+      // The request gate matches Host including the port; the loopback default list uses PORT (SPEC/27 FR-SVR-003).
+      PORT: String(PORT),
       DBLOOM_DATA_DIR: './test-results/auth-ui-data',
       DBLOOM_DIRECT_FREE_FORM_ACK: 'true',
     },

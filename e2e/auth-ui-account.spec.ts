@@ -199,7 +199,10 @@ test.describe('preferences', () => {
 
     await page.getByLabel('Hidden databases').fill('mysql, sys, mysql')
     await page.getByLabel('Hidden databases').blur()
-    await expect(page.getByText('Saved', { exact: true })).toBeVisible()
+    // Every field keeps its own status line, so the third save shows two "Saved"; look at this field's own.
+    await expect(
+      page.getByLabel('Hidden databases').locator('xpath=ancestor::*[.//p[@role="status"]][1]').getByRole('status'),
+    ).toHaveText('Saved')
 
     await page.reload()
     await expect(page.getByLabel('Theme')).toHaveValue('dark')

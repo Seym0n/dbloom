@@ -12,11 +12,26 @@ services:
       DBLOOM_DIRECT_FREE_FORM_ACK: 'true'
       DBLOOM_LOG_LEVEL: debug
       DBLOOM_ALLOW_DEBUG: 'true'
+      DBLOOM_ALLOW_PRIVATE: 'true' # the test target below is on the private compose network
+      DBLOOM_TARGET_TLS: 'off'
     ports:
       - '127.0.0.1:3300:3000' # direct access to the app port (must not honour forwarded headers)
     networks:
       default:
         ipv4_address: 172.30.0.2
+
+  mysql:
+    # Login target for the browser cookie test (e2e-proxy/); not needed by the vitest suite.
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', '127.0.0.1', '-proot']
+      interval: 3s
+      retries: 40
+    networks:
+      default:
+        ipv4_address: 172.30.0.20
 
   traefik:
     image: traefik:v3.6
