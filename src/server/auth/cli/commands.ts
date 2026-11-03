@@ -1,5 +1,6 @@
 /** Host CLI commands (FR-AUT-030): pure over injected dependencies; `main.ts` wires the real store. */
 import { readFileSync } from 'node:fs'
+import { AUDIT_CLI_USAGE } from '../../audit/cli-export'
 import { join } from 'node:path'
 import {
   AAD,
@@ -29,7 +30,8 @@ export const CLI_USAGE = `Usage: dbloom <command>
   recover <username>           print a recovery link
   sessions revoke <username>   end all sessions of a user
   rotate-secret                re-seal TOTP secrets under the current server key
-  exposure                     print the effective exposure and its warnings`
+  exposure                     print the effective exposure and its warnings
+${AUDIT_CLI_USAGE}`
 
 const done = (exitCode: CliResult['exitCode'], ...lines: string[]): CliResult => ({ exitCode, stdout: lines.join('\n') + '\n' })
 

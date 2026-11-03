@@ -58,6 +58,10 @@ export const ENV_VARS: readonly EnvVar[] = [
   v(C, 'Store', 'DBLOOM_STORE', 'string', 'sqlite', '`none` runs stateless (direct mode only, nothing persisted).'),
   v(C, 'Store', 'DBLOOM_DATA_DIR', 'path', './data', 'Store directory (the compose file mounts a volume at /data).'),
 
+  v(C, 'Audit', 'DBLOOM_AUDIT_SINK', 'string', 'stdout', 'Extra audit destination: `stdout` (default, the audit JSON line always goes to stdout) or `file:/absolute/path` (append only, mode 0600, one JSON line per event). A failing file is buffered and retried; see the deploy guide.'),
+  v(C, 'Audit', 'DBLOOM_AUDIT_ANONYMISE_IP', 'enum', 'off', 'Address in stored, exported and file-sink audit records: `off`, `truncate` (IPv4 /24, IPv6 /48) or `hash` (HMAC under a server key subkey). The stdout line keeps the address.', { values: ['off', 'truncate', 'hash'] }),
+  v(C, 'Audit', 'DBLOOM_AUDIT_RETENTION_DAYS', 'int', '365', 'Days the audit log keeps rows; older rows are purged daily (the purge is itself audited).', { min: 90, max: 1095 }),
+
   v(C, 'Targets', 'DBLOOM_DIRECT_TARGETS', 'list', '', 'Direct mode: servers users may connect to, host:port list (SEC-TGT-018).'),
   v(C, 'Targets', 'DBLOOM_DIRECT_FREE_FORM_ACK', 'bool', 'false', 'Direct mode: accept free-form targets (only behind other protections).'),
   v(C, 'Targets', 'DBLOOM_ALLOW_LOOPBACK', 'bool', 'false', 'Allow loopback target addresses (SEC-TGT-030).'),

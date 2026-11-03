@@ -16,6 +16,9 @@ import type {
 import { setCsrfToken } from '~/lib/csrf'
 import { AuthApiUnavailable } from './errors'
 import { createMockAuthApi } from './mock-api'
+import type { AuditFilter, AuditRow, OwnAuditRow, Page } from '~/server/audit/query'
+import type { AuditStatus } from '~/server/audit/service'
+import type { ExportFormat } from '~/server/audit/formats'
 import type {
   AccountSessionInfo,
   ConnectionInfo,
@@ -153,6 +156,12 @@ export interface AuthApi {
   deleteUser(userId: string): Promise<{ ok: true }>
   revokeUserSessions(userId: string): Promise<{ revoked: number }>
 
+  // ---- audit log, read side and export start (SPEC/29) ---------------------------------------------------
+  listAuditEvents(input: AuditFilter & { before?: number; limit?: number }): Promise<Page<AuditRow>>
+  listOwnAuditEvents(input: { before?: number; limit?: number }): Promise<Page<OwnAuditRow>>
+  getAuditStatus(): Promise<AuditStatus>
+  startAuditExport(input: AuditFilter & { format: ExportFormat }): Promise<{ token: string; rows: number; truncated: boolean; filename: string }>
+
   // ---- invites and recovery (FR-AUT-015, 016) ------------------------------------------------------------
   issueInvite(input: { role: Role; lifetimeMs?: number }): Promise<{ link: string; expiresAt: number }>
   listInvites(): Promise<InviteInfo[]>
@@ -206,6 +215,7 @@ const inviteMod = () => import('~/server/auth/invites.functions') as Promise<Mod
 const recoveryMod = () => import('~/server/auth/recovery.functions') as Promise<Mod>
 const accountMod = () => import('~/server/account.functions') as Promise<Mod>
 const prefsMod = () => import('~/server/prefs.functions') as Promise<Mod>
+const auditMod = () => import('~/server/audit.functions') as Promise<Mod>
 const sessionMod = () => import('~/server/session.functions') as Promise<Mod>
 
 /** Functions of package C that are not in a `*.functions.ts` yet are looked up in `auth.functions` first (so they light up once added). */
@@ -280,6 +290,11 @@ export function createServerAuthApi(): AuthApi {
     setUserRole: (userId, role) => tryAuth('setUserRole', { userId, role }),
     deleteUser: (userId) => tryAuth('deleteUser', { userId }),
     revokeUserSessions: (userId) => tryAuth('revokeUserSessions', { userId }),
+
+    listAuditEvents: (input) => call(auditMod, 'listAuditEvents', input),
+    listOwnAuditEvents: (input) => call(auditMod, 'listOwnAuditEvents', input),
+    getAuditStatus: () => call(auditMod, 'getAuditStatus', empty),
+    startAuditExport: (input) => call(auditMod, 'startAuditExport', input),
 
     issueInvite: (input) => call(inviteMod, 'issueInvite', input),
     listInvites: () => call(inviteMod, 'listInvites', empty),

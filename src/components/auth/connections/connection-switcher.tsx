@@ -1,6 +1,6 @@
 import { useId, useState } from 'react'
 import { Link } from '@tanstack/react-router'
-import { Plus, Settings2, Users, X } from 'lucide-react'
+import { Plus, Settings2, Users, X, ScrollText } from 'lucide-react'
 import { t } from '~/i18n'
 import { Button } from '~/components/ui/button'
 import { Select } from '~/components/ui/select'
@@ -74,6 +74,12 @@ export function ConnectionSwitcher({
           <Link to="/admin/users" className="press inline-flex h-8 items-center gap-2 rounded-[var(--radius-control)] px-3 text-sm font-medium text-muted hover:bg-active hover:text-ink">
             <Users size={14} aria-hidden />
             {t('auth.users.link')}
+          </Link>
+        )}
+        {isAdmin && (
+          <Link to="/admin/audit" className="press inline-flex h-8 items-center gap-2 rounded-[var(--radius-control)] px-3 text-sm font-medium text-muted hover:bg-active hover:text-ink">
+            <ScrollText size={14} aria-hidden />
+            {t('audit.nav')}
           </Link>
         )}
       </div>

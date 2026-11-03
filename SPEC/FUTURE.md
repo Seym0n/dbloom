@@ -147,3 +147,11 @@ Ideas that were discussed and deliberately postponed. They are **not requirement
 **Why deferred:** Owner decision, 2026-10-27: not in the first slice. The INSERT path works on every server and exposes no server-side file reading.
 
 **Related:** `25-module-io.md` Q2.
+
+## FU-admin-plane: administration plane (module `admin-plane`)
+
+**Idea:** Admin routes and admin sign-in only from `DBLOOM_ADMIN_NETWORKS` (SEC-TGT-147, ST-013), address allow/deny rules UI (ST-011, 012, 014). Today the variable is read only by the setup wizard.
+
+**Why deferred:** Owner decision, 2026-11-03: not in the first admin release. Admin pages are protected by the admin role and step-up only; `docs/deploy.md` must say that administrators reach them from any address until this ships.
+
+**Related:** `28-admin-capability-map.md`, `29-module-admin-audit.md` assumption 6.

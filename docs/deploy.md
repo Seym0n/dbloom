@@ -83,13 +83,25 @@ Edge and serverless hosting are not supported. Every topology prints its warning
 - **Stateless mode** (`DBLOOM_STORE=none`) keeps nothing on disk and is always direct mode; combining it with account mode is refused at startup. `read_only: true` in the compose file works in both modes (writes go to `/data` and `/tmp`).
 - **Shutdown.** On SIGTERM readiness turns 503, in-flight requests finish for up to `DBLOOM_SHUTDOWN_SECONDS` (default 25; compose waits 30 s), running imports and exports are marked `interrupted` (not persisted across the restart), pools close and the store closes. Do not set `CI` or `TEST` in the container: the server then skips its signal handling.
 
+## Audit log
+
+- **Where it goes.** Every audit event is one JSON line on stdout (`"audit":"<event>"`), always. In addition, installs with a store (account mode, and direct mode with `DBLOOM_STORE` not `none`) write each event to the `audit_log` table in the store; stateless installs (`DBLOOM_STORE=none`) have stdout only. Administrators read the table at `/admin/audit` (account mode); direct mode has no viewer.
+- **Retention.** `DBLOOM_AUDIT_RETENTION_DAYS` (90 to 1095, default 365; a value outside the range refuses startup). The purge runs at start and then every 24 hours, deletes older rows in batches and writes one `audit.purge` row with the count. A change of the variable applies at the next run or restart.
+- **External copy.** `DBLOOM_AUDIT_SINK=file:/absolute/path` appends one JSON line per event (mode 0600, one `fsync` per second). The app user must be able to write the path; with `read_only: true` mount a volume there. If the file cannot be written, events wait in memory (10 000 at most, oldest dropped and counted), the write is retried every 5 s, and `/admin/audit` shows the banner; an `audit.sink` row records each change of state. Rotate with `copytruncate`: a renamed file keeps being written until the next restart. This copy, kept on storage the app cannot rewrite, is the tamper-resistant record; see the next point.
+- **Append-only is a database rule, not a seal.** Triggers refuse `UPDATE` and refuse `DELETE` of rows younger than the retention cutoff. Anyone who holds the store file can drop the triggers. There is no hash chain.
+- **Addresses.** `DBLOOM_AUDIT_ANONYMISE_IP` (`off`, `truncate`, `hash`) applies to the table, the exports and the file copy, not to the stdout line. `hash` uses a subkey of the server key; without a server key (direct mode) it uses a key made at each start, so values do not match across restarts.
+- **Size.** About 150 to 200 bytes of payload per statement-level row, and `fields` is capped at 8 KiB. Rows live in the store volume: size the volume for your traffic and retention, and back it up as described below.
+- **Export.** Administrators export CSV or NDJSON from the viewer (needs a recent second factor; at most 1 000 000 rows, never older than the retention window). On the host: `docker exec <container> node .output/cli/dbloom.mjs audit export --since 2026-10-01 --format csv > audit.csv`. Both write an `audit.export` row before the first line.
+- **Administrators reach the admin pages from any address.** Restricting the administration pages (users, audit log) to named networks is not built yet (it is deferred; see `SPEC/FUTURE.md`). Until it ships, keep them behind your proxy's own access rules if you need that.
+- **Downgrade.** The audit table is schema version 6. An older program refuses to open a store of a newer version; restore the pre-upgrade backup to go back.
+
 ## Backup, upgrade, rollback
 
 - **Back up the `/data` volume and the server key.** The store holds users, factors and encrypted profiles; the key (`DBLOOM_SECRET_KEY` or the file in `DBLOOM_SECRET_KEY_FILE`) lives outside the volume on purpose. Without the key, TOTP secrets and recovery codes in a backup are unusable; with the volume alone, nobody can read them. Store them in different places.
 - **Rotate the server key:** set the new key as `DBLOOM_SECRET_KEY` and the old one as `DBLOOM_SECRET_KEY_PREVIOUS`, restart, run `node .output/cli/dbloom.mjs rotate-secret`, then remove the previous key.
 - **Upgrade:** build or pull the new image and redeploy. Take a volume backup first.
 - **Rollback:** redeploy the previous image. If a newer version changed the store, restore the pre-upgrade backup instead; whether an older version can open a newer store is not tested.
-- **Container commands** (run as the app user, `docker exec <container> node .output/cli/dbloom.mjs <command>`): `setup-token`, `recover <user>`, `sessions revoke <user>`, `rotate-secret`, `exposure`.
+- **Container commands** (run as the app user, `docker exec <container> node .output/cli/dbloom.mjs <command>`): `setup-token`, `recover <user>`, `sessions revoke <user>`, `rotate-secret`, `exposure`, `audit export`.
 
 ## Variable reference
 
@@ -121,6 +133,10 @@ Generated from `src/server/env-registry.ts` by `node scripts/gen-env-docs.mjs`; 
 | **Store** | | | |
 | `DBLOOM_STORE` | string | `sqlite` | `none` runs stateless (direct mode only, nothing persisted). |
 | `DBLOOM_DATA_DIR` | path | `./data` | Store directory (the compose file mounts a volume at /data). |
+| **Audit** | | | |
+| `DBLOOM_AUDIT_SINK` | string | `stdout` | Extra audit destination: `stdout` (default, the audit JSON line always goes to stdout) or `file:/absolute/path` (append only, mode 0600, one JSON line per event). A failing file is buffered and retried; see the deploy guide. |
+| `DBLOOM_AUDIT_ANONYMISE_IP` | enum (off, truncate, hash) | `off` | Address in stored, exported and file-sink audit records: `off`, `truncate` (IPv4 /24, IPv6 /48) or `hash` (HMAC under a server key subkey). The stdout line keeps the address. |
+| `DBLOOM_AUDIT_RETENTION_DAYS` | int (90 to 1095) | `365` | Days the audit log keeps rows; older rows are purged daily (the purge is itself audited). |
 | **Targets** | | | |
 | `DBLOOM_DIRECT_TARGETS` | list |  | Direct mode: servers users may connect to, host:port list (SEC-TGT-018). |
 | `DBLOOM_DIRECT_FREE_FORM_ACK` | bool | `false` | Direct mode: accept free-form targets (only behind other protections). |

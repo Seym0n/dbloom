@@ -170,6 +170,7 @@ export const AUTH_ENV = {
   loginBackoffCapMinutes: 'DBLOOM_LOGIN_BACKOFF_CAP_MINUTES',
   loginWindowMinutes: 'DBLOOM_LOGIN_WINDOW_MINUTES',
   loginAddressFailures: 'DBLOOM_LOGIN_ADDRESS_FAILURES',
+  auditRetentionDays: 'DBLOOM_AUDIT_RETENTION_DAYS',
   inviteHours: 'DBLOOM_INVITE_HOURS',
   recoveryLinkHours: 'DBLOOM_RECOVERY_LINK_HOURS',
   vaultPassphraseMin: 'DBLOOM_VAULT_PASSPHRASE_MIN',
@@ -290,7 +291,7 @@ export const KEY_ID_BYTES = 8
 export const SEALED_VERSION = 'v1'
 export const KEY_ID_INFO = 'key-id'
 /** HKDF-SHA-256 info strings of the server subkeys. */
-export const SUBKEY_INFO = { totp: 'totp', recoveryCodes: 'recovery-codes', preAuth: 'pre-auth' } as const
+export const SUBKEY_INFO = { totp: 'totp', recoveryCodes: 'recovery-codes', preAuth: 'pre-auth', auditIp: 'audit-ip' } as const
 export type SubkeyKind = keyof typeof SUBKEY_INFO
 
 /** Vault (FR-AUT-021, ST-087, ST-088, ST-089). Recovery key display: 32 Crockford characters in groups of four. */
@@ -723,6 +724,8 @@ export type SettingSpec<T> = {
   default: T
   ceiling?: T
   schema: z.ZodType<T>
+  /** Multiplier for the env value when the variable's unit is not in its name (the setting is stored in days). */
+  envUnit?: number
 }
 
 const ms = z.number().int().min(0)
@@ -867,6 +870,7 @@ export const AUTH_SETTINGS = {
   denyRootTarget: { st: 'ST-124', source: 'ui_within_env', env: AUTH_ENV.denyRootTarget, default: false, schema: z.boolean() },
   loginAutofocus: { st: 'UI-ISS-134', source: 'ui', default: false, schema: z.boolean() },
   loginRecall: { st: 'ST-074', source: 'env', env: AUTH_ENV.loginRecall, default: false, schema: z.boolean() },
+  auditRetentionDays: { st: 'ST-204', source: 'ui_within_env', env: AUTH_ENV.auditRetentionDays, envUnit: 1, floor: 90, default: 365, ceiling: 1095, schema: z.number().int().min(90).max(1095) },
   stepUpWindowMs: { st: 'ST-034', source: 'env', env: AUTH_ENV.stepUpMinutes, floor: 1 * MINUTE_MS, default: STEPUP_WINDOW_DEFAULT_MS, ceiling: 15 * MINUTE_MS, schema: ms },
 } as const satisfies Record<string, SettingSpec<unknown>>
 
@@ -1188,6 +1192,7 @@ export const AUTH_SERVER_FUNCTIONS = {
     'revokeSession',
     'listNotices',
   ],
+  audit: ['listAuditEvents', 'listOwnAuditEvents', 'getAuditStatus', 'startAuditExport'],
   users: ['listUsers', 'createUser', 'setUserStatus', 'setUserRole', 'deleteUser', 'revokeUserSessions'],
   invites: ['issueInvite', 'listInvites', 'revokeInvite', 'invitePasskeyOptions', 'redeemInvite', 'issueRecovery', 'recoveryPasskeyOptions', 'redeemRecovery'],
   connections: ['listConnections', 'openConnection', 'closeConnection'],

@@ -8,6 +8,8 @@ import { tokens } from '../tokens'
 import { createUserService } from '../users'
 import { AuthError } from '../types'
 import { openSqliteStore } from '../../store/sqlite-store'
+import { audit, registerAuditStore, unregisterAuditStore } from '../../audit'
+import { auditExportCommand } from '../../audit/cli-export'
 import { exposureCommand } from '../../exposure'
 import { CLI_USAGE, runCli } from './commands'
 
@@ -28,8 +30,14 @@ export async function main(
   }
   const dataDir = env.DBLOOM_DATA_DIR ?? './data'
   const store = openSqliteStore(join(dataDir, 'dbloom.db'))
+  registerAuditStore(store.db)
   try {
     const resolver = createAuthSettingsResolver(store.accounts, env)
+    if (argv[0] === 'audit') {
+      const code = auditExportCommand(argv.slice(1), store.db, write, resolver.resolve().auditRetentionDays)
+      if (code === 2) write(`${CLI_USAGE}\n`)
+      return code
+    }
     const key = loadSecretKey(env)
     // The CLI never sets passwords or runs ceremonies; those dependencies of the services refuse.
     const unavailable = async (): Promise<never> => {
@@ -51,11 +59,12 @@ export async function main(
       ring: key.ok ? key.ring : undefined,
       recovery,
       users,
-      audit: (event, fields) => void process.stderr.write(JSON.stringify({ t: new Date().toISOString(), audit: event, ...fields }) + '\n'),
+      audit: (event, fields) => audit(event, fields),
     })
     write(result.stdout)
     return result.exitCode
   } finally {
+    unregisterAuditStore()
     store.close()
   }
 }

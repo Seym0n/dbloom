@@ -32,10 +32,11 @@ function envUnitMs(name: string): number {
 }
 
 function parseEnv(raw: string, spec: SettingSpec<unknown>, name: string): unknown {
+  const unit = spec.envUnit ?? envUnitMs(name)
   const text = raw.trim()
   if (typeof spec.default === 'number') {
     const n = Number(text)
-    return Number.isFinite(n) ? n * envUnitMs(name) : text
+    return Number.isFinite(n) ? n * unit : text
   }
   if (typeof spec.default === 'boolean') {
     if (/^(1|true|yes|on)$/i.test(text)) return true

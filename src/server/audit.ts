@@ -1,11 +1,100 @@
+import { isAuditEvent } from './audit/events'
+import type { DatabaseSync } from 'node:sqlite'
+import { addSink, dispatch, listSinks, removeSink, type AuditEntry } from './audit/sink'
+import { createStoreSink, storeWriterFor } from './audit/store-sink'
 import type { StructureAuditEvent } from './structure/types'
 
-/** One JSON line per event on stdout. Never pass passwords, tokens or cell values (SEC-TGT-023). */
-export function audit(
-  event: string,
-  fields: Record<string, string | number | boolean | undefined> = {},
-): void {
-  console.log(JSON.stringify({ t: new Date().toISOString(), audit: event, ...fields }))
+/** Thrown by `auditRequired` when the row cannot be committed: the caller must abort its change (FR-AAU-004). */
+export class AuditUnavailable extends Error {
+  constructor(reason: string) {
+    super(`Audit log unavailable: ${reason}`)
+    this.name = 'AuditUnavailable'
+  }
+}
+
+type Fields = Record<string, string | number | boolean | undefined>
+
+/** Request context of the current call: set by the server runtime (effective client address, FR-SVR-005); absent in the CLI. */
+let contextProvider: (() => AuditEntry['ctx']) | undefined
+export function setAuditContext(provider: (() => AuditEntry['ctx']) | undefined): void {
+  contextProvider = provider
+}
+
+let storeDb: DatabaseSync | undefined
+const STORE_SINK = 'store'
+
+/** Opens the table sink on this handle (server runtime). `auditRequired` writes through the same handle. */
+export function registerAuditStore(db: DatabaseSync): void {
+  storeDb = db
+  addSink(createStoreSink(db, Date.now, STORE_SINK))
+}
+/** True when the table sink is registered (stateful server runtime). */
+export const auditRegistered = (): boolean => storeDb !== undefined
+export function unregisterAuditStore(): void {
+  storeDb = undefined
+  removeSink(STORE_SINK)
+}
+
+function checkCatalog(event: string): void {
+  if (isAuditEvent(event)) return
+  const message = `Audit event "${event}" is not in the catalog (src/server/audit/events.ts)`
+  if (process.env.NODE_ENV === 'test') throw new Error(message)
+  process.stderr.write(`${JSON.stringify({ t: new Date().toISOString(), level: 'error', msg: message })}
+`)
+}
+
+function entryOf(event: string, fields: Fields): AuditEntry {
+  let ctx: AuditEntry['ctx']
+  try {
+    ctx = contextProvider?.()
+  } catch {
+    ctx = undefined // outside a request
+  }
+  return { t: new Date().toISOString(), event, fields, ...(ctx ? { ctx } : {}) }
+}
+
+/**
+ * One audit event: checked against the catalog, then written to every sink (stdout line first, see `audit/sink.ts`).
+ * Best effort: a failing sink never throws here. Never pass passwords, tokens or cell values (SEC-TGT-023). An event
+ * missing from the catalog throws under test and is logged as an error in production; the line is written either way.
+ */
+export function audit(event: string, fields: Fields = {}): void {
+  checkCatalog(event)
+  dispatch(entryOf(event, fields))
+}
+
+/**
+ * Required write (FR-AAU-004): the row is committed before this returns; throws `AuditUnavailable` in stateless mode, on
+ * a read-only or locked handle, or when the insert fails. Other sinks (stdout, file) get the entry after the commit.
+ * With `db` inside an open transaction the row joins it (see `auditRequiredIn`).
+ */
+export function auditRequired(event: string, fields: Fields = {}): void {
+  auditRequiredIn(storeDb, event, fields)()
+}
+
+/**
+ * Transaction variant: the row joins the caller's open transaction on `db`, so the change and its row commit or roll back
+ * together. Returns `publish`, which the caller invokes after COMMIT to send the entry to the other sinks.
+ */
+export function auditRequiredIn(db: DatabaseSync | undefined, event: string, fields: Fields = {}): () => void {
+  checkCatalog(event)
+  if (!db) throw new AuditUnavailable('not available in this mode')
+  const entry = entryOf(event, fields)
+  try {
+    storeWriterFor(db).insert(entry)
+  } catch (error) {
+    throw new AuditUnavailable(error instanceof Error ? error.message : 'write failed')
+  }
+  return () => {
+    for (const sink of listSinks()) {
+      if (sink.name === STORE_SINK) continue
+      try {
+        sink.write(entry)
+      } catch {
+        // required row is already committed; other sinks are best effort
+      }
+    }
+  }
 }
 
 /** Structure statements: hash only, never SQL text or literals (NFR-TGT-090, SEC-TGT-023). */

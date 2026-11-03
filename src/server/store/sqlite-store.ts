@@ -182,6 +182,24 @@ export const MIGRATIONS: ((db: DatabaseSync) => void)[] = [
       CREATE TABLE IF NOT EXISTS user_notices (id TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE, kind TEXT NOT NULL, created_at INTEGER NOT NULL, read_at INTEGER) STRICT;
     `)
   },
+  // 6: audit log (SPEC/29 FR-AAU-001, 006). No foreign key: deleting a user keeps their history. Rows are append-only;
+  // the purge sets `site.audit_cutoff` in its transaction, and only rows older than it can be deleted.
+  (db) => {
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS audit_log (
+        id INTEGER PRIMARY KEY AUTOINCREMENT, at INTEGER NOT NULL, event TEXT NOT NULL, outcome TEXT,
+        actor_id TEXT, actor_name TEXT, actor_kind TEXT NOT NULL, subject TEXT, address TEXT, fields TEXT NOT NULL
+      ) STRICT;
+      CREATE INDEX IF NOT EXISTS audit_log_at ON audit_log(at);
+      CREATE INDEX IF NOT EXISTS audit_log_event ON audit_log(event);
+      CREATE INDEX IF NOT EXISTS audit_log_actor ON audit_log(actor_id);
+      CREATE TRIGGER IF NOT EXISTS audit_log_no_update BEFORE UPDATE ON audit_log
+      BEGIN SELECT RAISE(ABORT, 'audit_log is append-only'); END;
+      CREATE TRIGGER IF NOT EXISTS audit_log_no_delete BEFORE DELETE ON audit_log
+      WHEN OLD.at >= COALESCE((SELECT CAST(value AS INTEGER) FROM site WHERE key = 'audit_cutoff'), 0)
+      BEGIN SELECT RAISE(ABORT, 'audit_log is append-only'); END;
+    `)
+  },
 ]
 
 /** Applies pending migrations in one transaction; refuses a database newer than the code. */

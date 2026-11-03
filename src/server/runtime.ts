@@ -1,3 +1,10 @@
+import { audit, registerAuditStore, unregisterAuditStore } from './audit'
+import { configureAnonymiser } from './audit/anonymise'
+import { createFileSink, setActiveFileSink } from './audit/file-sink'
+import { addSink } from './audit/sink'
+import { loadSecretKey } from './auth/secret-key'
+import { purgeAudit } from './audit/retention'
+import { installAuditContext } from './net/audit-context'
 import { mkdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { DirectAuth } from './auth'
@@ -81,6 +88,34 @@ export function getRuntime(): Runtime {
       throw error
     }
   }
+  // Audit table sink (SPEC/29 FR-AAU-002): stateful modes only; stateless mode keeps stdout.
+  installAuditContext()
+  if (!stateless) registerAuditStore(store.db)
+  if (!stateless) {
+    // Retention (FR-AAU-005): at start and daily. A failed run is logged, never fatal.
+    const purge = () => {
+      try {
+        purgeAudit(store.db, config.auditRetentionDays)
+      } catch (error) {
+        log.warn('audit.purge_failed', { error: error instanceof Error ? error.message : 'failed' })
+      }
+    }
+    purge()
+    setInterval(purge, 24 * 3_600_000).unref()
+  }
+  // Address anonymisation and the external file sink (FR-AAU-009).
+  const auditKey = loadSecretKey(process.env)
+  configureAnonymiser(config.auditAnonymiseIp, config.auditAnonymiseIp === 'hash' && auditKey.ok ? auditKey.ring.subkey('auditIp') : undefined)
+  if (config.auditAnonymiseIp === 'hash' && !auditKey.ok) log.warn('audit.anonymise_hash_without_key', { note: 'addresses are hashed under a per-process key and cannot be correlated across restarts' })
+  if (config.auditFile) {
+    const fileSink = createFileSink({
+      path: config.auditFile,
+      onState: (s) => setTimeout(() => audit('audit.sink', { actorKind: 'system', outcome: s.state, state: s.state, buffered: s.buffered, drops: s.drops, error: s.lastError }), 0).unref(),
+    })
+    addSink(fileSink)
+    setActiveFileSink(fileSink)
+    registerShutdownStep({ name: 'audit-file', order: 30, run: () => fileSink.close() })
+  }
   // Account-mode limits come from the settings resolver; a short cache keeps it off the per-request path.
   const resolver = createAuthSettingsResolver(store.accounts)
   let cached: { at: number; value: ResolvedAuthSettings } | undefined
@@ -115,6 +150,7 @@ export function getRuntime(): Runtime {
     order: 40,
     run: () => {
       lock?.release()
+      unregisterAuditStore()
       store.db.exec('PRAGMA wal_checkpoint(TRUNCATE)')
       store.close()
     },

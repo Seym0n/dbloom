@@ -6,6 +6,7 @@
  * Users of `login`, all with password MOCK_PASSWORD: alice (full), bob (TOTP 123456, passkey, recovery code
  * MOCK_RECOVERY_CODE), carol (enrol only), dave (must change password), erin (throttled after two wrong passwords).
  */
+import { createMockAuditApi } from './mock-audit'
 import type { LoginMode, PrefImportProblem, SessionInfo, SessionState } from '~/server/auth/types'
 import { clearMockConnections, createMockConnectionApi, mockOpenConnections } from './mock-connections'
 import { MOCK_PREF_DEFAULTS, MOCK_USER_SCOPED, mockValid } from './mock-prefs'
@@ -602,6 +603,7 @@ export function createMockAuthApi(initial?: MockScenario): AuthApi {
 
     // ---- users, invites and recovery links, connections, vault and profiles: mock-connections.ts
     ...connectionApi,
+    ...createMockAuditApi({ flag, wait, needStepUp, username: owner }),
     listConnections: async () => {
       resetIdle(true)
       return connectionApi.listConnections()

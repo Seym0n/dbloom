@@ -60,6 +60,10 @@ export type Config = {
   tlsMode: 'proxy'
   hsts: { enabled: boolean; maxAgeSeconds: number; includeSubDomains: boolean }
   shutdownSeconds: number
+  auditRetentionDays: number
+  /** Absolute path of the external audit file, or undefined for stdout only. */
+  auditFile: string | undefined
+  auditAnonymiseIp: 'off' | 'truncate' | 'hash'
   logLevel: LogLevel
   allowDebug: boolean
   probeHosts: string[]
@@ -101,6 +105,14 @@ const num = (x: string | undefined, fallback: number) => {
 const raw = (env: NodeJS.ProcessEnv, name: string): string | undefined => {
   const x = env[name]?.trim()
   return x === undefined || x === '' ? undefined : x
+}
+
+/** `DBLOOM_AUDIT_SINK`: `stdout` or `file:/absolute/path`; anything else refuses startup. */
+function auditSinkFile(env: NodeJS.ProcessEnv): string | undefined {
+  const text = raw(env, 'DBLOOM_AUDIT_SINK')
+  if (text === undefined || text.toLowerCase() === 'stdout') return undefined
+  if (text.startsWith('file:') && isAbsolute(text.slice(5))) return text.slice(5)
+  throw new ConfigError('DBLOOM_AUDIT_SINK must be `stdout` or `file:` followed by an absolute path')
 }
 
 /** Strict parse of one registered variable through zod. Messages name the variable, never the value. */
@@ -330,6 +342,9 @@ export function loadConfigWithWarnings(env: NodeJS.ProcessEnv = process.env): Lo
       includeSubDomains: (strict(env, 'DBLOOM_HSTS_SUBDOMAINS') as boolean | undefined) ?? false,
     },
     shutdownSeconds: n('DBLOOM_SHUTDOWN_SECONDS', 25),
+    auditRetentionDays: n('DBLOOM_AUDIT_RETENTION_DAYS', 365),
+    auditFile: auditSinkFile(env),
+    auditAnonymiseIp: ((strict(env, 'DBLOOM_AUDIT_ANONYMISE_IP') as string | undefined) ?? 'off') as Config['auditAnonymiseIp'],
     logLevel,
     allowDebug,
     probeHosts,

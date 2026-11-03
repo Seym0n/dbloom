@@ -4,6 +4,7 @@ import { Button } from '~/components/ui/button'
 import type { AccountSessionView } from '~/lib/auth/api'
 import { ChangePasswordDialog } from '../change-password-dialog'
 import { Muted, Panel, Row, Section } from './account-ui'
+import { ActivitySection } from './activity-section'
 import { FactorsSection } from './factors-section'
 import { NoticesSection, SessionsSection } from './sessions-section'
 import { StepUpProvider } from './step-up'
@@ -37,6 +38,7 @@ export function SecurityPage({ session }: { session: AccountSessionView }) {
         </Section>
         <FactorsSection announce={setMessage} />
         <SessionsSection announce={setMessage} />
+        <ActivitySection />
       </div>
       <ChangePasswordDialog
         open={changing}

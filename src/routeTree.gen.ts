@@ -16,12 +16,14 @@ import { Route as RecoverRouteImport } from './routes/recover'
 import { Route as SetupRouteImport } from './routes/setup'
 import { Route as AccountIndexRouteImport } from './routes/account.index'
 import { Route as AccountPreferencesRouteImport } from './routes/account.preferences'
+import { Route as AdminAuditRouteImport } from './routes/admin.audit'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as ApiReadyRouteImport } from './routes/api/ready'
 import { Route as ApiStartupRouteImport } from './routes/api/startup'
 import { Route as ApiIoUploadRouteImport } from './routes/api/io/upload'
 import { Route as ApiRowsUploadRouteImport } from './routes/api/rows/upload'
+import { Route as ApiAuditExportTokenRouteImport } from './routes/api/audit/export.$token'
 import { Route as ApiIoDownloadIdRouteImport } from './routes/api/io/download.$id'
 import { Route as ApiRowsCellIdRouteImport } from './routes/api/rows/cell.$id'
 
@@ -60,6 +62,11 @@ const AccountPreferencesRoute = AccountPreferencesRouteImport.update({
   path: '/preferences',
   getParentRoute: () => AccountRoute,
 } as any)
+const AdminAuditRoute = AdminAuditRouteImport.update({
+  id: '/admin/audit',
+  path: '/admin/audit',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminUsersRoute = AdminUsersRouteImport.update({
   id: '/admin/users',
   path: '/admin/users',
@@ -90,6 +97,11 @@ const ApiRowsUploadRoute = ApiRowsUploadRouteImport.update({
   path: '/api/rows/upload',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAuditExportTokenRoute = ApiAuditExportTokenRouteImport.update({
+  id: '/api/audit/export/$token',
+  path: '/api/audit/export/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiIoDownloadIdRoute = ApiIoDownloadIdRouteImport.update({
   id: '/api/io/download/$id',
   path: '/api/io/download/$id',
@@ -108,6 +120,7 @@ export interface FileRoutesByFullPath {
   '/recover': typeof RecoverRoute
   '/setup': typeof SetupRoute
   '/account/preferences': typeof AccountPreferencesRoute
+  '/admin/audit': typeof AdminAuditRoute
   '/admin/users': typeof AdminUsersRoute
   '/api/health': typeof ApiHealthRoute
   '/api/ready': typeof ApiReadyRoute
@@ -115,6 +128,7 @@ export interface FileRoutesByFullPath {
   '/account/': typeof AccountIndexRoute
   '/api/io/upload': typeof ApiIoUploadRoute
   '/api/rows/upload': typeof ApiRowsUploadRoute
+  '/api/audit/export/$token': typeof ApiAuditExportTokenRoute
   '/api/io/download/$id': typeof ApiIoDownloadIdRoute
   '/api/rows/cell/$id': typeof ApiRowsCellIdRoute
 }
@@ -124,6 +138,7 @@ export interface FileRoutesByTo {
   '/recover': typeof RecoverRoute
   '/setup': typeof SetupRoute
   '/account/preferences': typeof AccountPreferencesRoute
+  '/admin/audit': typeof AdminAuditRoute
   '/admin/users': typeof AdminUsersRoute
   '/api/health': typeof ApiHealthRoute
   '/api/ready': typeof ApiReadyRoute
@@ -131,6 +146,7 @@ export interface FileRoutesByTo {
   '/account': typeof AccountIndexRoute
   '/api/io/upload': typeof ApiIoUploadRoute
   '/api/rows/upload': typeof ApiRowsUploadRoute
+  '/api/audit/export/$token': typeof ApiAuditExportTokenRoute
   '/api/io/download/$id': typeof ApiIoDownloadIdRoute
   '/api/rows/cell/$id': typeof ApiRowsCellIdRoute
 }
@@ -142,6 +158,7 @@ export interface FileRoutesById {
   '/recover': typeof RecoverRoute
   '/setup': typeof SetupRoute
   '/account/preferences': typeof AccountPreferencesRoute
+  '/admin/audit': typeof AdminAuditRoute
   '/admin/users': typeof AdminUsersRoute
   '/api/health': typeof ApiHealthRoute
   '/api/ready': typeof ApiReadyRoute
@@ -149,6 +166,7 @@ export interface FileRoutesById {
   '/account/': typeof AccountIndexRoute
   '/api/io/upload': typeof ApiIoUploadRoute
   '/api/rows/upload': typeof ApiRowsUploadRoute
+  '/api/audit/export/$token': typeof ApiAuditExportTokenRoute
   '/api/io/download/$id': typeof ApiIoDownloadIdRoute
   '/api/rows/cell/$id': typeof ApiRowsCellIdRoute
 }
@@ -161,6 +179,7 @@ export interface FileRouteTypes {
     | '/recover'
     | '/setup'
     | '/account/preferences'
+    | '/admin/audit'
     | '/admin/users'
     | '/api/health'
     | '/api/ready'
@@ -168,6 +187,7 @@ export interface FileRouteTypes {
     | '/account/'
     | '/api/io/upload'
     | '/api/rows/upload'
+    | '/api/audit/export/$token'
     | '/api/io/download/$id'
     | '/api/rows/cell/$id'
   fileRoutesByTo: FileRoutesByTo
@@ -177,6 +197,7 @@ export interface FileRouteTypes {
     | '/recover'
     | '/setup'
     | '/account/preferences'
+    | '/admin/audit'
     | '/admin/users'
     | '/api/health'
     | '/api/ready'
@@ -184,6 +205,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/api/io/upload'
     | '/api/rows/upload'
+    | '/api/audit/export/$token'
     | '/api/io/download/$id'
     | '/api/rows/cell/$id'
   id:
@@ -194,6 +216,7 @@ export interface FileRouteTypes {
     | '/recover'
     | '/setup'
     | '/account/preferences'
+    | '/admin/audit'
     | '/admin/users'
     | '/api/health'
     | '/api/ready'
@@ -201,6 +224,7 @@ export interface FileRouteTypes {
     | '/account/'
     | '/api/io/upload'
     | '/api/rows/upload'
+    | '/api/audit/export/$token'
     | '/api/io/download/$id'
     | '/api/rows/cell/$id'
   fileRoutesById: FileRoutesById
@@ -211,12 +235,14 @@ export interface RootRouteChildren {
   InviteRoute: typeof InviteRoute
   RecoverRoute: typeof RecoverRoute
   SetupRoute: typeof SetupRoute
+  AdminAuditRoute: typeof AdminAuditRoute
   AdminUsersRoute: typeof AdminUsersRoute
   ApiHealthRoute: typeof ApiHealthRoute
   ApiReadyRoute: typeof ApiReadyRoute
   ApiStartupRoute: typeof ApiStartupRoute
   ApiIoUploadRoute: typeof ApiIoUploadRoute
   ApiRowsUploadRoute: typeof ApiRowsUploadRoute
+  ApiAuditExportTokenRoute: typeof ApiAuditExportTokenRoute
   ApiIoDownloadIdRoute: typeof ApiIoDownloadIdRoute
   ApiRowsCellIdRoute: typeof ApiRowsCellIdRoute
 }
@@ -272,6 +298,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountPreferencesRouteImport
       parentRoute: typeof AccountRoute
     }
+    '/admin/audit': {
+      id: '/admin/audit'
+      path: '/admin/audit'
+      fullPath: '/admin/audit'
+      preLoaderRoute: typeof AdminAuditRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/users': {
       id: '/admin/users'
       path: '/admin/users'
@@ -314,6 +347,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiRowsUploadRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/audit/export/$token': {
+      id: '/api/audit/export/$token'
+      path: '/api/audit/export/$token'
+      fullPath: '/api/audit/export/$token'
+      preLoaderRoute: typeof ApiAuditExportTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/io/download/$id': {
       id: '/api/io/download/$id'
       path: '/api/io/download/$id'
@@ -350,12 +390,14 @@ const rootRouteChildren: RootRouteChildren = {
   InviteRoute: InviteRoute,
   RecoverRoute: RecoverRoute,
   SetupRoute: SetupRoute,
+  AdminAuditRoute: AdminAuditRoute,
   AdminUsersRoute: AdminUsersRoute,
   ApiHealthRoute: ApiHealthRoute,
   ApiReadyRoute: ApiReadyRoute,
   ApiStartupRoute: ApiStartupRoute,
   ApiIoUploadRoute: ApiIoUploadRoute,
   ApiRowsUploadRoute: ApiRowsUploadRoute,
+  ApiAuditExportTokenRoute: ApiAuditExportTokenRoute,
   ApiIoDownloadIdRoute: ApiIoDownloadIdRoute,
   ApiRowsCellIdRoute: ApiRowsCellIdRoute,
 }
