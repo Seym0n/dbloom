@@ -1,19 +1,19 @@
 # Proxy suite and proxy verify items (FR-SVR-015, 018; task 8)
 
-Run 2026-11-03: `npm run test:e2e:proxy` (vitest, no browser), 16 tests green. Image from the repo Dockerfile; `traefik:v3.6`, `caddy:2`; app on a fixed address behind two proxies in `deploy/proxy/compose.proxy.yaml` (network 172.30.0.0/24, `DBLOOM_TRUST_PROXY` lists exactly the two proxy addresses, stateless store, debug log so the effective client address is visible). The proxies exist only in this test setup; the image never contains one.
+Run 2026-11-03: `npm run test:e2e:proxy` (vitest, no browser), 21 tests green. Image from the repo Dockerfile; `traefik:v3.6`, `caddy:2`, `nginx:1-alpine`; app on a fixed address behind two proxies in `deploy/proxy/compose.proxy.yaml` (network 172.30.0.0/24, `DBLOOM_TRUST_PROXY` lists exactly the two proxy addresses, stateless store, debug log so the effective client address is visible). The proxies exist only in this test setup; the image never contains one.
 
 ## Coverage
-| Topic | Traefik (full) | Caddy (subset) | Direct to app port |
-|---|---|---|---|
-| Central headers, HSTS, no CORS | yes | HSTS | |
-| http to https redirect | yes (Traefik entry point) | | |
-| Forged `Host` gives 421, empty body | yes | yes | yes |
-| Forged `X-Forwarded-Host`, `Forwarded` ignored for origin | yes | | |
-| Spoofed `X-Forwarded-For` does not become the client address | yes | yes | yes (untrusted peer) |
-| Proxy reports `http` on an `https` origin: credential page 403 | yes (header-triggered router) | | |
-| POST without `Origin`, cross-site `Origin`: 403; OPTIONS 405 | yes | yes (no Origin) | yes (no Origin) |
-| Body cap in the proxy (buffering middleware, 4 MiB): 413 | yes | | |
-| Probe paths for public peers: 404 | yes | | |
+| Topic | Traefik (full) | Caddy (subset) | Direct to app port | nginx (subset) |
+|---|---|---|---|---|
+| Central headers, HSTS, no CORS | yes | HSTS | | HSTS |
+| http to https redirect | yes (Traefik entry point) | | |  |
+| Forged `Host` gives 421, empty body | yes | yes | yes | yes |
+| Forged `X-Forwarded-Host`, `Forwarded` ignored for origin | yes | | |  |
+| Spoofed `X-Forwarded-For` does not become the client address | yes | yes | yes (untrusted peer) | yes |
+| Proxy reports `http` on an `https` origin: credential page 403 | yes (header-triggered router) | | |  |
+| POST without `Origin`, cross-site `Origin`: 403; OPTIONS 405 | yes | yes (no Origin) | yes (no Origin) | yes (no Origin) |
+| Body cap in the proxy (buffering middleware, 4 MiB): 413 | yes | | | yes (`client_max_body_size 4m`) |
+| Probe paths for public peers: 404 | yes | | |  |
 
 Test-only deviations: the Traefik router forwards every `Host` (`HostRegexp`), so the app's own 421 is exercised; real Coolify routers match the domain. The Caddy site lists `evil.example` so Caddy's own SNI/Host check does not stop the forged-Host test. The client address is read from the app's debug access log (`client` field), which exists only at debug level (personal data).
 
@@ -25,4 +25,4 @@ Test-only deviations: the Traefik router forwards every `Host` (`HostRegexp`), s
 
 ## Open
 - CI job runs the suite on `main` only (spec); Docker Hub pulls of the two proxy images are not pinned by digest yet.
-- Nginx and Apache are not covered; the guide lists what a proxy must overwrite (`Host` forwarded, `X-Forwarded-For` set from the peer, `X-Forwarded-Proto` set, client-sent copies replaced, body limit, read timeout), and an nginx subset is a cheap addition.
+- Apache is not covered; nginx runs the subset with the reference config `deploy/proxy/nginx/default.conf` (sets `X-Forwarded-For` to `$remote_addr`, `X-Forwarded-Proto` to `$scheme`, clears `Forwarded` and `X-Forwarded-Host`, `client_max_body_size 4m`, 600 s read timeout; the nginx image installs openssl with `apk` at start to make a throw-away certificate). The guide lists what a proxy must overwrite (`Host` forwarded, `X-Forwarded-For` set from the peer, `X-Forwarded-Proto` set, client-sent copies replaced, body limit, read timeout), and an nginx subset is a cheap addition.

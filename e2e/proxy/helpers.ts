@@ -7,6 +7,7 @@ export const ORIGIN_HOST = 'dbloom.test'
 export const TARGETS = {
   traefik: { port: 18443, tls: true },
   caddy: { port: 19443, tls: true },
+  nginx: { port: 19444, tls: true },
   traefikHttp: { port: 18080, tls: false },
   direct: { port: 3300, tls: false },
 } as const
