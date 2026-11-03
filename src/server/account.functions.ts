@@ -4,9 +4,8 @@
  * the shared JSON error of `auth/error-transport.ts` (the code list is closed, 5.9).
  */
 import { createServerFn } from '@tanstack/react-start'
-import { getRequestIP } from '@tanstack/react-start/server'
+import { currentClientAddress } from './net/current'
 import { accountMiddleware } from './middleware'
-import { getRuntime } from './runtime'
 import { getAccountServices } from './auth/account-runtime'
 import { throwAuthError } from './auth/error-transport'
 import {
@@ -44,7 +43,7 @@ export const openConnection = createServerFn({ method: 'POST' })
   .middleware([accountMiddleware])
   .validator(openConnectionInput)
   .handler(({ data, context }) =>
-    guarded(() => getServices().connections.open(context.account, data, { address: getRequestIP({ xForwardedFor: getRuntime().config.trustProxy }) ?? 'unknown' })),
+    guarded(() => getServices().connections.open(context.account, data, { address: currentClientAddress() })),
   )
 
 export const closeConnection = createServerFn({ method: 'POST' })

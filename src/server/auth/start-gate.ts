@@ -1,4 +1,5 @@
 /** Start gate (FR-AUT-001): login mode, setup state and the account-mode start checks. Pure; the runtime feeds it. */
+import { parsePublicOrigin } from '../net/origin'
 import { loadSecretKey } from './secret-key'
 import { AUTH_ENV, LOGIN_MODES, type LoginMode, type SiteState, type StartupState } from './types'
 
@@ -14,23 +15,6 @@ export type StartDecision = {
   state: StartupState
   /** `DBLOOM_AUTO_SETUP=direct` on a fresh store: the caller completes the direct setup before serving. */
   autoSetup: boolean
-}
-
-const LOOPBACK = /^(localhost|127(\.\d{1,3}){3}|\[::1\]|::1)$/i
-
-/** `DBLOOM_PUBLIC_ORIGIN`: https, or http on loopback only; no path, query or credentials. Returns the origin. */
-export function parsePublicOrigin(raw: string | undefined): { ok: true; origin: URL } | { ok: false } {
-  if (!raw || !raw.trim()) return { ok: false }
-  let url: URL
-  try {
-    url = new URL(raw.trim())
-  } catch {
-    return { ok: false }
-  }
-  if (url.username || url.password || url.search || url.hash || (url.pathname !== '/' && url.pathname !== '')) return { ok: false }
-  if (url.protocol === 'https:') return { ok: true, origin: url }
-  if (url.protocol === 'http:' && LOOPBACK.test(url.hostname)) return { ok: true, origin: url }
-  return { ok: false }
 }
 
 export function parseLoginMode(raw: string | undefined): LoginMode | undefined {

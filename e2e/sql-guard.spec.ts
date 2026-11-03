@@ -223,6 +223,7 @@ test.describe('SCN-026 destructive statements need the server-side confirmation'
     const foreignHeaders: Record<string, string> = { ...mine.headers, 'x-dbloom-csrf': csrf }
     delete foreignHeaders['content-length']
     delete foreignHeaders['host']
+    foreignHeaders.origin = new URL(mine.url).origin
     const foreign = await other.request.post(mine.url, { headers: foreignHeaders, data: mine.body })
     expect(await succeeded(foreign)).toBe(false)
     expect(await countRows(scratch, 'customer')).toBe(3)

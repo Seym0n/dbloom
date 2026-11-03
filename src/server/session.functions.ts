@@ -1,11 +1,12 @@
 import { createServerFn } from '@tanstack/react-start'
-import { deleteCookie, getCookie, getRequestIP, setCookie } from '@tanstack/react-start/server'
+import { deleteCookie, getCookie, setCookie } from '@tanstack/react-start/server'
 import { z } from 'zod'
 import { audit } from './audit'
 import { getAccountServices } from './auth/account-runtime'
 import { throwAuthError } from './auth/error-transport'
 import { getPrefsService } from './auth/prefs/runtime'
 import { AuthError } from './auth/types'
+import { currentClientAddress } from './net/current'
 import { SESSION_COOKIE, publicMiddleware, sessionMiddleware } from './middleware'
 import { getRuntime } from './runtime'
 import { buildSessionInfo } from './session-info'
@@ -27,7 +28,7 @@ export const login = createServerFn({ method: 'POST' })
     const state = setup.startupState()
     // Direct login only exists in direct (and stateless) installs.
     if (state.kind === 'ready' && state.mode === 'account') throwAuthError(new AuthError('auth_failed'))
-    const address = getRequestIP({ xForwardedFor: config.trustProxy }) ?? 'unknown'
+    const address = currentClientAddress()
     // A new token on every login; an old cookie is never reused (SEC-TGT-040).
     await sessions.destroy(getCookie(SESSION_COOKIE))
     let result: { token: string; csrf: string }

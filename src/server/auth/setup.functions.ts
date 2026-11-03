@@ -1,9 +1,10 @@
 /** Setup server functions (FR-AUT-003): thin handlers over `getRuntime().setup`; 404 once setup is complete. */
 import { createServerFn } from '@tanstack/react-start'
-import { deleteCookie, getCookie, getRequestHeader, getRequestIP, getRequestUrl, setCookie } from '@tanstack/react-start/server'
+import { deleteCookie, getCookie, getRequestHeader, setCookie } from '@tanstack/react-start/server'
 import { z } from 'zod'
 import { CSRF_HEADER } from '~/lib/csrf'
 import { csrfClientMiddleware, sameOriginMiddleware } from '../middleware'
+import { currentClientAddress, currentRequestOrigin } from '../net/current'
 import { getRuntime } from '../runtime'
 import { SetupError } from './setup'
 import {
@@ -18,7 +19,7 @@ import {
 type Json = string | number | boolean | null | Json[] | { [k: string]: Json }
 type JsonObject = { [k: string]: Json }
 const empty = z.object({}).strict()
-const address = () => getRequestIP({ xForwardedFor: getRuntime().config.trustProxy }) ?? 'unknown'
+const address = currentClientAddress
 
 /** Maps a setup failure to a bare HTTP response: 404 when gone, 401 without a session, 409 for a wrong step. */
 function fail(error: unknown): never {
@@ -56,7 +57,7 @@ export const setupGetState = createServerFn({ method: 'GET' })
     // Before the token is accepted the page learns only the pending state, nothing else (DEP-TGT-123).
     if (!setup.reachable(address())) throw new Response(null, { status: 404 })
     const cookie = getCookie(SETUP_COOKIE)
-    const state = cookie ? setup.state(cookie, { origin: getRequestUrl().origin }) : undefined
+    const state = cookie ? setup.state(cookie, { origin: currentRequestOrigin() }) : undefined
     return state ? { pending: true as const, ...state } : { pending: true as const }
   })
 
@@ -90,7 +91,7 @@ export const setupPasskeyOptions = createServerFn({ method: 'POST' })
 export const setupPasskeyVerify = createServerFn({ method: 'POST' })
   .middleware([sameOriginMiddleware, csrfClientMiddleware])
   .validator(setupPasskeyVerifyInput)
-  .handler(({ data }) => run(async (cookie) => { await getRuntime().setup.passkeyVerify(cookie, data.response, data.name); return { ok: true as const } }))
+  .handler(({ data }) => run(async (cookie) => ({ ok: true as const, ...(await getRuntime().setup.passkeyVerify(cookie, data.response, data.name)) })))
 
 export const setupTotpStart = createServerFn({ method: 'POST' })
   .middleware([sameOriginMiddleware, csrfClientMiddleware])

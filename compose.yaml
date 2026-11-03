@@ -1,11 +1,16 @@
 services:
   dbloom:
     build: .
+    # The image binds 0.0.0.0 and refuses to start without a public origin and the proxy network (SPEC/27 FR-SVR-002).
+    # TODO(server task 7): drop the published port (Coolify routes to the container) and add compose.local.yaml.
     ports:
       - '3000:3000'
     env_file:
       - path: .env
         required: false
+    environment:
+      DBLOOM_PUBLIC_ORIGIN: ${DBLOOM_PUBLIC_ORIGIN:?set DBLOOM_PUBLIC_ORIGIN (https URL) in .env}
+      DBLOOM_TRUST_PROXY: ${DBLOOM_TRUST_PROXY:?set DBLOOM_TRUST_PROXY (CIDR of the reverse proxy network) in .env}
     volumes:
       - dbloom-data:/data
     restart: unless-stopped

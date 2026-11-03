@@ -1,0 +1,183 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`gate against the built server > header diff: page, asset, function, route, error, refusal (snapshot) 1`] = `
+{
+  "asset": {
+    "http": {
+      "headers": {
+        "cache-control": "public, max-age=31536000, immutable",
+        "cross-origin-opener-policy": "same-origin",
+        "permissions-policy": "camera=(), microphone=(), geolocation=()",
+        "referrer-policy": "no-referrer",
+        "x-content-type-options": "nosniff",
+        "x-robots-tag": "noindex, nofollow",
+      },
+      "status": 200,
+    },
+    "https": {
+      "headers": {
+        "cache-control": "public, max-age=31536000, immutable",
+        "cross-origin-opener-policy": "same-origin",
+        "permissions-policy": "camera=(), microphone=(), geolocation=()",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=31536000",
+        "x-content-type-options": "nosniff",
+        "x-robots-tag": "noindex, nofollow",
+      },
+      "status": 200,
+    },
+  },
+  "error-404": {
+    "http": {
+      "headers": {
+        "cache-control": "no-store",
+        "cross-origin-opener-policy": "same-origin",
+        "permissions-policy": "camera=(), microphone=(), geolocation=()",
+        "referrer-policy": "no-referrer",
+        "x-content-type-options": "nosniff",
+        "x-robots-tag": "noindex, nofollow",
+      },
+      "status": 404,
+    },
+    "https": {
+      "headers": {
+        "cache-control": "no-store",
+        "cross-origin-opener-policy": "same-origin",
+        "permissions-policy": "camera=(), microphone=(), geolocation=()",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=31536000",
+        "x-content-type-options": "nosniff",
+        "x-robots-tag": "noindex, nofollow",
+      },
+      "status": 404,
+    },
+  },
+  "function": {
+    "http": {
+      "headers": {
+        "cache-control": "no-store",
+        "cross-origin-opener-policy": "same-origin",
+        "permissions-policy": "camera=(), microphone=(), geolocation=()",
+        "referrer-policy": "no-referrer",
+        "x-content-type-options": "nosniff",
+        "x-robots-tag": "noindex, nofollow",
+        "x-tss-serialized": "true",
+      },
+      "status": 500,
+    },
+    "https": {
+      "headers": {
+        "cache-control": "no-store",
+        "cross-origin-opener-policy": "same-origin",
+        "permissions-policy": "camera=(), microphone=(), geolocation=()",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=31536000",
+        "x-content-type-options": "nosniff",
+        "x-robots-tag": "noindex, nofollow",
+        "x-tss-serialized": "true",
+      },
+      "status": 500,
+    },
+  },
+  "page": {
+    "http": {
+      "headers": {
+        "cache-control": "no-store",
+        "cross-origin-opener-policy": "same-origin",
+        "permissions-policy": "camera=(), microphone=(), geolocation=()",
+        "referrer-policy": "no-referrer",
+        "x-content-type-options": "nosniff",
+        "x-robots-tag": "noindex, nofollow",
+      },
+      "status": 200,
+    },
+    "https": {
+      "headers": {
+        "cache-control": "no-store",
+        "cross-origin-opener-policy": "same-origin",
+        "permissions-policy": "camera=(), microphone=(), geolocation=()",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=31536000",
+        "x-content-type-options": "nosniff",
+        "x-robots-tag": "noindex, nofollow",
+      },
+      "status": 200,
+    },
+  },
+  "refusal-405": {
+    "http": {
+      "headers": {
+        "cache-control": "no-store",
+        "cross-origin-opener-policy": "same-origin",
+        "permissions-policy": "camera=(), microphone=(), geolocation=()",
+        "referrer-policy": "no-referrer",
+        "x-content-type-options": "nosniff",
+        "x-robots-tag": "noindex, nofollow",
+      },
+      "status": 405,
+    },
+    "https": {
+      "headers": {
+        "cache-control": "no-store",
+        "cross-origin-opener-policy": "same-origin",
+        "permissions-policy": "camera=(), microphone=(), geolocation=()",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=31536000",
+        "x-content-type-options": "nosniff",
+        "x-robots-tag": "noindex, nofollow",
+      },
+      "status": 405,
+    },
+  },
+  "refusal-421": {
+    "http": {
+      "headers": {
+        "cache-control": "no-store",
+        "cross-origin-opener-policy": "same-origin",
+        "permissions-policy": "camera=(), microphone=(), geolocation=()",
+        "referrer-policy": "no-referrer",
+        "x-content-type-options": "nosniff",
+        "x-robots-tag": "noindex, nofollow",
+      },
+      "status": 421,
+    },
+    "https": {
+      "headers": {
+        "cache-control": "no-store",
+        "cross-origin-opener-policy": "same-origin",
+        "permissions-policy": "camera=(), microphone=(), geolocation=()",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=31536000",
+        "x-content-type-options": "nosniff",
+        "x-robots-tag": "noindex, nofollow",
+      },
+      "status": 421,
+    },
+  },
+  "route": {
+    "http": {
+      "headers": {
+        "cache-control": "no-store",
+        "cross-origin-opener-policy": "same-origin",
+        "permissions-policy": "camera=(), microphone=(), geolocation=()",
+        "referrer-policy": "no-referrer",
+        "x-content-type-options": "nosniff",
+        "x-robots-tag": "noindex, nofollow",
+      },
+      "status": 200,
+    },
+    "https": {
+      "headers": {
+        "cache-control": "no-store",
+        "cross-origin-opener-policy": "same-origin",
+        "permissions-policy": "camera=(), microphone=(), geolocation=()",
+        "referrer-policy": "no-referrer",
+        "strict-transport-security": "max-age=31536000",
+        "x-content-type-options": "nosniff",
+        "x-robots-tag": "noindex, nofollow",
+      },
+      "status": 200,
+    },
+  },
+}
+`;

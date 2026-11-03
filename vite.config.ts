@@ -20,9 +20,19 @@ export default defineConfig({
     },
   },
   plugins: [
-    tanstackStart(),
+    tanstackStart({
+      // Readable ids `<file>.<name>` so the gate can name a credential function (src/server/net/gate.ts).
+      serverFns: {
+        generateFunctionId: ({ filename, functionName }) => {
+          const file = filename.split(/[\\/]/).pop()?.replace(/\.[^.]+$/, '') ?? 'fn'
+          return `${file}.${functionName}`.replace(/[^A-Za-z0-9_.-]/g, '_')
+        },
+      },
+    }),
     nitro({
-      plugins: ['./src/server/startup-plugin.ts'],
+      // Global request gate before routing (FR-SVR-006), then the startup check and the central header hook.
+      handlers: [{ route: '/**', middleware: true, handler: './src/server/net/gate-middleware.ts' }],
+      plugins: ['./src/server/startup-plugin.ts', './src/server/http/headers-plugin.ts'],
       traceDeps: ['@guanmingchiu/sqlparser-ts*', 'reflect-metadata'],
     }),
     viteReact(),

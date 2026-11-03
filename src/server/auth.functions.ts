@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { createServerFn } from '@tanstack/react-start'
-import { deleteCookie, getCookie, getRequestHeader, getRequestIP, setCookie, setResponseStatus } from '@tanstack/react-start/server'
+import { deleteCookie, getCookie, getRequestHeader, setCookie, setResponseStatus } from '@tanstack/react-start/server'
+import { currentClientAddress } from './net/current'
 import { SESSION_COOKIE, accountMiddleware, accountStateMiddleware, publicMiddleware } from './middleware'
 import { getRuntime } from './runtime'
 import { clientHintOf, PRE_AUTH_MAX_AGE_SECONDS } from './auth/signin'
@@ -43,9 +44,8 @@ const wire = (value: unknown) => value as Json
 const boundary = throwAuthError
 
 const requestMeta = () => {
-  const { config } = getRuntime()
   return {
-    address: getRequestIP({ xForwardedFor: config.trustProxy }) ?? 'unknown',
+    address: currentClientAddress(),
     clientHint: clientHintOf(getRequestHeader('user-agent')),
   }
 }

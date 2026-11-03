@@ -3,7 +3,7 @@ import { mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { DirectAuth, LOGIN_FAILED } from '~/server/auth'
-import type { Config } from '~/server/config'
+import { loadConfig, type Config } from '~/server/config'
 import { SessionManager } from '~/server/sessions'
 import { openSqliteStore } from '~/server/store/sqlite-store'
 import type { Store } from '~/server/store/store'
@@ -14,6 +14,7 @@ const servers = [
 ]
 
 const config: Config = {
+  ...loadConfig({}),
   dataDir: '',
   allowedTargets: [],
   freeFormAck: true,

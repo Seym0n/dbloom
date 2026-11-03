@@ -104,8 +104,10 @@ test.describe('requests and logout (SEC-TGT-042, SCN-010)', () => {
     )
 
     // Same cookie, no CSRF header: refused with the single "session ended" response.
+    // The replay adds the Origin a browser would send (the gate refuses state-changing requests without one).
+    const asBrowser = { origin: new URL(url).origin }
     const forged = await page.request.post(url, {
-      headers,
+      headers: { ...headers, ...asBrowser },
       data: body ?? undefined,
     })
     expect(await forged.text()).toContain('session_ended')
@@ -117,7 +119,7 @@ test.describe('requests and logout (SEC-TGT-042, SCN-010)', () => {
     const other = await browser.newContext()
     await other.addCookies([cookie])
     const reuse = await other.request.post(url, {
-      headers: { ...headers, 'x-dbloom-csrf': original['x-dbloom-csrf'] ?? '' },
+      headers: { ...headers, ...asBrowser, 'x-dbloom-csrf': original['x-dbloom-csrf'] ?? '' },
       data: body ?? undefined,
     })
     expect(await reuse.text()).toContain('session_ended')

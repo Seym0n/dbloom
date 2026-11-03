@@ -1,4 +1,5 @@
 import { definePlugin } from 'nitro'
+import { INTERNAL_REQUEST } from './net/gate-middleware'
 
 /**
  * Refuses to start on a bad configuration (SEC-TGT-018) instead of failing on the first request. The runtime is created
@@ -9,7 +10,10 @@ export default definePlugin((nitro) => {
     void (async () => {
       let ok = false
       try {
-        ok = (await nitro.fetch(new Request('http://localhost/api/startup'))).ok
+        // In-process request: the gate skips it (no peer, Host is not on the allow-list of a deployed instance).
+        const request = new Request('http://localhost/api/startup') as Request & { context?: Record<symbol, unknown> }
+        request.context = { [INTERNAL_REQUEST]: true }
+        ok = (await nitro.fetch(request)).ok
       } catch (error) {
         console.error(
           `DBLoom cannot start: ${error instanceof Error ? error.message : String(error)}`,

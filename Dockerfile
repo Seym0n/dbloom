@@ -6,7 +6,8 @@ COPY . .
 RUN npm run build
 
 FROM node:24-slim
-ENV NODE_ENV=production PORT=3000 DBLOOM_DATA_DIR=/data
+# Listens on all interfaces (container); the start rule then requires DBLOOM_PUBLIC_ORIGIN and DBLOOM_TRUST_PROXY.
+ENV NODE_ENV=production PORT=3000 DBLOOM_DATA_DIR=/data DBLOOM_HOST=0.0.0.0
 WORKDIR /app
 COPY --from=build /app/.output ./.output
 RUN mkdir /data && chown node:node /data

@@ -346,7 +346,8 @@ export function forge(page: Page, c: Captured, body: string): Promise<APIRespons
   const headers = { ...c.headers }
   delete headers['content-length']
   delete headers['host']
-  return page.request.post(c.url, { headers, data: body })
+  // A replay is not a browser request: add the Origin the gate requires on state-changing requests (FR-SVR-006).
+  return page.request.post(c.url, { headers: { ...headers, origin: new URL(c.url).origin }, data: body })
 }
 
 export const succeeded = async (res: APIResponse) => (await res.text()).includes('"s":"done"')

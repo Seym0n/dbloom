@@ -1,8 +1,9 @@
 import { describe, expect, test } from 'vitest'
 import { isAddressAllowed, resolveAllowedAddress, TargetDeniedError } from '~/server/host-policy'
-import type { Config } from '~/server/config'
+import { loadConfig, type Config } from '~/server/config'
 
 const base: Config = {
+  ...loadConfig({}),
   dataDir: '',
   allowedTargets: [],
   freeFormAck: true,
