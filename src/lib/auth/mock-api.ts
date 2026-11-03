@@ -187,6 +187,7 @@ export function createMockAuthApi(initial?: MockScenario): AuthApi {
   const outcome = (username: string, st: SessionState): SignInOutcome => {
     const csrf = `mock-csrf-${Math.random().toString(36).slice(2, 10)}`
     state.session = { username, state: st, csrf }
+    resetIdle()
     save()
     return { csrf, state: st }
   }
@@ -235,6 +236,31 @@ export function createMockAuthApi(initial?: MockScenario): AuthApi {
       return (window.sessionStorage.getItem('dbloom.authMock.flags') ?? '').split(',').includes(name)
     } catch {
       return false
+    }
+  }
+  /**
+   * Idle limit of the mock session, kept in this tab's session storage: set at the first read from
+   * `dbloom.authMock.idleMs` (a test's short limit, default 30 minutes) and moved by `listConnections`, the call
+   * "Stay signed in" uses. A new sign-in or sign-out starts over.
+   */
+  const IDLE_KEY = 'dbloom.authMock.idleUntil'
+  const idleUntil = (): number => {
+    try {
+      const raw = window.sessionStorage.getItem(IDLE_KEY)
+      if (raw) return Number(raw)
+      const until = Date.now() + (Number(window.sessionStorage.getItem('dbloom.authMock.idleMs')) || 30 * 60_000)
+      window.sessionStorage.setItem(IDLE_KEY, String(until))
+      return until
+    } catch {
+      return Date.now() + 30 * 60_000
+    }
+  }
+  const resetIdle = (touch = false) => {
+    try {
+      if (touch) window.sessionStorage.setItem(IDLE_KEY, String(Date.now() + 30 * 60_000))
+      else window.sessionStorage.removeItem(IDLE_KEY)
+    } catch {
+      /* in-memory only */
     }
   }
   const owner = () => {
@@ -332,8 +358,10 @@ export function createMockAuthApi(initial?: MockScenario): AuthApi {
     setupPasskeyVerify: async () => {
       setupGuard()
       state.draft.factor = 'passkey'
+      const issued = state.draft.codes === undefined
+      if (issued) state.draft.codes = codes()
       save()
-      return wait({ ok: true as const })
+      return wait({ ok: true as const, ...(issued ? { recoveryCodes: state.draft.codes } : {}) })
     },
     setupTotpStart: async () => {
       setupGuard()
@@ -388,7 +416,7 @@ export function createMockAuthApi(initial?: MockScenario): AuthApi {
                 return { id: `mock-${u.username}`, username: u.username, displayName: u.displayName, role: u.role, securityVersion: 0 }
               })(),
               connections: mockOpenConnections(),
-              idleExpiresAt: Date.now() + 30 * 60_000,
+              idleExpiresAt: idleUntil(),
               absoluteExpiresAt: Date.now() + 12 * 3_600_000,
               stepUpUntil: null,
             }
@@ -442,6 +470,7 @@ export function createMockAuthApi(initial?: MockScenario): AuthApi {
     },
     signOut: async () => {
       state.session = null
+      resetIdle()
       clearMockConnections()
       save()
       return wait({ ok: true as const })
@@ -573,6 +602,10 @@ export function createMockAuthApi(initial?: MockScenario): AuthApi {
 
     // ---- users, invites and recovery links, connections, vault and profiles: mock-connections.ts
     ...connectionApi,
+    listConnections: async () => {
+      resetIdle(true)
+      return connectionApi.listConnections()
+    },
 
     invitePasskeyOptions: async ({ token }) => {
       if (token !== MOCK_INVITE_TOKEN) return fail('invite_invalid')

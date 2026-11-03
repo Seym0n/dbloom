@@ -64,8 +64,12 @@ test('SCN-064 setup wizard: token, breached password, passkey, store written onl
     await page.getByRole('button', { name: 'Save and add a second factor' }).click()
     await page.getByRole('button', { name: 'Add a passkey' }).click()
     await page.getByRole('button', { name: 'Add passkey' }).click()
+    // A passkey-only administrator gets recovery codes with the first factor (FR-AUT-010): shown once, saved, then on.
+    await expect(page.getByRole('heading', { name: 'Save your recovery codes' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Continue' })).toBeDisabled()
+    await page.getByLabel('I saved them').check()
+    await page.getByRole('button', { name: 'Continue' }).click()
     await expect(page.getByText('Passkey added')).toBeVisible()
-    // A passkey-only administrator gets no recovery codes in the wizard (finding, SPEC/26 15.6): codes come with TOTP.
 
     // Nothing is in the store before step 5.
     expect(count(server, 'users')).toBe(0)
@@ -80,6 +84,7 @@ test('SCN-064 setup wizard: token, breached password, passkey, store written onl
     // After step 5: rows exist, the token file is gone, the console says so, `/setup` is gone, also after a restart.
     expect(count(server, 'users')).toBe(1)
     expect(count(server, 'webauthn_credentials')).toBe(1)
+    expect(count(server, 'recovery_codes')).toBeGreaterThan(0)
     expect(setupTokenFile(server)).toBeUndefined()
     expect(readdirSync(server.dataDir).some((n) => n.startsWith('setup-token'))).toBe(false)
     expect(server.log()).toContain('setup token consumed')

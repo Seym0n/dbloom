@@ -575,15 +575,20 @@ Status: Docker suites run for the first time; task 12 written and green with the
 17. Existing rows e2e (4 specs): when the second toolbar band wraps, the Columns popover opened under the sidebar; `ml-auto` on the right group.
 18. `auth-ui-a11y` "light theme setup steps" cold-start flake (execution context destroyed by the first dev-server reload): the axe helper retries once the page settled.
 
+**Leftovers built afterwards (2026-11-02).** Former findings a, b, d, e are done; the letters of the rest are unchanged.
+- a. FR-AUT-010: the wizard issues the ten recovery codes with the first factor, a passkey included (`setup.passkeyVerify` returns them once, like `totpVerify`; the admin step shows them and requires "I saved them"). A TOTP added after the passkey issues a new set, replacing the first.
+- b. SEC-UIX-109: `IdleWarning` (`src/components/auth/idle-warning.tsx`) in `AccountApp`. At `idleExpiresAt - IDLE_WARNING_MS` it re-reads the limit with `getAuthBoot` (does not extend; work in the shell or another tab moves it), then opens a dialog with a countdown and "Stay signed in". The button calls `listConnections` (an ordinary non-background call that moves `lastSeenAt`; no new server function) and re-reads the limit. No answer: "session ended" dialog as before. Deviation: Escape and the backdrop do not close the dialog.
+- d. SCN-072: `ConnectionLost` (`src/components/connection-lost.tsx`) in the shell. A query error that is a fetch `TypeError` (`isNetworkError`) sets a flag; a notice with Retry shows, the session is kept. Retry probes with `getAuthBoot`: unreachable keeps the notice, no session shows "session ended", otherwise failed queries refetch; any successful query clears the flag. Other errors (HTTP 5xx) keep the generic load error. Mutations and the SQL tab's own calls do not raise it.
+- e. FR-AUT-026: account menu top right of the shell (`ActionsMenu` with a new `header` slot): user name, Account, Log out; the sidebar entries are gone in account mode. Direct mode keeps "Log out" in the sidebar. The picker keeps "Sign out". Deviation: the repo's own disclosure menu is used (no shadcn/Radix menu in the project).
+- Tests: `tests/auth-idle-connection.test.ts`, `tests/auth-setup.test.ts` (passkey codes), `e2e/auth-ui-shell.spec.ts` (menu, idle warning, expiry, connection lost), `e2e/auth-ui-setup.spec.ts` (passkey codes). Mock layer: `dbloom.authMock.idleMs` session-storage setting for a short idle limit. The live specs `auth-live-connections` and `auth-live-tamper` open the menu to log out; not re-run against the built server.
+
 **Findings left open (owner decisions or later work).**
-a. A passkey-only administrator gets no recovery codes in the wizard (codes are made at TOTP verification only), against FR-AUT-010 and the SCN-064 text; they appear when a TOTP is added later.
-b. SEC-UIX-109 idle warning ("Stay signed in", two minutes before the limit) is not built: `IDLE_WARNING_MS` is unused in the UI.
 c. ST-074 and FR-AUT-019 for direct mode (named targets list, last server preselected) are not built: the setting is read, the login form is free text.
-d. SCN-072 asks for "Connection lost" with Retry when a target goes away; the shell shows its generic load error.
-e. FR-AUT-026 account menu at the top right is not built: the shell has an "Account" link and "Log out" in the sidebar; the picker has "Sign out".
 f. The typed-credentials form defaults to "Encrypted, check the certificate" whatever `DBLOOM_TARGET_TLS` says (the specs pick "Not encrypted" for the Docker servers).
 g. The second-factor page names its button "Sign in as someone else" (SPEC: "Sign out").
 h. Audit names for factors (`account.factor`) and password (`account.password`) still differ from the contract list (`factor.added`, `factor.removed`, `user.password_changed`).
 i. A direct mode chosen in the wizard is still not checked by `assertDirectTargets` (15.4 item 5).
 j. `ssr.external` and `traceDeps` list `reflect-metadata`; the lockfile root entry was edited by hand (no network): run `npm install` once.
 k. The nitro build can fail with EBUSY on Windows (retry helper only hides it).
+
+**Decided (owner "Fine", 2026-11-02), leftovers block:** the account menu uses the repo's `ActionsMenu` (no new dependency); the idle dialog needs "Stay signed in" (Escape and backdrop do not dismiss it); the menu's non-item header div is accepted (axe passes). Open: `auth-ui-account` "saves as you go" Playwright spec fails on the leftovers tree (cause unconfirmed, possibly flaky); `auth-live` and main Playwright suites not yet re-run after the leftovers.

@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { QueryClientProvider, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
 import { StepUpProvider } from '~/components/auth/account/step-up'
+import { IdleWarning } from '~/components/auth/idle-warning'
 import { AppShell } from '~/components/shell/app-shell'
 import type { AccountSessionView } from '~/lib/auth/api'
 import { setCsrfToken } from '~/lib/csrf'
@@ -28,6 +29,7 @@ export function AccountApp(props: {
   return (
     <StepUpProvider>
       <AccountAppInner {...props} />
+      <IdleWarning idleExpiresAt={props.session.idleExpiresAt} />
     </StepUpProvider>
   )
 }
@@ -86,7 +88,7 @@ function AccountAppInner({
           target: { host: active.host, port: active.port, username: active.targetUser },
         }}
         open={open}
-        account={{ onSignOut }}
+        account={{ onSignOut, name: session.user?.displayName || session.user?.username || '' }}
         connectionSlot={
           <ConnectionSwitcher
             connections={session.connections}

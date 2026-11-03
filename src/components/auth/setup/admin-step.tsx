@@ -134,8 +134,10 @@ export function AdminStep({
         <PasskeyEnrol
           options={() => api.setupPasskeyOptions()}
           verify={(response, name) => api.setupPasskeyVerify(response, name)}
-          onDone={() => {
-            onChange({ ...admin, passkey: true })
+          onDone={(result) => {
+            const codes = (result as { recoveryCodes?: string[] } | undefined)?.recoveryCodes
+            onChange({ ...admin, passkey: true, codes: codes ?? admin.codes, codesSaved: codes ? false : admin.codesSaved })
+            if (codes) setCodesOpen(true)
             setFactor(null)
           }}
           onCancel={() => setFactor(null)}

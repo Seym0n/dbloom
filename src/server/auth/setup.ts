@@ -8,7 +8,8 @@ import { createHash, randomBytes, randomUUID } from 'node:crypto'
 import { join } from 'node:path'
 import { assertDirectTargets, loadConfig } from '../config'
 import { audit } from '../audit'
-import { StartRefusal, evaluateStart, parseLoginMode, parsePublicOrigin } from './start-gate'
+import { parsePublicOrigin } from '../net/origin'
+import { StartRefusal, evaluateStart, parseLoginMode } from './start-gate'
 import {
   AAD,
   AUTH_ENV,
@@ -202,6 +203,13 @@ export function createSetupService(deps: SetupDeps): SetupApi {
     if (s.draft.loginMode !== 'account' || !s.draft.site || !s.admin) throw new SetupError('step')
     return s.admin
   }
+  /** Generates the recovery codes of the first factor; the caller has checked the service exists. */
+  const issueCodes = (s: Session, userId: string): string[] => {
+    const svc = deps.recoveryCodes!
+    const plain = svc.generate()
+    s.codes = { plain, macs: plain.map((c) => svc.mac(userId, svc.normalise(c) ?? c)) }
+    return plain
+  }
 
   return {
     startupState,
@@ -302,14 +310,14 @@ export function createSetupService(deps: SetupDeps): SetupApi {
       let matches: boolean | null = null
       if (origin.ok && browser?.origin) {
         try {
-          matches = new URL(browser.origin).origin === origin.origin.origin
+          matches = new URL(browser.origin).origin === origin.value.origin
         } catch {
           matches = false
         }
       }
       const env: SetupEnvStatus = {
         storeMode: 'stateful',
-        publicOrigin: origin.ok ? origin.origin.origin : null,
+        publicOrigin: origin.ok ? origin.value.origin : null,
         publicOriginMatchesBrowser: matches,
         secretKeyPresent: !!deps.ring,
         adminNetworks: nets,
@@ -391,12 +399,16 @@ export function createSetupService(deps: SetupDeps): SetupApi {
       const s = get(cookie)
       const a = requireAdminStep(s)
       const w = needWebauthn()
+      if (!deps.recoveryCodes) throw new SetupError('env')
       // A passkey enrolled here must report user verification (FR-AUT-003).
       const verified = await w.verifyRegistration(s.hash, 'setup_passkey', response, { requireUserVerification: true })
       get(cookie)
       s.passkeys.push({ ...verified, userId: a.userId, name, createdAt: now(), lastUsedAt: null })
       s.draft.admin!.factor = 'passkey' satisfies FactorKind
+      // The first factor issues the recovery codes, passkey-only included (FR-AUT-010).
+      const issued = s.codes ? undefined : issueCodes(s, a.userId)
       recompute(s)
+      return issued ? { recoveryCodes: issued } : {}
     },
 
     totpStart(cookie) {
@@ -422,9 +434,7 @@ export function createSetupService(deps: SetupDeps): SetupApi {
       }
       s.totp = { secret: p.secret, step: res.step }
       delete s.pendingTotp
-      const a = s.admin!
-      const plain = deps.recoveryCodes.generate()
-      s.codes = { plain, macs: plain.map((c) => deps.recoveryCodes!.mac(a.userId, deps.recoveryCodes!.normalise(c) ?? c)) }
+      const plain = issueCodes(s, s.admin!.userId)
       s.draft.admin!.factor = 'totp' satisfies FactorKind
       recompute(s)
       return { recoveryCodes: plain }

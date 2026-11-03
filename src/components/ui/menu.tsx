@@ -21,11 +21,14 @@ export function ActionsMenu({
   items,
   className,
   trigger,
+  header,
 }: {
   label: string
   items: MenuItem[]
   className?: string
   trigger?: ReactNode
+  /** Static text above the items (for example who is signed in); not focusable, not a menu item. */
+  header?: ReactNode
 }) {
   const [pos, setPos] = useState<{ top: number; left: number } | null>(null)
   const button = useRef<HTMLButtonElement>(null)
@@ -37,7 +40,7 @@ export function ActionsMenu({
     const rect = button.current?.getBoundingClientRect()
     if (!rect) return
     setPos({
-      top: Math.max(8, Math.min(rect.bottom + 4, window.innerHeight - 16 - items.length * 44)),
+      top: Math.max(8, Math.min(rect.bottom + 4, window.innerHeight - 16 - items.length * 44 - (header ? 56 : 0))),
       left: Math.max(8, Math.min(rect.right - MENU_WIDTH, window.innerWidth - MENU_WIDTH - 8)),
     })
   }
@@ -113,6 +116,7 @@ export function ActionsMenu({
           style={{ top: pos.top, left: pos.left, width: MENU_WIDTH }}
           className="fixed z-50 flex flex-col rounded-lg border border-border bg-surface p-1 shadow-lg"
         >
+          {header && <div className="border-b border-border px-2 pt-1.5 pb-2 mb-1">{header}</div>}
           {items.map((item) => (
             <button
               key={item.key}

@@ -44,7 +44,8 @@ test('SCN-073 a modified ciphertext does not open: the profile connect fails and
     await page.getByRole('button', { name: 'Back to connecting' }).click()
     await page.getByRole('button', { name: 'Connect with MySQL' }).click()
     await expect(page.getByRole('button', { name: db.database, exact: true })).toBeVisible()
-    await page.getByRole('button', { name: 'Log out' }).click()
+    await page.getByRole('button', { name: 'Account menu' }).click()
+    await page.getByRole('menuitem', { name: 'Log out' }).click()
     await expect(h1(page)).toHaveText('Sign in to DBLoom')
 
     // One character of the sealed part changes while the server is stopped.

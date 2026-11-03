@@ -101,6 +101,10 @@ test('passkey enrolment in the wizard', async ({ page }) => {
   await page.getByRole('button', { name: 'Save and add a second factor' }).click()
   await page.getByRole('button', { name: 'Add a passkey' }).click()
   await page.getByRole('button', { name: 'Add passkey' }).click()
+  // A passkey-only administrator gets recovery codes too (FR-AUT-010).
+  await expect(page.getByRole('list', { name: 'Recovery codes' }).getByRole('listitem')).toHaveCount(10)
+  await page.getByLabel('I saved them').check()
+  await page.getByRole('button', { name: 'Continue' }).click()
   await expect(page.getByText('Passkey added')).toBeVisible()
   await expect(page.getByRole('button', { name: 'Finish setup' })).toBeEnabled()
 })

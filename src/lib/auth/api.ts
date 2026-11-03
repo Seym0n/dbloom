@@ -111,7 +111,7 @@ export interface AuthApi {
   setupVerifyToken(token: string): Promise<{ ok: true; csrf: string } | { ok: false }>
   setupSaveStep(input: SetupSaveStepInput): Promise<SetupDraft>
   setupPasskeyOptions(): Promise<CreationOptions>
-  setupPasskeyVerify(response: RegistrationResponse, name: string): Promise<{ ok: true }>
+  setupPasskeyVerify(response: RegistrationResponse, name: string): Promise<{ ok: true; recoveryCodes?: string[] }>
   setupTotpStart(): Promise<TotpStart>
   setupTotpVerify(code: string): Promise<{ recoveryCodes: string[] }>
   setupComplete(input: { codesSaved?: true; acknowledgeAdminNetwork?: boolean }): Promise<{ ok: true }>

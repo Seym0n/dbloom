@@ -226,19 +226,21 @@ describe('wizard (FR-AUT-003)', () => {
     expect(restarted.startupState()).toEqual({ kind: 'ready', mode: 'account' })
   })
 
-  it('completes with a passkey (user verification required) and no codes', async () => {
+  it('completes with a passkey (user verification required) and issues recovery codes (FR-AUT-010)', async () => {
     const spy = vi.spyOn(fakeWebauthn, 'verifyRegistration')
     const setup = make()
     setup.prepareToken(clock)
     const { cookie } = setup.verifyToken(tokenOnDisk(), '127.0.0.1')
     await walkToAdmin(setup, cookie)
     await setup.passkeyOptions(cookie)
-    await setup.passkeyVerify(cookie, {} as never, 'Laptop')
+    const { recoveryCodes } = await setup.passkeyVerify(cookie, {} as never, 'Laptop')
     expect(spy).toHaveBeenCalledWith(expect.any(String), 'setup_passkey', expect.anything(), { requireUserVerification: true })
-    setup.complete(cookie, { acknowledgeAdminNetwork: false })
+    expect(recoveryCodes).toHaveLength(10)
+    expect(() => setup.complete(cookie, { acknowledgeAdminNetwork: false })).toThrow(expect.objectContaining({ code: 'step' })) // codes not saved
+    setup.complete(cookie, { codesSaved: true, acknowledgeAdminNetwork: false })
     const user = store.accounts.getUserByKey('admin')!
     expect(store.accounts.listPasskeys(user.id)).toMatchObject([{ id: 'cred-1', name: 'Laptop', uvInitial: true }])
-    expect(store.accounts.countRecoveryCodes(user.id)).toBe(0)
+    expect(store.accounts.countRecoveryCodes(user.id)).toBe(10)
   })
 
   it('needs a factor, and passkeys answer unavailable without a WebAuthn service', async () => {

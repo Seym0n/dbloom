@@ -130,7 +130,8 @@ test('SCN-072 two tabs, two servers: each tab keeps its own target; a foreign or
   await page.getByRole('button', { name: my.database, exact: true }).click()
   await expect.poll(() => captured).toBeTruthy()
   const replay = async (id: string, request = page.request) => {
-    const headers: Record<string, string> = { ...captured!.headers, 'x-dbloom-connection': id }
+    // The request client sends no Origin; the gate (FR-SVR-006) refuses a state-changing request without one.
+    const headers: Record<string, string> = { ...captured!.headers, origin: server.baseURL, 'x-dbloom-connection': id }
     delete headers['content-length']
     const res = await request.fetch(captured!.url, {
       method: 'POST',
@@ -191,7 +192,8 @@ test('SCN-072 two tabs, two servers: each tab keeps its own target; a foreign or
 
   // Sign-out ends the connections; signing in again starts at the picker.
   await page.goto(server.baseURL + '/')
-  await page.getByRole('button', { name: 'Log out' }).click()
+  await page.getByRole('button', { name: 'Account menu' }).click()
+  await page.getByRole('menuitem', { name: 'Log out' }).click()
   await expect(h1(page)).toHaveText('Sign in to DBLoom')
   expect(await connectionId(page)).toBeNull()
 })

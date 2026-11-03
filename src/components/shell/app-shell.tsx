@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Link, useRouter } from '@tanstack/react-router'
+import { useRouter } from '@tanstack/react-router'
 import { LogOut, Menu, MessageSquare, Plus, UserRound, X } from 'lucide-react'
 import { BrandName } from '~/components/brand'
 import { TableView } from '~/components/grid/table-view'
+import { ConnectionLost } from '~/components/connection-lost'
 import { SessionEndedDialog } from '~/components/session-ended-dialog'
 import { SqlTab, type SqlTabMeta } from '~/components/sql/sql-tab'
 import { getSqlLimits } from '~/components/sql/server-api'
@@ -13,7 +14,8 @@ import { ImportTab, type UploadedFile } from '~/components/io/import-tab'
 import { wireIoCatalog } from '~/components/io/wire'
 import { StructureDialogs, type StructureAction } from '~/components/structure/db-dialogs'
 import { TableDesigner } from '~/components/structure/table-designer'
-import { Button, buttonClass } from '~/components/ui/button'
+import { Button } from '~/components/ui/button'
+import { ActionsMenu } from '~/components/ui/menu'
 import { Dialog } from '~/components/ui/dialog'
 import { setCsrfToken } from '~/lib/csrf'
 import { ioApi } from '~/lib/io/api'
@@ -142,7 +144,7 @@ export function AppShell({
   /** Account mode: the connection switcher under the server card. Direct mode passes nothing. */
   connectionSlot?: ReactNode
   /** Account mode: sign-out and session-ended lead to the account sign-in, and the shell links to /account. */
-  account?: { onSignOut: () => void | Promise<void> }
+  account?: { onSignOut: () => void | Promise<void>; /** Shown in the account menu. */ name?: string }
 }) {
   // The CSRF token lives in memory only; set while rendering so the first requests already carry it.
   if (typeof window !== 'undefined') setCsrfToken(session.csrf)
@@ -353,6 +355,8 @@ export function AppShell({
         }}
       />
 
+      <ConnectionLost />
+
       <Dialog
         open={closing !== null}
         onClose={() => setClosing(null)}
@@ -440,16 +444,12 @@ export function AppShell({
               }}
             />
           </div>
-          {account && (
-            <Link to="/account" className={cn(buttonClass({ variant: 'ghost' }), 'justify-start')}>
-              <UserRound size={14} strokeWidth={1.5} aria-hidden />
-              {t('nav.account')}
-            </Link>
+          {!account && (
+            <Button variant="ghost" className="justify-start" onClick={() => void signOut()}>
+              <LogOut size={14} strokeWidth={1.5} aria-hidden />
+              {t('nav.logout')}
+            </Button>
           )}
-          <Button variant="ghost" className="justify-start" onClick={() => void signOut()}>
-            <LogOut size={14} strokeWidth={1.5} aria-hidden />
-            {t('nav.logout')}
-          </Button>
         </DropTarget>
       </aside>
 
@@ -495,6 +495,33 @@ export function AppShell({
           <MessageSquare size={14} strokeWidth={1.5} aria-hidden />
           {t('nav.assistant')}
         </Button>
+        {account && (
+          <ActionsMenu
+            label={t('nav.accountMenu')}
+            className="h-8 w-auto max-w-[200px] gap-2 px-2 text-sm text-muted pointer-coarse:h-9 pointer-coarse:w-auto"
+            trigger={
+              <>
+                <UserRound size={14} strokeWidth={1.5} aria-hidden />
+                <span className="hidden truncate sm:inline">{account.name}</span>
+              </>
+            }
+            header={account.name ? <p className="truncate text-sm font-medium">{account.name}</p> : undefined}
+            items={[
+              {
+                key: 'account',
+                label: t('nav.account'),
+                icon: <UserRound size={14} strokeWidth={1.5} />,
+                onSelect: () => void router.navigate({ to: '/account' }),
+              },
+              {
+                key: 'logout',
+                label: t('nav.logout'),
+                icon: <LogOut size={14} strokeWidth={1.5} />,
+                onSelect: () => void signOut(),
+              },
+            ]}
+          />
+        )}
       </header>
 
       <main className="col-start-1 row-start-2 mr-2 mb-2 ml-2 flex min-h-0 overflow-hidden rounded-[var(--radius-sheet)] border border-border bg-surface md:col-start-2 md:ml-0">

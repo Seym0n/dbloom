@@ -1504,7 +1504,7 @@ export interface SetupService {
   state(cookie: string): { draft: SetupDraft; env: SetupEnvStatus } | undefined
   saveStep(cookie: string, input: z.infer<typeof setupSaveStepInput>): Promise<SetupDraft>
   passkeyOptions(cookie: string): Promise<PublicKeyCredentialCreationOptionsJSON>
-  passkeyVerify(cookie: string, response: RegistrationResponseJSON, name: string): Promise<void>
+  passkeyVerify(cookie: string, response: RegistrationResponseJSON, name: string): Promise<{ recoveryCodes?: string[] }>
   totpStart(cookie: string): { uri: string; secret: string; qrSvg: string }
   totpVerify(cookie: string, code: string): { recoveryCodes: string[] }
   /** One store transaction; a second call or a race loses with 404. */
