@@ -62,7 +62,7 @@ export function StateBadge({ state }: { state: JobState }) {
   const Icon =
     state === 'done'
       ? Check
-      : state === 'failed' || state === 'cancelled'
+      : state === 'failed' || state === 'cancelled' || state === 'interrupted'
         ? Ban
         : state === 'paused'
           ? PauseCircle
@@ -195,7 +195,9 @@ export function JobResultView({ job, links }: { job: IoJob; links?: ReactNode })
           ? t('io.result.doneRejects')
           : state === 'cancelled'
             ? t('io.result.cancelled')
-            : t('io.result.failed')
+            : state === 'interrupted'
+              ? t('io.result.interrupted')
+              : t('io.result.failed')
   return (
     <section role="status" aria-live="polite" className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center gap-2">

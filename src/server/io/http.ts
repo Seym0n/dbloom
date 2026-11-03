@@ -5,6 +5,8 @@ import type { Runtime } from '../runtime'
 import type { LiveSession } from '../sessions'
 import { isStateless, ownerKeyFor } from '../sql/state'
 import { auditIo } from '../audit'
+import { registerShutdownStep, unregisterShutdownStep } from '../lifecycle/shutdown'
+import { log } from '../log'
 import { JobRegistry, isDone, isTerminal, type JobOwner } from './jobs'
 import { limitsFor, uploadLimitNote, type IoLimitsResolved } from './limits'
 import { memoryIoPrefs } from './store'
@@ -51,6 +53,23 @@ export function getIoServices(
   temp.startSweeper()
   jobs.startSweeper()
   services = { temp, jobs }
+  // Shutdown (FR-SVR-014): running jobs end as `interrupted` first, their files are removed after the pools closed.
+  registerShutdownStep({
+    name: 'io-jobs',
+    order: 10,
+    run: async () => {
+      jobs.stopSweeper()
+      for (const j of await jobs.interruptAll()) log.info('io.job.interrupted', { jobId: j.id, kind: j.kind, was: j.from, state: 'interrupted' })
+    },
+  })
+  registerShutdownStep({
+    name: 'io-temp',
+    order: 30,
+    run: async () => {
+      temp.stopSweeper()
+      log.info('io.temp.removed', { files: await temp.removeAll() })
+    },
+  })
   return services
 }
 
@@ -58,6 +77,8 @@ export function getIoServices(
 export function resetIoServices(): void {
   services?.temp.stopSweeper()
   services?.jobs.stopSweeper()
+  unregisterShutdownStep('io-jobs')
+  unregisterShutdownStep('io-temp')
   services = undefined
 }
 
@@ -130,6 +151,7 @@ const STATUS: Partial<Record<IoErrorCode, number>> = {
   busy: 429,
   export_failed: 409,
   cancelled: 409,
+  interrupted: 409,
 }
 
 export function ioErrorResponse(
@@ -327,10 +349,10 @@ export async function handleIoDownload(
   const { jobs, owner } = e
   const job = jobs.get(id, owner)
   if (!job || job.kind !== 'export') return neutral(404)
-  if (job.state === 'failed' || job.state === 'cancelled') {
+  if (job.state === 'failed' || job.state === 'cancelled' || job.state === 'interrupted') {
     const err = job.result?.error
     return ioErrorResponse(
-      job.state === 'cancelled' ? 'cancelled' : 'export_failed',
+      job.state === 'cancelled' ? 'cancelled' : job.state === 'interrupted' ? 'interrupted' : 'export_failed',
       err?.message ?? 'The export did not finish',
       409,
     )
@@ -363,7 +385,7 @@ export async function handleIoDownload(
       request.signal.addEventListener('abort', onAbort, { once: true })
       src.on('data', (chunk: Buffer | string) => {
         const state = jobs.stateOf(id)
-        if (state === undefined || state === 'failed' || state === 'cancelled')
+        if (state === undefined || state === 'failed' || state === 'cancelled' || state === 'interrupted')
           return fail(controller)
         try {
           controller.enqueue(typeof chunk === 'string' ? Buffer.from(chunk) : new Uint8Array(chunk))

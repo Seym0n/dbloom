@@ -189,6 +189,30 @@ export class SessionManager {
     }
   }
 
+  /**
+   * Shutdown: stops running SQL, closes every target pool and wipes the vault keys. Session rows stay in the store (a
+   * restarted instance has no pools, so they are dropped on first use). Never throws.
+   */
+  async closeAll(): Promise<number> {
+    let n = 0
+    for (const [idHash, runtime] of [...this.live]) {
+      this.live.delete(idHash)
+      if (runtime.pool) {
+        await runRegistry.cancelSession(runtime.pool, idHash).catch(() => undefined)
+        await runtime.pool.end().catch(() => undefined)
+        n++
+      }
+      runtime.vaultKey?.fill(0)
+      for (const entry of runtime.connections?.values() ?? []) {
+        await runRegistry.cancelSession(entry.pool, scopeKeyOf(idHash, entry.connectionId)).catch(() => undefined)
+        await entry.pool.end().catch(() => undefined)
+        n++
+      }
+      runtime.connections?.clear()
+    }
+    return n
+  }
+
   async sweep(): Promise<void> {
     const now = this.now()
     for (const [idHash] of this.live) {

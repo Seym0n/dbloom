@@ -343,6 +343,7 @@ function ImportFlow({
                     finalTable &&
                     job.data.state !== 'failed' &&
                     job.data.state !== 'cancelled' &&
+                    job.data.state !== 'interrupted' &&
                     onOpenTable && (
                       <Button variant="primary" onClick={() => onOpenTable(db, finalTable)}>
                         {t('io.result.openTable', { name: finalTable })}
@@ -350,7 +351,7 @@ function ImportFlow({
                     )}
                   {db &&
                     createdTable &&
-                    (job.data.state === 'failed' || job.data.state === 'cancelled') &&
+                    (job.data.state === 'failed' || job.data.state === 'cancelled' || job.data.state === 'interrupted') &&
                     onDropTable && (
                       <Button onClick={() => onDropTable(db, createdTable)}>
                         {t('io.result.dropNew', { name: createdTable })}

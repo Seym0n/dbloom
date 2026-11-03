@@ -279,7 +279,7 @@ export type ParseProblem = { row: number; column?: string; code: string; message
 // ---- Jobs (FR-IO-001) ------------------------------------------------------------------------------
 
 export type JobKind = 'export' | 'import'
-export type JobState = 'queued' | 'running' | 'paused' | 'done' | 'done_with_skips' | 'done_with_rejects' | 'failed' | 'cancelled'
+export type JobState = 'queued' | 'running' | 'paused' | 'done' | 'done_with_skips' | 'done_with_rejects' | 'failed' | 'cancelled' | 'interrupted'
 
 export type JobProgress = {
   bytes: number
@@ -347,6 +347,7 @@ export const IO_ERROR_CODES = [
   'not_enabled',
   'path_refused',
   'cancelled',
+  'interrupted',
 ] as const
 export type IoErrorCode = (typeof IO_ERROR_CODES)[number]
 

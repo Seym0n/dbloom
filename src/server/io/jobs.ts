@@ -54,6 +54,7 @@ export const TERMINAL_STATES: readonly JobState[] = [
   'done_with_rejects',
   'failed',
   'cancelled',
+  'interrupted',
 ]
 export const DONE_STATES: readonly JobState[] = ['done', 'done_with_skips', 'done_with_rejects']
 export const isTerminal = (s: JobState) => TERMINAL_STATES.includes(s)
@@ -61,14 +62,15 @@ export const isDone = (s: JobState) => DONE_STATES.includes(s)
 
 /** Allowed moves of the state machine. */
 export const TRANSITIONS: Record<JobState, readonly JobState[]> = {
-  queued: ['running', 'cancelled', 'failed'],
-  running: ['paused', 'done', 'done_with_skips', 'done_with_rejects', 'failed', 'cancelled'],
-  paused: ['running', 'cancelled', 'failed'],
+  queued: ['running', 'cancelled', 'failed', 'interrupted'],
+  running: ['paused', 'done', 'done_with_skips', 'done_with_rejects', 'failed', 'cancelled', 'interrupted'],
+  paused: ['running', 'cancelled', 'failed', 'interrupted'],
   done: [],
   done_with_skips: [],
   done_with_rejects: [],
   failed: [],
   cancelled: [],
+  interrupted: [],
 }
 
 // ---- Bounded record ------------------------------------------------------------------------------------
@@ -304,7 +306,7 @@ export class JobRegistry {
     id: string,
     state: Extract<
       JobState,
-      'done' | 'done_with_skips' | 'done_with_rejects' | 'failed' | 'cancelled'
+      'done' | 'done_with_skips' | 'done_with_rejects' | 'failed' | 'cancelled' | 'interrupted'
     >,
     result: JobResult,
   ): IoJob {
@@ -359,6 +361,39 @@ export class JobRegistry {
       }
     }
     return clone(boundRecord(e.job))
+  }
+
+  /**
+   * Shutdown (FR-SVR-014): every queued, running or paused job is stopped (signal aborted, hook run) and ends as
+   * `interrupted`, never silently dropped. Returns the ids with their kind. Jobs live in this process only (Q5), so the
+   * state is what a client polling during the grace period sees and what the shutdown log records.
+   */
+  async interruptAll(): Promise<{ id: string; kind: JobKind; from: JobState }[]> {
+    const out: { id: string; kind: JobKind; from: JobState }[] = []
+    for (const [id, e] of [...this.jobs]) {
+      if (isTerminal(e.job.state)) continue
+      const from = e.job.state
+      e.controller.abort()
+      const hook = e.cancelHook
+      e.cancelHook = undefined
+      try {
+        await hook?.()
+      } catch {
+        // the connection is destroyed anyway; the job still ends
+      }
+      if (isTerminal(e.job.state)) continue // the runner ended it meanwhile
+      this.move(e, 'interrupted')
+      e.job.result = {
+        skipped: e.job.result?.skipped ?? [],
+        rejected: [],
+        rejectedCount: e.job.result?.rejectedCount ?? 0,
+        notes: [],
+        error: { code: 'interrupted', message: 'The server was stopped while the job was running' },
+        durationMs: this.now() - e.job.startedAt,
+      }
+      out.push({ id, kind: e.job.kind, from })
+    }
+    return out
   }
 
   setOutput(id: string, output: SpoolSource): void {

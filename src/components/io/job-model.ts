@@ -35,6 +35,7 @@ export const ERROR_KEYS: Record<IoErrorCode, MessageKey> = {
   not_enabled: 'io.error.not_enabled',
   path_refused: 'io.error.path_refused',
   cancelled: 'io.error.cancelled',
+  interrupted: 'io.error.interrupted',
 }
 
 export const isIoCode = (v: unknown): v is IoErrorCode =>
@@ -109,13 +110,14 @@ export const STATE_KEYS: Record<JobState, MessageKey> = {
   done_with_rejects: 'io.state.done_with_rejects',
   failed: 'io.state.failed',
   cancelled: 'io.state.cancelled',
+  interrupted: 'io.state.interrupted',
 }
 
 /** Done states that are not plain success carry a warning tone. */
 export const stateTone = (s: JobState): 'neutral' | 'warning' | 'negative' | 'positive' =>
   s === 'done'
     ? 'positive'
-    : s === 'done_with_skips' || s === 'done_with_rejects' || s === 'paused'
+    : s === 'done_with_skips' || s === 'done_with_rejects' || s === 'paused' || s === 'interrupted'
       ? 'warning'
       : s === 'failed'
         ? 'negative'

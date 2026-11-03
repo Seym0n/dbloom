@@ -173,6 +173,8 @@ Typed config only, zod at boundaries, `t('key')` for any user-visible text, no s
 
 **Decided (owner, 2026-11-03) after task 4:** remaining task 4 decisions accepted: probe paths answer 404 for non-probe peers; ready response shape; request id and logging; assets deviation accepted (static assets bypass the gate), revisit in hardening. Header size, connection and timeout limits dropped (see FR-SVR-009).
 
+**Status (2026-11-03, task 5):** done: graceful shutdown (FR-SVR-014) on srvx's own signal handling plus a Nitro plugin and `close` hook, no listener wrapper (`src/server/lifecycle/shutdown.ts`, `startup-plugin.ts`; findings in `reviews/server-lifecycle.md`); new terminal job state `interrupted`; instance lock (FR-SVR-013, DEP-TGT-150) as a row in the store's `site` table (`lifecycle/instance-lock.ts`, no migration); tests `tests/server-lifecycle*.test.ts`. Open for the owner: jobs are in-process, so `interrupted` is not persisted across the restart; srvx ignores signals when `CI` or `TEST` is set; readiness is observable only on already-open connections.
+
 ## 12. Notes for `docs/deploy.md` (FR-SVR-019; collected 2026-11-03, written in task 9)
 - **Required variables for the container:** `DBLOOM_PUBLIC_ORIGIN` and `DBLOOM_TRUST_PROXY` (CIDR list of the proxy network). The image binds `0.0.0.0`; Compose publishes no port. Local run: `compose.local.yaml` (task 7). `.env.example` is generated from `src/server/env-registry.ts`; the variable table in the guide is generated from the same registry.
 - **Legacy `DBLOOM_TRUST_PROXY=true`** still works for one release with a warning; use a CIDR list instead. Optional `DBLOOM_PROXY_HOPS=N` when proxy addresses change (entry N from the right of `X-Forwarded-For`).

@@ -260,6 +260,31 @@ export class TempStore {
   }
 
   /**
+   * Shutdown: removes every staged and spool file, registered or not (the jobs that owned them end with the
+   * process), and returns the count. Only files with a 32-hex name are touched.
+   */
+  async removeAll(): Promise<number> {
+    let n = 0
+    for (const f of [...this.files.values()]) if (await this.remove(f.id)) n++
+    let names: string[] = []
+    try {
+      names = readdirSync(this.dir)
+    } catch {
+      return n
+    }
+    for (const name of names) {
+      if (!TEMP_ID.test(name)) continue
+      try {
+        rmSync(join(this.dir, name), { force: true })
+        n++
+      } catch {
+        // busy or gone
+      }
+    }
+    return n
+  }
+
+  /**
    * Removes files past their retention and leftovers of earlier runs: files in the directory that carry a
    * 32-hex name, are not registered and are older than the retention.
    */

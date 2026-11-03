@@ -9,6 +9,7 @@ const TERMINAL: readonly JobState[] = [
   'done_with_rejects',
   'failed',
   'cancelled',
+  'interrupted',
 ]
 
 export const isTerminal = (state: JobState | undefined): boolean =>

@@ -6,6 +6,8 @@ import { createSqlitePrefsBackend, type PrefsBackend } from './auth/prefs/backen
 import { createTargetConnectRules } from './auth/connections'
 import { configurePrefsService, getPrefsService } from './auth/prefs/runtime'
 import { createAuthSettingsResolver } from './auth/settings'
+import { InstanceLock } from './lifecycle/instance-lock'
+import { registerShutdownStep } from './lifecycle/shutdown'
 import { createSetupRuntime } from './auth/setup-runtime'
 import { evaluateStart } from './auth/start-gate'
 import { createThrottle } from './auth/throttle'
@@ -60,6 +62,22 @@ export function getRuntime(): Runtime {
   mkdirSync(config.dataDir, { recursive: true })
   const store = openSqliteStore(join(config.dataDir, 'dbloom.db'))
   const stateless = process.env.DBLOOM_STORE === 'none'
+  // Single instance (FR-SVR-013): a stateful store has one owner. A second process fails here, before it changes anything.
+  let lock: InstanceLock | undefined
+  if (!stateless) {
+    lock = new InstanceLock(store.db, {
+      onLost: (reason) => {
+        log.error('instance lock lost; stopping', { reason })
+        if (process.env.NODE_ENV === 'production') process.exit(1)
+      },
+    })
+    try {
+      lock.acquire()
+    } catch (error) {
+      store.close()
+      throw error
+    }
+  }
   // Account-mode limits come from the settings resolver; a short cache keeps it off the per-request path.
   const resolver = createAuthSettingsResolver(store.accounts)
   let cached: { at: number; value: ResolvedAuthSettings } | undefined
@@ -87,6 +105,17 @@ export function getRuntime(): Runtime {
   else if (gate.state.kind === 'setup_pending') setup.prepareToken(Date.now())
   const sessions = new SessionManager(store, config, Date.now, settings)
   setInterval(() => void sessions.sweep(), 60_000).unref()
+  // Shutdown (FR-SVR-014): pools first; then the store step releases the lock row, checkpoints the WAL and closes.
+  registerShutdownStep({ name: 'sessions', order: 20, run: async () => void log.info('sessions.closed', { pools: await sessions.closeAll() }) })
+  registerShutdownStep({
+    name: 'store',
+    order: 40,
+    run: () => {
+      lock?.release()
+      store.db.exec('PRAGMA wal_checkpoint(TRUNCATE)')
+      store.close()
+    },
+  })
   // Preferences (FR-AUT-024): the registry service shares the `ui_prefs` table with rows and io. Stateless mode keeps
   // one in-memory table for all three, dropped per session id when the session ends.
   let statelessPrefs: Runtime['statelessPrefs']
