@@ -51,12 +51,14 @@ export function SettingsPage() {
             SETTING_GROUPS.map((group) => {
               const items = settings.data.settings.filter((s) => s.group === group)
               if (items.length === 0) return null
+              const revertMs = settings.data.settings.find((s) => s.key === 'autoRevertMs')?.effective
+              const revertMinutes = typeof revertMs === 'number' ? Math.max(1, Math.round(revertMs / 60_000)) : 5
               return (
                 <Section key={group} title={t(`settings.group.${group}`)}>
                   <Panel>
                     <ul aria-label={t(`settings.group.${group}`)}>
                       {items.map((d) => (
-                        <SettingRow key={d.key} d={d} onChanged={reload} />
+                        <SettingRow key={d.key} d={d} onChanged={reload} revertMinutes={revertMinutes} />
                       ))}
                     </ul>
                   </Panel>

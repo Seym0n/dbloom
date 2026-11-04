@@ -16,11 +16,11 @@
   - Acceptance: `settings-service.ts` applies the guard in `set` and `reset`; `confirmPending`, `cancelPending`, `listPending` role matrix (admin, user, anonymous, direct mode, not `full`); `settings pending`; CLI `settings reset` and `maintenance off` mark pending `superseded`; functions file thin.
   - Verify: `npx vitest run tests/protect-*.test.ts tests/settings-*.test.ts`, `npm run build` (`vite build`), rebuild CLI, CLI integration test.
   - Files: settings-service.ts, settings.functions.ts, auth/cli/main.ts, commands.ts, gate list, tests.
-- [ ] 5 UI
+- [x] 5 UI (done 2026-11-04; guarded row note, static pending line (value, local deadline, Confirm with step-up, Revert now without), PendingLink on users/audit/exposure/connection home, mock layer confirmPending/cancelPending with pending store, revertMs test override and session start (mock-api startedAt), texts in settings.json (English only, the file has one locale), e2e/auth-ui-protect.spec.ts 9 tests incl. axe light/dark 375 px; typecheck, eslint, vite build clean)
   - Acceptance: guarded rows show "reverts in N minutes unless confirmed after signing in again"; static pending line (key, new value, deadline as local time, Confirm, Revert now); one-line link on other admin pages; mock layer and api methods; texts in `src/i18n/settings.json`; axe clean light and dark, 375 px.
   - Verify: `npm run test:e2e:auth-ui`, typecheck, lint, `vite build`.
   - Files: components/auth/settings/*, routes/admin.settings.tsx, lib/auth/mock-settings.ts, mock-api.ts, api.ts, i18n/settings.json, e2e/auth-ui-protect.spec.ts.
-- [ ] 6 Live, docs, acceptance
+- [x] 6 Live, docs, acceptance (done 2026-11-04; e2e/auth-live-protect.spec.ts 5 tests with AUTOREVERT=1 min, 4.4 min run; docs/deploy.md section Protected settings and auto-revert, CLI list += settings pending; SPEC/reviews/admin-protect-acceptance.md; FUTURE.md 3 entries; full vitest 3212 passed 0 failed; typecheck and eslint clean)
   - Acceptance: live spec with `DBLOOM_AUTOREVERT_MINUTES=1`: unconfirmed change reverts with nobody signed in; sign-in again then confirm keeps it; server restart keeps the deadline; CLI reset clears pending. `docs/deploy.md` section "Protected settings and auto-revert". `SPEC/reviews/admin-protect-acceptance.md`. FUTURE.md: impact count (SEC-TGT-144 deviation), cooling-off, versioned rollback.
   - Verify: `npm run test:e2e:auth-live`, `npm test`.
   - Files: e2e/auth-live-protect.spec.ts, docs/deploy.md, SPEC/reviews/admin-protect-acceptance.md, SPEC/FUTURE.md.

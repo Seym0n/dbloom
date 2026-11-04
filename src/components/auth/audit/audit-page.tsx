@@ -5,6 +5,7 @@ import { ArrowLeft, Download } from 'lucide-react'
 import { t } from '~/i18n'
 import { BrandName } from '~/components/brand'
 import { ExposureBanner } from '~/components/auth/exposure/exposure-banner'
+import { PendingLink } from '~/components/auth/settings/pending-link'
 import { SiteNotices } from '~/components/auth/settings/site-notices'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
@@ -59,6 +60,7 @@ export function AuditPage({ mode, initialActor }: { mode: 'account' | 'direct'; 
             </div>
           </header>
           {mode === 'account' && <ExposureBanner />}
+          {mode === 'account' && <PendingLink />}
           {mode === 'account' && <SiteNotices />}
           {mode === 'direct' ? <DirectNotice /> : <AuditLog {...(initialActor ? { initialActor } : {})} />}
         </div>

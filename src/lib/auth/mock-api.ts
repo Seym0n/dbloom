@@ -54,7 +54,7 @@ type MockState = {
   verified: boolean
   draft: { loginMode?: LoginMode; adminUsername?: string; adminName?: string; adminPassword?: string; factor?: 'passkey' | 'totp'; codes?: string[]; totpStarted?: boolean }
   users: MockUser[]
-  session: { username: string; state: SessionState; csrf: string } | null
+  session: { username: string; state: SessionState; csrf: string; startedAt?: number } | null
   failures: Record<string, number>
   throttleUntil: Record<string, number>
 }
@@ -189,7 +189,7 @@ export function createMockAuthApi(initial?: MockScenario): AuthApi {
   }
   const outcome = (username: string, st: SessionState): SignInOutcome => {
     const csrf = `mock-csrf-${Math.random().toString(36).slice(2, 10)}`
-    state.session = { username, state: st, csrf }
+    state.session = { username, state: st, csrf, startedAt: Date.now() }
     resetIdle()
     save()
     return { csrf, state: st }
@@ -312,7 +312,7 @@ export function createMockAuthApi(initial?: MockScenario): AuthApi {
     }
   }
 
-  const settingsMock = createMockSettings({ flag, wait, needStepUp, who: () => current().u.displayName || current().u.username })
+  const settingsMock = createMockSettings({ flag, wait, needStepUp, who: () => current().u.displayName || current().u.username, sessionStart: () => state.session?.startedAt ?? 0 })
   const loginInfo = (): LoginPageInfo => {
     const site = settingsMock.site()
     return { mode: state.mode, siteName: 'DBLoom', passwordEnabled: true, passkeyEnabled: true, autofocus: false, notice: site.notice, maintenance: site.maintenance }

@@ -3,7 +3,9 @@
  * the effective value is the stored one, else the built-in default. Stored values live in this tab's session storage.
  * Flags (`dbloom.authMock.flags`): `settings-locked` (locks `sessionsPerUser`), `maintenance-forced` (`.env` forces
  * maintenance on), `settings-audit-fail` (every write answers `settings_audit_unavailable`), `settings-stranded`
- * (narrowing `mfaFactors` or `primaryCredentials` would strand two users).
+ * (narrowing `mfaFactors` or `primaryCredentials` would strand two users). A change to a guarded key (SPEC/33) applies at
+ * once and reverts after the deadline (`dbloom.authMock.revertMs`, default 5 minutes) unless confirmed by a session that
+ * signed in after the change.
  */
 import { AUTH_SETTINGS, MFA_SCOPES, type MaintenanceView, type SettingDescription, type SettingSourceLabel, type SettingSpec, type SettingValue } from '~/server/auth/types'
 import { SETTING_META } from '~/server/auth/setting-meta'
@@ -14,6 +16,30 @@ import type { AuthApi } from './api'
 const STORE_KEY = 'dbloom.authMock.settings'
 type Row = { value: SettingValue; updatedAt: number; updatedBy: string }
 type Rows = Record<string, Row>
+const PENDING_KEY = 'dbloom.authMock.pending'
+type Pending = { revertTo: Row | null; newValue: SettingValue; newUpdatedAt: number | null; createdAt: number; deadlineAt: number; actor: string }
+type PendingRows = Record<string, Pending>
+const readPending = (): PendingRows => {
+  try {
+    return JSON.parse(window.sessionStorage.getItem(PENDING_KEY) ?? '{}') as PendingRows
+  } catch {
+    return {}
+  }
+}
+const writePending = (rows: PendingRows) => {
+  try {
+    window.sessionStorage.setItem(PENDING_KEY, JSON.stringify(rows))
+  } catch {
+    /* in-memory only */
+  }
+}
+const revertMs = () => {
+  try {
+    return Number(window.sessionStorage.getItem('dbloom.authMock.revertMs')) || 5 * 60_000
+  } catch {
+    return 5 * 60_000
+  }
+}
 
 const read = (): Rows => {
   try {
@@ -37,7 +63,7 @@ const refusal = (code: SettingsRefusal['code'], detail?: string, count?: number)
 })
 const rank = (scope: unknown) => MFA_SCOPES.indexOf(scope as (typeof MFA_SCOPES)[number])
 
-type Deps = { flag: (name: string) => boolean; wait: <T>(v: T) => Promise<T>; needStepUp: () => void; who: () => string }
+type Deps = { flag: (name: string) => boolean; wait: <T>(v: T) => Promise<T>; needStepUp: () => void; who: () => string; sessionStart: () => number }
 
 export type MockSite = { notice: string; banner: string; maintenance: MaintenanceView }
 
@@ -45,8 +71,26 @@ export function createMockSettings(d: Deps): { api: Pick<AuthApi, 'getSettings' 
   const lockedKey = (key: string) => d.flag('settings-locked') && key === 'sessionsPerUser'
   const forcedKey = (key: string) => d.flag('maintenance-forced') && key === 'maintenanceOn'
 
-  function describeAll(): SettingDescription[] {
+  /** Puts a pending change back (or drops it when another write came after it). */
+  function settle(key: string, p: Pending) {
     const rows = read()
+    if ((rows[key]?.updatedAt ?? null) === p.newUpdatedAt) {
+      if (p.revertTo) rows[key] = p.revertTo
+      else delete rows[key]
+      write(rows)
+    }
+    const pending = readPending()
+    delete pending[key]
+    writePending(pending)
+  }
+  function sweep() {
+    for (const [key, p] of Object.entries(readPending())) if (p.deadlineAt <= Date.now()) settle(key, p)
+  }
+
+  function describeAll(): SettingDescription[] {
+    sweep()
+    const rows = read()
+    const pendingRows = readPending()
     const out: SettingDescription[] = []
     for (const key of Object.keys(SPECS) as (keyof typeof AUTH_SETTINGS)[]) {
       const spec = SPECS[key]!
@@ -85,7 +129,7 @@ export function createMockSettings(d: Deps): { api: Pick<AuthApi, 'getSettings' 
         limits,
         locked,
         guarded: isGuardedKey(key),
-        pending: null,
+        pending: pendingRows[key] ? { newValue: pendingRows[key]!.newValue, deadlineAt: pendingRows[key]!.deadlineAt, actor: pendingRows[key]!.actor } : null,
         forced,
         editable: spec.source === 'ui_within_env' && !locked && !forced,
         updatedAt: row?.updatedAt ?? null,
@@ -136,11 +180,20 @@ export function createMockSettings(d: Deps): { api: Pick<AuthApi, 'getSettings' 
     if (desc.locked || desc.forced || !desc.editable) return refusal('settings_locked', desc.locked ? 'locked' : desc.forced ? 'forced' : 'not_editable')
     if (basedOn !== desc.updatedAt) return refusal('settings_conflict')
     const rows = read()
+    const arm = (newValue: SettingValue, newUpdatedAt: number | null, before: Row | null) => {
+      if (!desc.guarded) return
+      const pending = readPending()
+      const kept = pending[key]
+      pending[key] = { revertTo: kept ? kept.revertTo : before, newValue, newUpdatedAt, createdAt: kept ? kept.createdAt : Date.now(), deadlineAt: Date.now() + revertMs(), actor: d.who() }
+      writePending(pending)
+    }
     if (reset) {
       if (desc.updatedAt === null) return { ok: true, changed: false, updatedAt: null }
       if (d.flag('settings-audit-fail')) return refusal('settings_audit_unavailable')
+      const before = rows[key] ?? null
       delete rows[key]
       write(rows)
+      arm(SPECS[key]!.default as SettingValue, null, before)
       return { ok: true, changed: true, updatedAt: null }
     }
     const v = validate(desc, value)
@@ -150,8 +203,10 @@ export function createMockSettings(d: Deps): { api: Pick<AuthApi, 'getSettings' 
     if (desc.stored !== null && JSON.stringify(desc.stored) === JSON.stringify(v.value)) return { ok: true, changed: false, updatedAt: desc.updatedAt }
     if (d.flag('settings-audit-fail')) return refusal('settings_audit_unavailable')
     const updatedAt = Math.max(Date.now(), (desc.updatedAt ?? 0) + 1)
+    const before = rows[key] ?? null
     rows[key] = { value: v.value, updatedAt, updatedBy: d.who() }
     write(rows)
+    arm(v.value, updatedAt, before)
     return { ok: true, changed: true, updatedAt }
   }
 
@@ -167,9 +222,24 @@ export function createMockSettings(d: Deps): { api: Pick<AuthApi, 'getSettings' 
       },
       setSetting: async (key, value, basedOn) => d.wait(change(key, value, basedOn, false)),
       resetSetting: async (key, basedOn) => d.wait(change(key, undefined, basedOn, true)),
-      // The mock never keeps a pending change yet (task 5 of SPEC/33 adds it): nothing to confirm or cancel.
-      confirmPending: async () => d.wait(refusal('settings_no_pending')),
-      cancelPending: async () => d.wait(refusal('settings_no_pending')),
+      confirmPending: async (key) => {
+        d.needStepUp()
+        sweep()
+        const p = readPending()[key]
+        if (!p) return d.wait(refusal('settings_no_pending'))
+        if (d.sessionStart() < p.createdAt) return d.wait(refusal('settings_confirm_session'))
+        const pending = readPending()
+        delete pending[key]
+        writePending(pending)
+        return d.wait({ ok: true as const })
+      },
+      cancelPending: async (key) => {
+        sweep()
+        const p = readPending()[key]
+        if (!p) return d.wait(refusal('settings_no_pending'))
+        settle(key, p)
+        return d.wait({ ok: true as const })
+      },
     },
   }
 }

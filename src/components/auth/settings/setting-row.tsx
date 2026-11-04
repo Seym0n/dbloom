@@ -78,7 +78,7 @@ function refusalText(r: SettingsRefusal): string {
 }
 
 /** One setting: label, source, range, notes and the editor that matches its kind (SPEC/32 FR-ASE-013). */
-export function SettingRow({ d, onChanged }: { d: SettingDescription; onChanged: () => Promise<unknown> }) {
+export function SettingRow({ d, onChanged, revertMinutes }: { d: SettingDescription; onChanged: () => Promise<unknown>; revertMinutes: number }) {
   const labelId = useId()
   const { guard } = useStepUp()
   const act = useAction()
@@ -139,6 +139,18 @@ export function SettingRow({ d, onChanged }: { d: SettingDescription; onChanged:
   const source = d.source === 'limit' ? 'warning' : 'neutral'
   const range = rangeText(d)
   const disabled = act.busy
+  const pending = d.pending
+
+  /** Keep a waiting change (needs a recent factor, and a session that signed in after the change) or put it back at once. */
+  async function resolve(action: 'confirm' | 'revert') {
+    setNote(null)
+    setRefusal(null)
+    const r = await act.run(() => (action === 'confirm' ? guard(() => authApi().confirmPending(d.key)) : authApi().cancelPending(d.key)))
+    if (!r.ok) return
+    if (r.value.ok) setNote(action === 'confirm' ? t('settings.pending.confirmed') : t('settings.pending.reverted'))
+    else setRefusal(r.value.error)
+    await onChanged()
+  }
   const editor = (() => {
     if (!d.editable) return <p className="text-sm break-words whitespace-pre-line">{display(d)}</p>
     if (d.key === ENDS_AT)
@@ -224,6 +236,7 @@ export function SettingRow({ d, onChanged }: { d: SettingDescription; onChanged:
             <Pill tone={source}>{t(`settings.source.${d.source}`)}</Pill>
           </p>
           {range && <p className="mt-1 text-xs text-muted">{range}</p>}
+          {d.guarded && d.editable && <p className="mt-1 text-xs text-muted">{revertMinutes === 1 ? t('settings.note.guarded.one') : t('settings.note.guarded', { minutes: revertMinutes })}</p>}
           {d.locked && <p className="mt-1 text-xs text-muted">{t('settings.note.locked')}</p>}
           {d.forced && <p className="mt-1 text-xs text-muted">{t('settings.note.forced')}</p>}
           {!d.editable && !d.locked && !d.forced && <p className="mt-1 text-xs text-muted">{t('settings.note.envOnly')}</p>}
@@ -247,6 +260,19 @@ export function SettingRow({ d, onChanged }: { d: SettingDescription; onChanged:
                   {t('settings.reset')}
                 </Button>
               )}
+            </div>
+          )}
+          {pending && (
+            <div role="group" aria-label={t('settings.pending.region')} className="flex flex-col gap-2 rounded-[var(--radius-control)] border border-border bg-[var(--pill-warning-bg)] px-3 py-2 text-sm text-[var(--pill-warning-ink)]">
+              <p className="break-words">{t('settings.pending.line', { value: display({ ...d, effective: pending.newValue }), time: formatWhen(pending.deadlineAt) })}</p>
+              <div className="flex flex-wrap items-center gap-2">
+                <Button variant="primary" disabled={disabled} aria-label={t('settings.pending.confirmAria', { name })} onClick={() => void resolve('confirm')}>
+                  {t('settings.pending.confirm')}
+                </Button>
+                <Button disabled={disabled} aria-label={t('settings.pending.revertAria', { name })} onClick={() => void resolve('revert')}>
+                  {t('settings.pending.revert')}
+                </Button>
+              </div>
             </div>
           )}
           {strands !== null && strands > 0 && <p role="status" className="text-sm text-negative">{t('settings.preview.strands', { count: strands })}</p>}

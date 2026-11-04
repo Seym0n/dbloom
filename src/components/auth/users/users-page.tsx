@@ -16,6 +16,7 @@ import { describeError } from '~/lib/auth/messages'
 import { useAction } from '~/lib/auth/use-action'
 import type { InviteInfo, Role, UserSummary } from '~/server/auth/types'
 import { ExposureBanner } from '~/components/auth/exposure/exposure-banner'
+import { PendingLink } from '~/components/auth/settings/pending-link'
 import { SiteNotices } from '~/components/auth/settings/site-notices'
 import { NoticesPanel } from './notices-panel'
 import { CreateUserDialog, formatWhen, InviteDialog, LinkShownDialog, RoleSelect } from './user-dialogs'
@@ -46,6 +47,7 @@ export function UsersPage({ meId }: { meId: string | undefined }) {
             </div>
           </header>
           <ExposureBanner />
+          <PendingLink />
           <SiteNotices />
           <UsersSection meId={meId} />
           <NoticesPanel />

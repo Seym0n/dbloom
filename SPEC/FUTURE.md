@@ -195,3 +195,27 @@ Ideas that were discussed and deliberately postponed. They are **not requirement
 **Why deferred:** Owner decision 2026-11-03 (`32-module-admin-settings.md` Q2): about 70 more variables for little gain; `DBLOOM_SETTINGS_LOCK` is the operator's fence.
 
 **Related:** `32-module-admin-settings.md`, `12-settings.md` section 2.
+
+## FU-protect-impact-count: count of affected users before a protected change
+
+**Idea:** Before a protected setting is saved, show how many active users the new value would affect or lock out, and ask the administrator to confirm that count (SEC-TGT-144 as written).
+
+**Why deferred:** Owner decision 2026-11-04 (`33-module-admin-protect.md`): auto-revert is the safety net; no count, no countdown. The narrowing refusal of FR-ASE-008 stays.
+
+**Related:** `33-module-admin-protect.md` FR-APR-004, FR-APR-005, `11-target-security.md` SEC-TGT-144.
+
+## FU-protect-cooling-off: delay before a protected change takes effect
+
+**Idea:** A protected change waits a set time (for example 10 minutes) before it applies, and can be cancelled meanwhile.
+
+**Why deferred:** The change applies at once and reverts unless confirmed; a cooling-off period would need a second state and a second timer for little extra safety.
+
+**Related:** `33-module-admin-protect.md` section 9.
+
+## FU-protect-versioned-rollback: history of setting values with rollback
+
+**Idea:** Keep every stored value of a setting with its author and time, and let an administrator roll back to any of them, not only to the value before the last change.
+
+**Why deferred:** `pending_settings` keeps one `revert_to` per key; the audit log already records old and new values.
+
+**Related:** `33-module-admin-protect.md` section 9, `32-module-admin-settings.md`.

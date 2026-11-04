@@ -1,4 +1,5 @@
 import { ExposureBanner } from '~/components/auth/exposure/exposure-banner'
+import { PendingLink } from '~/components/auth/settings/pending-link'
 import { InfoBanner, MaintenanceNotice } from '~/components/auth/settings/site-notices'
 import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
@@ -31,6 +32,7 @@ export function ConnectionHome({ onOpened, onSignOut, isAdmin, banner, maintenan
       {isAdmin && (
         <div className="mb-4">
           <ExposureBanner />
+          <PendingLink />
         </div>
       )}
       {(banner || maintenance?.active) && (

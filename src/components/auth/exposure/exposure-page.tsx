@@ -6,6 +6,7 @@ import { BrandName } from '~/components/brand'
 import { Button } from '~/components/ui/button'
 import { Muted, Panel, Pill, Row, Section } from '~/components/auth/account/account-ui'
 import { ErrorNote } from '~/components/auth/auth-frame'
+import { PendingLink } from '~/components/auth/settings/pending-link'
 import { authApi } from '~/lib/auth/api'
 import { useAction } from '~/lib/auth/use-action'
 import type { ExposureAnswer } from '~/server/exposure-service'
@@ -38,6 +39,7 @@ export function ExposurePage() {
             <p className="max-w-[60ch] text-sm text-muted">{t('exposure.lead')}</p>
           </div>
         </header>
+        <PendingLink />
         {exposure.isPending ? (
           <Muted>{t('audit.loading')}</Muted>
         ) : exposure.isError ? (
