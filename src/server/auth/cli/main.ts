@@ -7,7 +7,7 @@ import { createSettingsWriter } from '../settings-write'
 import { createThrottle } from '../throttle'
 import { tokens } from '../tokens'
 import { createUserService } from '../users'
-import { AuthError } from '../types'
+import { AuthError, type AuthSettingKey } from '../types'
 import { openSqliteStore } from '../../store/sqlite-store'
 import { audit, registerAuditStore, unregisterAuditStore } from '../../audit'
 import { auditExportCommand } from '../../audit/cli-export'
@@ -63,8 +63,15 @@ export async function main(
       audit: (event, fields) => audit(event, fields),
       settings: {
         describe: () => resolver.describe(),
+        pending: () => store.accounts.getPendingSettings('pending'),
         // Best-effort audit on purpose: the owner must be able to undo a setting even when the audit log is unavailable.
-        reset: (key, basedOn) => createSettingsWriter({ store: store.accounts, env, audit: (event, fields) => audit(event, fields) }).reset(key, basedOn, 'cli'),
+        // The CLI reset is the recovery path: no auto-revert of its own, and it closes a pending change of the key
+        // (a running server notices at its next sweep that nothing is pending any more).
+        reset: (key, basedOn) => {
+          const r = createSettingsWriter({ store: store.accounts, env, guard: false, audit: (event, fields) => audit(event, fields) }).reset(key, basedOn, 'cli')
+          store.accounts.resolvePending(key as AuthSettingKey, 'superseded')
+          return r
+        },
       },
     })
     write(result.stdout)

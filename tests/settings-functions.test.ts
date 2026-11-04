@@ -48,6 +48,7 @@ function service(env: NodeJS.ProcessEnv = {}): SettingsService {
     changed: () => undefined,
     audit: (event, fields) => {
       if (failAudit) throw new SettingsError('settings_audit_unavailable')
+      if (event === 'settings.pending') return // guarded keys also write this row; tests/protect-pending.test.ts covers it
       rows.push({ event, fields })
     },
   })
@@ -234,10 +235,10 @@ describe('client chunk', () => {
     const imports = [...src.matchAll(/^import .* from '([^']+)'/gm)].map((m) => m[1]!)
     expect(imports.sort()).toEqual(['./auth/error-transport', './middleware', './settings-admin-runtime', '@tanstack/react-start', 'zod'])
   })
-  it('exports the four functions and the three input schemas, nothing else', () => {
+  it('exports the six functions and the four input schemas, nothing else', () => {
     const src = readFileSync('src/server/settings.functions.ts', 'utf8')
     expect([...src.matchAll(/^export const (\w+)/gm)].map((m) => m[1]!).sort()).toEqual([
-      'getSettings', 'previewSetting', 'previewSettingInput', 'resetSetting', 'resetSettingInput', 'setSetting', 'setSettingInput',
+      'cancelPending', 'confirmPending', 'getSettings', 'pendingSettingInput', 'previewSetting', 'previewSettingInput', 'resetSetting', 'resetSettingInput', 'setSetting', 'setSettingInput',
     ])
   })
 })

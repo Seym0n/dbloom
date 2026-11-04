@@ -32,7 +32,7 @@ import { MAX_TEMPLATES } from '../io/types'
 import type { SessionRecord, Store } from './store'
 import type {
   AccountSessionRecord, AccountStore, AuthSettingKey, LinkTokenRecord, PasskeyRecord,
-  ProfileRecord, SettingRow, TotpRecord, User, UserNotice, VaultRecord,
+  PendingSetting, PendingStatus, ProfileRecord, SettingRow, TotpRecord, User, UserNotice, VaultRecord,
 } from '../auth/types'
 
 /** Column shapes of the migration-5 tables as node:sqlite returns them (snake_case). */
@@ -211,6 +211,17 @@ export const MIGRATIONS: ((db: DatabaseSync) => void)[] = [
       CREATE INDEX IF NOT EXISTS seen_locations_at ON seen_locations(last_seen_at);
     `)
   },
+  // 8: guarded settings changes awaiting confirmation, with an absolute deadline (SPEC/33).
+  (db) => {
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS pending_settings (
+        key TEXT PRIMARY KEY, revert_to TEXT, new_value TEXT NOT NULL, new_updated_at INTEGER NOT NULL, actor TEXT NOT NULL,
+        created_at INTEGER NOT NULL, deadline_at INTEGER NOT NULL,
+        status TEXT NOT NULL CHECK (status IN ('pending','confirmed','reverted','cancelled','superseded'))
+      ) STRICT;
+      CREATE INDEX IF NOT EXISTS pending_settings_status ON pending_settings(status);
+    `)
+  },
 ]
 
 /** Applies pending migrations in one transaction; refuses a database newer than the code. */
@@ -347,6 +358,22 @@ export function openSqliteStore(path: string, options: Partial<SqlStateOptions> 
       getSettings: () => many<{ key: AuthSettingKey; value: string; updated_at: number; updated_by: string }>('SELECT key,value,updated_at,updated_by FROM settings ORDER BY key').map((r): SettingRow => ({ key: r.key, value: r.value, updatedAt: r.updated_at, updatedBy: r.updated_by })),
       setSetting: (r) => void run('INSERT INTO settings(key,value,updated_at,updated_by) VALUES(?,?,?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at=excluded.updated_at,updated_by=excluded.updated_by', r.key, r.value, r.updatedAt, r.updatedBy),
       deleteSetting: (key) => run('DELETE FROM settings WHERE key=?', key).changes === 1,
+      getPendingSettings: (status) =>
+        many<{ key: AuthSettingKey; revert_to: string | null; new_value: string; new_updated_at: number; actor: string; created_at: number; deadline_at: number; status: PendingStatus }>(
+          status ? 'SELECT * FROM pending_settings WHERE status=? ORDER BY deadline_at' : 'SELECT * FROM pending_settings ORDER BY deadline_at',
+          ...(status ? [status] : []),
+        ).map((r): PendingSetting => ({ key: r.key, revertTo: r.revert_to, newValue: r.new_value, newUpdatedAt: r.new_updated_at, actor: r.actor, createdAt: r.created_at, deadlineAt: r.deadline_at, status: r.status })),
+      // Still pending: keep the older revert target and creation time (SPEC/33 assumption 7); otherwise this is a fresh change.
+      upsertPending: (r) =>
+        void run(
+          `INSERT INTO pending_settings(key,revert_to,new_value,new_updated_at,actor,created_at,deadline_at,status) VALUES(?,?,?,?,?,?,?,'pending')
+           ON CONFLICT(key) DO UPDATE SET
+             revert_to=CASE WHEN pending_settings.status='pending' THEN pending_settings.revert_to ELSE excluded.revert_to END,
+             created_at=CASE WHEN pending_settings.status='pending' THEN pending_settings.created_at ELSE excluded.created_at END,
+             new_value=excluded.new_value,new_updated_at=excluded.new_updated_at,actor=excluded.actor,deadline_at=excluded.deadline_at,status='pending'`,
+          r.key, r.revertTo, r.newValue, r.newUpdatedAt, r.actor, r.createdAt, r.deadlineAt,
+        ),
+      resolvePending: (key, status) => run(`UPDATE pending_settings SET status=? WHERE key=? AND status='pending'`, status, key).changes === 1,
       createUser: (u) => void run('INSERT INTO users VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)', u.id, u.username, u.usernameKey, u.displayName, u.role, u.status, u.securityVersion, u.mustChangePassword ? 1 : 0, u.tempPasswordExpiresAt, u.webauthnUserId, u.createdAt, u.updatedAt, u.createdBy, u.lastSignInAt),
       getUser: (id) => { const r = one<UserRow>('SELECT * FROM users WHERE id=?', id); return r ? userFrom(r) : undefined },
       getUserByKey: (key) => { const r = one<UserRow>('SELECT * FROM users WHERE username_key=?', key); return r ? userFrom(r) : undefined },

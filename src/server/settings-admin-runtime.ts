@@ -4,6 +4,7 @@ import { createSettingsWriter, SettingsError } from './auth/settings-write'
 import { getSignInServices } from './auth/signin-runtime'
 import { createSettingsService, type SettingsService } from './settings-service'
 import { getRuntime } from './runtime'
+import { pendingSettings, startPendingSettings } from './settings-pending-runtime'
 import { loginModeOf } from './session-context'
 
 let service: SettingsService | undefined
@@ -18,8 +19,10 @@ export function settingsService(): SettingsService {
   const rt = getRuntime()
   const accounts = rt.store.accounts
   const resolver = createAuthSettingsResolver(accounts, process.env)
+  const pending = pendingSettings() ?? startPendingSettings(accounts)
   const writer = createSettingsWriter({
     store: accounts,
+    armed: () => pending.schedule(),
     audit: (event, fields) => {
       try {
         auditRequired(event, fields)
@@ -32,6 +35,7 @@ export function settingsService(): SettingsService {
   service = createSettingsService({
     store: accounts,
     writer,
+    pending,
     describe: () => resolver.describe(),
     stepUp: { requireRecentFactor: (ctx, purpose) => getSignInServices().stepUp.requireRecentFactor(ctx, purpose) },
     mode: () => (rt.statelessPrefs !== undefined ? 'stateless' : loginModeOf(rt)),

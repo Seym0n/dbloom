@@ -234,6 +234,7 @@ Generated from `src/server/env-registry.ts` by `node scripts/gen-env-docs.mjs`; 
 | `DBLOOM_DENY_ROOT_TARGET` | string |  | Auth setting override (file 26); validated by the auth module. |
 | `DBLOOM_LOGIN_RECALL` | string |  | Auth setting override (file 26); validated by the auth module. |
 | `DBLOOM_STEPUP_MINUTES` | string |  | Auth setting override (file 26); validated by the auth module. |
+| `DBLOOM_AUTOREVERT_MINUTES` | string |  | Auth setting override (file 26); validated by the auth module. |
 | **SQL** | | | |
 | `DBLOOM_SQL_DISABLED` | bool | `false` | Turns the SQL module off. |
 | `DBLOOM_SQL_PARSER` | string |  | `off` is the parser kill switch. |

@@ -7,6 +7,7 @@
  */
 import { AUTH_SETTINGS, MFA_SCOPES, type MaintenanceView, type SettingDescription, type SettingSourceLabel, type SettingSpec, type SettingValue } from '~/server/auth/types'
 import { SETTING_META } from '~/server/auth/setting-meta'
+import { isGuardedKey } from '~/server/settings-guard'
 import type { PreviewAnswer, SettingsAnswer, SettingsRefusal } from '~/server/settings-service'
 import type { AuthApi } from './api'
 
@@ -40,7 +41,7 @@ type Deps = { flag: (name: string) => boolean; wait: <T>(v: T) => Promise<T>; ne
 
 export type MockSite = { notice: string; banner: string; maintenance: MaintenanceView }
 
-export function createMockSettings(d: Deps): { api: Pick<AuthApi, 'getSettings' | 'previewSetting' | 'setSetting' | 'resetSetting'>; site: () => MockSite } {
+export function createMockSettings(d: Deps): { api: Pick<AuthApi, 'getSettings' | 'previewSetting' | 'setSetting' | 'resetSetting' | 'confirmPending' | 'cancelPending'>; site: () => MockSite } {
   const lockedKey = (key: string) => d.flag('settings-locked') && key === 'sessionsPerUser'
   const forcedKey = (key: string) => d.flag('maintenance-forced') && key === 'maintenanceOn'
 
@@ -83,6 +84,8 @@ export function createMockSettings(d: Deps): { api: Pick<AuthApi, 'getSettings' 
         source,
         limits,
         locked,
+        guarded: isGuardedKey(key),
+        pending: null,
         forced,
         editable: spec.source === 'ui_within_env' && !locked && !forced,
         updatedAt: row?.updatedAt ?? null,
@@ -164,6 +167,9 @@ export function createMockSettings(d: Deps): { api: Pick<AuthApi, 'getSettings' 
       },
       setSetting: async (key, value, basedOn) => d.wait(change(key, value, basedOn, false)),
       resetSetting: async (key, basedOn) => d.wait(change(key, undefined, basedOn, true)),
+      // The mock never keeps a pending change yet (task 5 of SPEC/33 adds it): nothing to confirm or cancel.
+      confirmPending: async () => d.wait(refusal('settings_no_pending')),
+      cancelPending: async () => d.wait(refusal('settings_no_pending')),
     },
   }
 }

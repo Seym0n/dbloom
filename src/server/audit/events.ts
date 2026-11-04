@@ -80,6 +80,11 @@ export const AUDIT_EVENTS = [
   // the settings editor (SPEC/32); `settings.clamped` is in the auth-account list above
   'settings.change',
   'settings.reset',
+  // guarded changes and their auto-revert (SPEC/33)
+  'settings.pending',
+  'settings.confirm',
+  'settings.cancel',
+  'settings.revert',
 ] as const
 
 export type AuditEventName = (typeof AUDIT_EVENTS)[number]

@@ -77,6 +77,7 @@ export const SETTING_META = {
   noticeBurstMinutes: n('audit', 'minutes'),
   noticeLocationDays: n('audit', 'days'),
   stepUpWindowMs: min('signin'),
+  autoRevertMs: min('signin'),
   loginNotice: text('site'),
   infoBanner: text('site'),
   maintenanceOn: bool('site'),

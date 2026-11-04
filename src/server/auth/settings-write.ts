@@ -5,10 +5,11 @@
  * wizard's `write()` is a different path and keeps clamping.
  */
 import { notifySettingsChanged } from '../settings-runtime'
+import { isGuardedKey } from '../settings-guard'
 import { computeSetting, createAuthSettingsResolver } from './settings'
 import { AUTH_SETTINGS, MFA_SCOPES, type AccountStore, type AuthSettingKey, type SettingDescription } from './types'
 
-export const SETTINGS_ERROR_CODES = ['settings_unknown', 'settings_locked', 'settings_invalid', 'settings_conflict', 'settings_strands_users', 'settings_audit_unavailable'] as const
+export const SETTINGS_ERROR_CODES = ['settings_unknown', 'settings_locked', 'settings_invalid', 'settings_conflict', 'settings_strands_users', 'settings_audit_unavailable', 'settings_no_pending', 'settings_confirm_session'] as const
 export type SettingsErrorCode = (typeof SETTINGS_ERROR_CODES)[number]
 
 /** Refusal of a settings write. `detail` is a short reason for the page, never a stored value. `count` is set for `settings_strands_users`. */
@@ -24,7 +25,7 @@ export class SettingsError extends Error {
 }
 
 type AuditFields = Record<string, string | number | boolean | undefined>
-export type SettingsAuditEvent = 'settings.change' | 'settings.reset'
+export type SettingsAuditEvent = 'settings.change' | 'settings.reset' | 'settings.pending'
 
 export type SettingsWriterDeps = {
   store: AccountStore
@@ -34,6 +35,10 @@ export type SettingsWriterDeps = {
   audit: (event: SettingsAuditEvent, fields: AuditFields) => void
   /** Called after a committed change; defaults to the process-wide cache invalidation. */
   changed?: () => void
+  /** Guarded keys apply at once and revert unless confirmed (SPEC/33). The CLI passes false: its reset is the recovery path. Default true. */
+  guard?: boolean
+  /** Called after a guarded change committed, so the manager can arm its timer. */
+  armed?: () => void
 }
 
 export type SetResult = { changed: boolean; old: unknown; new: unknown; updatedAt: number | null }
@@ -56,6 +61,8 @@ export function createSettingsWriter(deps: SettingsWriterDeps): SettingsWriter {
   const now = deps.now ?? Date.now
   const { store } = deps
   const changed = deps.changed ?? notifySettingsChanged
+  const guard = deps.guard ?? true
+  const autoRevertMs = () => computeSetting('autoRevertMs', undefined, env).effective as number
 
   function describeKey(key: string): SettingDescription {
     if (!isKey(key)) throw new SettingsError('settings_unknown')
@@ -126,9 +133,19 @@ export function createSettingsWriter(deps: SettingsWriterDeps): SettingsWriter {
       if (d.stored !== null && text(d.stored) === text(v)) return { changed: false, old: d.effective, new: d.effective, updatedAt: d.updatedAt }
       const next = computeSetting(d.key, text(v), env).effective
       deps.audit('settings.change', { setting: d.key, old: text(d.effective), new: text(next), actor, stored: d.stored !== null })
+      const at = now()
+      const pending = guard && isGuardedKey(d.key) ? { deadlineAt: at + autoRevertMs() } : undefined
+      if (pending) deps.audit('settings.pending', { setting: d.key, old: text(d.effective), new: text(next), deadlineAt: pending.deadlineAt, actor })
       const row = { key: d.key, value: text(v), updatedAt: stamp(d.updatedAt), updatedBy: actor }
-      store.setSetting(row)
+      if (pending) {
+        // One transaction: the value and its way back exist together or not at all. An older pending row keeps its revert target.
+        store.transaction(() => {
+          store.setSetting(row)
+          store.upsertPending({ key: d.key, revertTo: d.stored !== null ? text(d.stored) : null, newValue: text(next), newUpdatedAt: row.updatedAt, actor, createdAt: at, deadlineAt: pending.deadlineAt, status: 'pending' })
+        })
+      } else store.setSetting(row)
       changed()
+      if (pending) deps.armed?.()
       return { changed: true, old: d.effective, new: next, updatedAt: row.updatedAt }
     },
 
@@ -139,8 +156,18 @@ export function createSettingsWriter(deps: SettingsWriterDeps): SettingsWriter {
       if (d.updatedAt === null) return { changed: false, old: d.effective, new: d.effective, updatedAt: null }
       const next = computeSetting(d.key, undefined, env).effective
       deps.audit('settings.reset', { setting: d.key, old: text(d.effective), new: text(next), actor })
-      store.deleteSetting(d.key)
+      const at = now()
+      const pending = guard && isGuardedKey(d.key) ? { deadlineAt: at + autoRevertMs() } : undefined
+      if (pending) deps.audit('settings.pending', { setting: d.key, old: text(d.effective), new: text(next), deadlineAt: pending.deadlineAt, actor })
+      if (pending) {
+        // A reset leaves no row: newUpdatedAt 0 tells the revert to expect none.
+        store.transaction(() => {
+          store.deleteSetting(d.key)
+          store.upsertPending({ key: d.key, revertTo: d.stored !== null ? text(d.stored) : null, newValue: text(next), newUpdatedAt: 0, actor, createdAt: at, deadlineAt: pending.deadlineAt, status: 'pending' })
+        })
+      } else store.deleteSetting(d.key)
       changed()
+      if (pending) deps.armed?.()
       return { changed: true, old: d.effective, new: next, updatedAt: null }
     },
   }

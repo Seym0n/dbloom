@@ -17,6 +17,7 @@ const value = z.union([z.string().max(600), z.number(), z.boolean(), z.array(z.s
 export const setSettingInput = z.object({ key, value, basedOn }).strict()
 export const resetSettingInput = z.object({ key, basedOn }).strict()
 export const previewSettingInput = z.object({ key, value }).strict()
+export const pendingSettingInput = z.object({ key }).strict()
 
 export const getSettings = createServerFn({ method: 'POST' })
   .middleware([accountMiddleware])
@@ -57,6 +58,28 @@ export const resetSetting = createServerFn({ method: 'POST' })
   .handler(({ context, data }) => {
     try {
       return settingsService().reset(context.account, data.key, data.basedOn)
+    } catch (error) {
+      return throwAuthError(error, 'auth_failed')
+    }
+  })
+
+export const confirmPending = createServerFn({ method: 'POST' })
+  .middleware([accountMiddleware])
+  .validator(pendingSettingInput)
+  .handler(({ context, data }) => {
+    try {
+      return settingsService().confirm(context.account, data.key)
+    } catch (error) {
+      return throwAuthError(error, 'auth_failed')
+    }
+  })
+
+export const cancelPending = createServerFn({ method: 'POST' })
+  .middleware([accountMiddleware])
+  .validator(pendingSettingInput)
+  .handler(({ context, data }) => {
+    try {
+      return settingsService().cancel(context.account, data.key)
     } catch (error) {
       return throwAuthError(error, 'auth_failed')
     }

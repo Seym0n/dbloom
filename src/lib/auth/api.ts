@@ -20,7 +20,7 @@ import type { AuditFilter, AuditRow, OwnAuditRow, Page } from '~/server/audit/qu
 import type { AuditStatus } from '~/server/audit/service'
 import type { ExportFormat } from '~/server/audit/formats'
 import type { ExposureAnswer } from '~/server/exposure-service'
-import type { PreviewAnswer, SettingsAnswer, SettingsView } from '~/server/settings-service'
+import type { PendingAnswer, PreviewAnswer, SettingsAnswer, SettingsView } from '~/server/settings-service'
 import type {
   AccountSessionInfo,
   ConnectionInfo,
@@ -179,6 +179,9 @@ export interface AuthApi {
   previewSetting(key: string, value: unknown): Promise<PreviewAnswer>
   setSetting(key: string, value: unknown, basedOn: number | null): Promise<SettingsAnswer>
   resetSetting(key: string, basedOn: number | null): Promise<SettingsAnswer>
+  /** Guarded changes (SPEC/33): keep the change (needs a session that signed in after it) or revert it at once. */
+  confirmPending(key: string): Promise<PendingAnswer>
+  cancelPending(key: string): Promise<PendingAnswer>
 
   // ---- invites and recovery (FR-AUT-015, 016) ------------------------------------------------------------
   issueInvite(input: { role: Role; lifetimeMs?: number }): Promise<{ link: string; expiresAt: number }>
@@ -324,6 +327,8 @@ export function createServerAuthApi(): AuthApi {
     previewSetting: (key, value) => call(settingsMod, 'previewSetting', { key, value }),
     setSetting: (key, value, basedOn) => call(settingsMod, 'setSetting', { key, value, basedOn }),
     resetSetting: (key, basedOn) => call(settingsMod, 'resetSetting', { key, basedOn }),
+    confirmPending: (key) => call(settingsMod, 'confirmPending', { key }),
+    cancelPending: (key) => call(settingsMod, 'cancelPending', { key }),
 
     issueInvite: (input) => call(inviteMod, 'issueInvite', input),
     listInvites: () => call(inviteMod, 'listInvites', empty),

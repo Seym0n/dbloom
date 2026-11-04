@@ -38,6 +38,7 @@ const writer = (env: NodeJS.ProcessEnv = {}, changed?: () => void): SettingsWrit
     ...(changed ? { changed } : {}),
     audit: (event, fields) => {
       if (failAudit) throw new Error('Audit log unavailable: test')
+      if (event === 'settings.pending') return // guarded keys also write this row; tests/protect-pending.test.ts covers it
       events.push({ event, fields, storedAtAudit: storedValue(fields.setting as AuthSettingKey) })
     },
   })

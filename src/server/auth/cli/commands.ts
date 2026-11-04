@@ -10,6 +10,7 @@ import {
   type AccountStore,
   type AuthAuditFields,
   type CliResult,
+  type PendingSetting,
   type RecoveryService,
   type SecretKeyRing,
   type SettingDescription,
@@ -27,6 +28,8 @@ export type CliDeps = {
   /** Settings of the host: the description of every key and a reset that skips role and step-up but keeps every limit and lock. */
   settings?: {
     describe: () => SettingDescription[]
+    /** Guarded changes waiting for confirmation (SPEC/33). */
+    pending: () => PendingSetting[]
     reset: (key: string, basedOn: number | null) => { changed: boolean }
   }
   now?: () => number
@@ -39,7 +42,8 @@ export const CLI_USAGE = `Usage: dbloom <command>
   rotate-secret                re-seal TOTP secrets under the current server key
   exposure                     print the effective exposure and its warnings
   settings list                print every setting: effective value, source, lock
-  settings reset <key>         remove the stored value of a setting (back to .env or built-in)
+  settings pending             list guarded changes waiting for confirmation (they revert at their deadline)
+  settings reset <key>         remove the stored value of a setting (back to .env or built-in); closes a pending change of it
   maintenance off              switch maintenance mode off (not when DBLOOM_MAINTENANCE forces it)
 ${AUDIT_CLI_USAGE}`
 
@@ -119,6 +123,13 @@ export async function runCli(argv: string[], deps: CliDeps): Promise<CliResult> 
       })
       record('ok')
       return done(0, ...lines)
+    }
+    case 'settings pending': {
+      if (!deps.settings || argv.length !== 2) return done(2, CLI_USAGE)
+      const rows = deps.settings.pending()
+      record('ok')
+      if (rows.length === 0) return done(0, 'No change is waiting for confirmation.')
+      return done(0, ...rows.map((p) => `${p.key.padEnd(26)} now ${p.newValue.slice(0, 40).padEnd(24)} reverts at ${new Date(p.deadlineAt).toISOString()} unless confirmed (changed by ${p.actor})`))
     }
     case 'settings reset':
     case 'maintenance off': {

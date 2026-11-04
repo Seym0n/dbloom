@@ -9,6 +9,7 @@ import { mkdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { DirectAuth } from './auth'
 import { log } from './log'
+import { startPendingSettings } from './settings-pending-runtime'
 import { createSqlitePrefsBackend, type PrefsBackend } from './auth/prefs/backend'
 import { createTargetConnectRules } from './auth/connections'
 import { configurePrefsService, getPrefsService } from './auth/prefs/runtime'
@@ -107,6 +108,8 @@ export function getRuntime(): Runtime {
     }
     purge()
     setInterval(purge, 24 * 3_600_000).unref()
+    // Guarded settings changes (SPEC/33): revert what expired while the process was down, arm the timer for the rest.
+    startPendingSettings(store.accounts)
   }
   // Address anonymisation and the external file sink (FR-AAU-009).
   const auditKey = loadSecretKey(process.env)

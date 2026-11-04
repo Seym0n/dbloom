@@ -86,6 +86,8 @@
   "settings.error.settings_invalid.outside_envelope": "A chosen option is not allowed by the operator.",
   "settings.error.settings_conflict": "Someone else changed this setting meanwhile. The page was reloaded; check the value and try again.",
   "settings.error.settings_strands_users": "{count} active users would be left with no allowed option and could not sign in. Nothing was changed.",
+  "settings.error.settings_no_pending": "This change is no longer waiting for confirmation.",
+  "settings.error.settings_confirm_session": "Sign in again with the new settings, then confirm. A session from before the change cannot confirm it.",
   "settings.error.settings_audit_unavailable": "The audit log could not be written, so nothing was changed.",
   "settings.error.generic": "The change could not be made.",
 
@@ -133,6 +135,7 @@
   "settings.key.noticeBurstMinutes": "Window for that notice",
   "settings.key.noticeLocationDays": "Remember a sign-in network for",
   "settings.key.stepUpWindowMs": "Second-factor confirmation stays valid for",
+  "settings.key.autoRevertMs": "A risky change reverts unless confirmed within",
   "settings.key.loginNotice": "Notice on the sign-in page",
   "settings.key.infoBanner": "Banner for signed-in users",
   "settings.key.maintenanceOn": "Maintenance mode",

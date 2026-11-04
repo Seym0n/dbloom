@@ -1,4 +1,5 @@
 import { audit } from '../audit'
+import { isGuardedKey } from '../settings-guard'
 import { SETTING_META, type SettingMeta } from './setting-meta'
 import {
   AUTH_ENV,
@@ -199,6 +200,7 @@ export function createAuthSettingsResolver(store: AccountStore, env: NodeJS.Proc
     describe() {
       const rows = new Map(store.getSettings().map((s) => [s.key, s]))
       const lock = lockedKeys(env)
+      const pending = new Map(store.getPendingSettings('pending').map((p) => [p.key, p]))
       const out: SettingDescription[] = []
       for (const key of Object.keys(SPECS) as AuthSettingKey[]) {
         const spec = SPECS[key]!
@@ -225,6 +227,8 @@ export function createAuthSettingsResolver(store: AccountStore, env: NodeJS.Proc
           source,
           limits: c.limits,
           locked: c.locked,
+          guarded: isGuardedKey(key),
+          pending: pending.has(key) ? { newValue: JSON.parse(pending.get(key)!.newValue) as SettingValue, deadlineAt: pending.get(key)!.deadlineAt, actor: pending.get(key)!.actor } : null,
           forced: c.forced,
           editable: spec.source === 'ui_within_env' && !c.locked && !c.forced,
           updatedAt: row?.updatedAt ?? null,

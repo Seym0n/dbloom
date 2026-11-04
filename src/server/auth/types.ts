@@ -116,7 +116,7 @@ export type { TlsMode } from '../config'
 export const TLS_MODES = ['verify', 'skip-verify', 'off'] as const satisfies readonly TlsMode[]
 
 /** Host CLI commands (FR-AUT-030). */
-export const CLI_COMMANDS = ['setup-token', 'recover', 'sessions revoke', 'rotate-secret', 'settings list', 'settings reset', 'maintenance off'] as const
+export const CLI_COMMANDS = ['setup-token', 'recover', 'sessions revoke', 'rotate-secret', 'settings list', 'settings pending', 'settings reset', 'maintenance off'] as const
 export type CliCommand = (typeof CLI_COMMANDS)[number]
 
 // ---- Names, cookies, headers, environment ------------------------------------------------------------------
@@ -187,6 +187,7 @@ export const AUTH_ENV = {
   denyRootTarget: 'DBLOOM_DENY_ROOT_TARGET',
   loginRecall: 'DBLOOM_LOGIN_RECALL',
   stepUpMinutes: 'DBLOOM_STEPUP_MINUTES',
+  autoRevertMinutes: 'DBLOOM_AUTOREVERT_MINUTES',
   settingsLock: 'DBLOOM_SETTINGS_LOCK',
   maintenance: 'DBLOOM_MAINTENANCE',
   loginNotice: 'DBLOOM_LOGIN_NOTICE',
@@ -338,6 +339,8 @@ export const PREFS_SCOPE = 'prefs'
 
 /** Step-up window until the admin module owns ST-034 (FR-AUT-013). */
 export const STEPUP_WINDOW_DEFAULT_MS = 5 * MINUTE_MS
+/** Auto-revert period of guarded settings (ST-035, SPEC/33): `.env` only, 1 to 15 minutes. */
+export const AUTOREVERT_DEFAULT_MS = 5 * MINUTE_MS
 /** Administrator session limits (ST-069, ST-070 admin defaults). */
 export const ADMIN_SESSION_IDLE_DEFAULT_MS = 15 * MINUTE_MS
 export const ADMIN_SESSION_ABSOLUTE_DEFAULT_MS = 4 * HOUR_MS
@@ -601,6 +604,20 @@ export type SiteState = { loginMode: LoginMode; setupCompletedAt: number; siteNa
 
 /** `settings` row (FR-AUT-029). `value` is JSON text. */
 export type SettingRow = { key: AuthSettingKey; value: string; updatedAt: number; updatedBy: string }
+
+/** `pending_settings` row (migration 8, SPEC/33): a guarded change awaiting confirmation. `revertTo` and `newValue` are JSON text; `revertTo` null means the key had no stored value. */
+export type PendingStatus = 'pending' | 'confirmed' | 'reverted' | 'cancelled' | 'superseded'
+export type PendingSetting = {
+  key: AuthSettingKey
+  revertTo: string | null
+  newValue: string
+  /** `updated_at` of the settings row the change wrote; the revert only applies while the row still has it. */
+  newUpdatedAt: number
+  actor: string
+  createdAt: number
+  deadlineAt: number
+  status: PendingStatus
+}
 
 /** Account session row: the skeleton row plus the columns of migration 5 (FR-AUT-017). */
 export type AccountSessionRecord = SessionRecord & {
@@ -902,6 +919,8 @@ export const AUTH_SETTINGS = {
   noticeBurstMinutes: { st: 'ST-207', source: 'ui_within_env', env: AUTH_ENV.noticeBurstMinutes, envUnit: 1, floor: 1, default: 10, ceiling: 60, schema: z.number().int().min(1).max(60) },
   noticeLocationDays: { st: 'ST-207', source: 'ui_within_env', env: AUTH_ENV.noticeLocationDays, envUnit: 1, floor: 7, default: 90, ceiling: 365, schema: z.number().int().min(7).max(365) },
   stepUpWindowMs: { st: 'ST-034', source: 'env', env: AUTH_ENV.stepUpMinutes, floor: 1 * MINUTE_MS, default: STEPUP_WINDOW_DEFAULT_MS, ceiling: 15 * MINUTE_MS, schema: ms },
+  /** ST-035: how long a guarded change stays in force unconfirmed (SPEC/33). ENV-only on purpose: a UI value of 0 would remove the safety net. */
+  autoRevertMs: { st: 'ST-035', source: 'env', env: AUTH_ENV.autoRevertMinutes, floor: 1 * MINUTE_MS, default: AUTOREVERT_DEFAULT_MS, ceiling: 15 * MINUTE_MS, schema: ms },
   /** ST-216: plain text above the sign-in form. `.env` value is the default (and the only source in direct mode). */
   loginNotice: { st: 'ST-216', source: 'ui_within_env', env: AUTH_ENV.loginNotice, default: '', ceiling: LOGIN_NOTICE_MAX, schema: siteText(LOGIN_NOTICE_MAX, false) },
   /** ST-219: plain text banner for signed-in users (newlines allowed). */
@@ -956,6 +975,10 @@ export type SettingDescription = {
   limits: { floor?: SettingValue; ceiling?: SettingValue; envelope?: SettingValue[] }
   /** `DBLOOM_SETTINGS_LOCK` names the key: shown read-only at its `.env` value. */
   locked: boolean
+  /** One of `GUARDED_KEYS` (SPEC/33): a change reverts unless confirmed. */
+  guarded: boolean
+  /** A guarded change still awaiting confirmation. */
+  pending: { newValue: SettingValue; deadlineAt: number; actor: string } | null
   /** `.env` forces the value on (maintenance mode): the UI cannot lower it. */
   forced: boolean
   editable: boolean
@@ -1426,6 +1449,11 @@ export interface AccountStore {
   setSetting(row: SettingRow): void
   /** Removes the stored value of a key (reset to the default); true when a row existed. */
   deleteSetting(key: AuthSettingKey): boolean
+  /** Guarded changes (SPEC/33): one row per key; `upsertPending` keeps the older `revertTo` and `createdAt` while the key is still pending. */
+  getPendingSettings(status?: PendingStatus): PendingSetting[]
+  upsertPending(row: PendingSetting): void
+  /** Atomic transition out of `pending`; true when this call made it. */
+  resolvePending(key: AuthSettingKey, status: Exclude<PendingStatus, 'pending'>): boolean
 
   // users
   createUser(user: User): void

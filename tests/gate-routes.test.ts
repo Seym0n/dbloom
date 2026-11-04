@@ -45,7 +45,7 @@ const NON_CREDENTIAL = new Set(
     'listHistory deleteHistory saveBookmark listBookmarks renameBookmark deleteBookmark getCompletionSchema getSqlLimits',
     'getStructureLists previewStructure executeStructure getTableDefinition',
     'listAuditEvents listOwnAuditEvents getAuditStatus startAuditExport getExposure acknowledgeExposure',
-    'getSettings previewSetting setSetting resetSetting',
+    'getSettings previewSetting setSetting resetSetting confirmPending cancelPending',
   ]
     .join(' ')
     .split(/\s+/),
