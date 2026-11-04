@@ -16,6 +16,7 @@ import { Route as RecoverRouteImport } from './routes/recover'
 import { Route as SetupRouteImport } from './routes/setup'
 import { Route as AccountIndexRouteImport } from './routes/account.index'
 import { Route as AccountPreferencesRouteImport } from './routes/account.preferences'
+import { Route as AdminAssistantRouteImport } from './routes/admin.assistant'
 import { Route as AdminAuditRouteImport } from './routes/admin.audit'
 import { Route as AdminExposureRouteImport } from './routes/admin.exposure'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
@@ -63,6 +64,11 @@ const AccountPreferencesRoute = AccountPreferencesRouteImport.update({
   id: '/preferences',
   path: '/preferences',
   getParentRoute: () => AccountRoute,
+} as any)
+const AdminAssistantRoute = AdminAssistantRouteImport.update({
+  id: '/admin/assistant',
+  path: '/admin/assistant',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AdminAuditRoute = AdminAuditRouteImport.update({
   id: '/admin/audit',
@@ -132,6 +138,7 @@ export interface FileRoutesByFullPath {
   '/recover': typeof RecoverRoute
   '/setup': typeof SetupRoute
   '/account/preferences': typeof AccountPreferencesRoute
+  '/admin/assistant': typeof AdminAssistantRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/exposure': typeof AdminExposureRoute
   '/admin/settings': typeof AdminSettingsRoute
@@ -152,6 +159,7 @@ export interface FileRoutesByTo {
   '/recover': typeof RecoverRoute
   '/setup': typeof SetupRoute
   '/account/preferences': typeof AccountPreferencesRoute
+  '/admin/assistant': typeof AdminAssistantRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/exposure': typeof AdminExposureRoute
   '/admin/settings': typeof AdminSettingsRoute
@@ -174,6 +182,7 @@ export interface FileRoutesById {
   '/recover': typeof RecoverRoute
   '/setup': typeof SetupRoute
   '/account/preferences': typeof AccountPreferencesRoute
+  '/admin/assistant': typeof AdminAssistantRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/exposure': typeof AdminExposureRoute
   '/admin/settings': typeof AdminSettingsRoute
@@ -197,6 +206,7 @@ export interface FileRouteTypes {
     | '/recover'
     | '/setup'
     | '/account/preferences'
+    | '/admin/assistant'
     | '/admin/audit'
     | '/admin/exposure'
     | '/admin/settings'
@@ -217,6 +227,7 @@ export interface FileRouteTypes {
     | '/recover'
     | '/setup'
     | '/account/preferences'
+    | '/admin/assistant'
     | '/admin/audit'
     | '/admin/exposure'
     | '/admin/settings'
@@ -238,6 +249,7 @@ export interface FileRouteTypes {
     | '/recover'
     | '/setup'
     | '/account/preferences'
+    | '/admin/assistant'
     | '/admin/audit'
     | '/admin/exposure'
     | '/admin/settings'
@@ -259,6 +271,7 @@ export interface RootRouteChildren {
   InviteRoute: typeof InviteRoute
   RecoverRoute: typeof RecoverRoute
   SetupRoute: typeof SetupRoute
+  AdminAssistantRoute: typeof AdminAssistantRoute
   AdminAuditRoute: typeof AdminAuditRoute
   AdminExposureRoute: typeof AdminExposureRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
@@ -323,6 +336,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/account/preferences'
       preLoaderRoute: typeof AccountPreferencesRouteImport
       parentRoute: typeof AccountRoute
+    }
+    '/admin/assistant': {
+      id: '/admin/assistant'
+      path: '/admin/assistant'
+      fullPath: '/admin/assistant'
+      preLoaderRoute: typeof AdminAssistantRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/admin/audit': {
       id: '/admin/audit'
@@ -430,6 +450,7 @@ const rootRouteChildren: RootRouteChildren = {
   InviteRoute: InviteRoute,
   RecoverRoute: RecoverRoute,
   SetupRoute: SetupRoute,
+  AdminAssistantRoute: AdminAssistantRoute,
   AdminAuditRoute: AdminAuditRoute,
   AdminExposureRoute: AdminExposureRoute,
   AdminSettingsRoute: AdminSettingsRoute,

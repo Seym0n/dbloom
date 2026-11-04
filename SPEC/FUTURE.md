@@ -219,3 +219,59 @@ Ideas that were discussed and deliberately postponed. They are **not requirement
 **Why deferred:** `pending_settings` keeps one `revert_to` per key; the audit log already records old and new values.
 
 **Related:** `33-module-admin-protect.md` section 9, `32-module-admin-settings.md`.
+
+## FU-assistant-delete-ddl: DELETE and schema changes by the assistant
+
+**Idea:** Let the assistant propose `DELETE`, `TRUNCATE` and DDL with the same per-call approval, always manual, never auto, through the existing write guard and confirmation token (the hard class of the SQL tab).
+
+**Why deferred:** Owner decision 2026-11-04 (`34-module-assistant.md` Q1): approval covers `SELECT`, `INSERT` and `UPDATE` only. Such statements open in an SQL tab, unrun.
+
+**Related:** `34-module-assistant.md` FR-AST-011, `23-module-sql-tab.md` FR-SQL-027.
+
+## FU-assistant-aggregates: aggregates over PII with a minimum group size
+
+**Idea:** Let `AVG`, `SUM`, `MIN` and `MAX` over a PII column come back as real numbers when the group has at least a set number of rows (for example five), and tokenize them below that.
+
+**Why deferred:** Owner decision 2026-11-04 (Q8): strict first. An aggregate over a PII column is tokenized, a comparison on it is refused.
+
+**Related:** `34-module-assistant.md` FR-AST-008, FR-AST-009.
+
+## FU-assistant-token-store: tokens that survive a restart
+
+**Idea:** Keep the token map encrypted with the server key so an old conversation can use its tokens after a restart.
+
+**Why deferred:** Owner decision 2026-11-04 (Q5): tokens in memory only. It would put personal data at rest in the store.
+
+**Related:** `34-module-assistant.md` FR-AST-010.
+
+## FU-assistant-outbound-proxy: an outbound proxy setting for the AI endpoint
+
+**Idea:** A proxy URL, user and password of DBLoom's own (ST-033) used by the assistant's client.
+
+**Why deferred:** Node's `NODE_USE_ENV_PROXY=1` with `HTTPS_PROXY` already applies to `fetch` (`docs/deploy.md`, "AI assistant").
+
+**Related:** `12-settings.md` ST-033, `34-module-assistant.md` FR-AST-017.
+
+## FU-assistant-stream: progressive text instead of polling
+
+**Idea:** Stream the model's text to the page as it is written (server-sent events) instead of showing each answer when its step ends.
+
+**Why deferred:** A turn can outlast a proxy's read timeout, so the first release starts a turn in the background and polls (`34-module-assistant.md`, task 4).
+
+**Related:** `34-module-assistant.md` FR-AST-013.
+
+## FU-assistant-skills: assistant skills
+
+**Idea:** Named, reviewed prompts such as a schema review or a normalisation check that replace legacy wizards (OPEN item 19 idea).
+
+**Why deferred:** Not needed for the first release.
+
+**Related:** `OPEN.md` item 19, `34-module-assistant.md` section 9.
+
+## FU-assistant-endpoints: several endpoints and a model per user
+
+**Idea:** More than one AI endpoint, and a model choice per user or per conversation.
+
+**Why deferred:** One endpoint and one model name (ST-223, ST-225) are enough for the first release.
+
+**Related:** `34-module-assistant.md` section 9.

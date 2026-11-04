@@ -77,6 +77,11 @@ export function ConnectionHome({ onOpened, onSignOut, isAdmin, banner, maintenan
             {t('settings.nav')}
           </Link>
         )}
+        {isAdmin && (
+          <Link to="/admin/assistant" className="press inline-flex h-8 items-center rounded-[var(--radius-control)] px-3 text-sm font-medium text-muted hover:bg-active hover:text-ink">
+            {t('asstAdmin.nav')}
+          </Link>
+        )}
         <Button variant="ghost" onClick={onSignOut}>
           {t('auth.signOut')}
         </Button>

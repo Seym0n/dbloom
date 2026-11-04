@@ -20,6 +20,8 @@ import type { AuditFilter, AuditRow, OwnAuditRow, Page } from '~/server/audit/qu
 import type { AuditStatus } from '~/server/audit/service'
 import type { ExportFormat } from '~/server/audit/formats'
 import type { ExposureAnswer } from '~/server/exposure-service'
+import type { AckView, AdminAnswer, AdminOverview, RuleView } from '~/server/assistant/admin-service'
+import type { Suggestion } from '~/server/assistant/suggest'
 import type { PendingAnswer, PreviewAnswer, SettingsAnswer, SettingsView } from '~/server/settings-service'
 import type {
   AccountSessionInfo,
@@ -174,6 +176,15 @@ export interface AuthApi {
   getExposure(): Promise<ExposureAnswer>
   acknowledgeExposure(id: string): Promise<{ ok: true }>
 
+  // ---- assistant administration (SPEC/34): markings of PII columns, acknowledgements, endpoint status; a refusal is an answer ----
+  getAssistantAdmin(): Promise<AdminOverview>
+  addPiiRule(input: { targetKey: string; rule: string }): Promise<AdminAnswer<{ rule: RuleView; created: boolean }>>
+  removePiiRule(id: number): Promise<AdminAnswer<{ removed: RuleView }>>
+  setPiiAck(targetKey: string): Promise<AdminAnswer<{ ack: AckView }>>
+  clearPiiAck(targetKey: string): Promise<AdminAnswer<{ cleared: boolean }>>
+  /** Columns of the connection this call is made on whose names look like personal data (administrators). */
+  suggestPiiColumns(): Promise<{ suggestions: Suggestion[]; more: boolean }>
+
   // ---- settings page (SPEC/32); a refusal of the write is an answer `{ ok: false, error }`, not a thrown error ----
   getSettings(): Promise<SettingsView>
   previewSetting(key: string, value: unknown): Promise<PreviewAnswer>
@@ -237,6 +248,8 @@ const recoveryMod = () => import('~/server/auth/recovery.functions') as Promise<
 const accountMod = () => import('~/server/account.functions') as Promise<Mod>
 const prefsMod = () => import('~/server/prefs.functions') as Promise<Mod>
 const exposureMod = () => import('~/server/exposure.functions') as Promise<Mod>
+const assistantAdminMod = () => import('~/server/assistant-admin.functions') as Promise<Mod>
+const assistantMod = () => import('~/server/assistant.functions') as Promise<Mod>
 const settingsMod = () => import('~/server/settings.functions') as Promise<Mod>
 const auditMod = () => import('~/server/audit.functions') as Promise<Mod>
 const sessionMod = () => import('~/server/session.functions') as Promise<Mod>
@@ -322,6 +335,13 @@ export function createServerAuthApi(): AuthApi {
 
     getExposure: () => call(exposureMod, 'getExposure', empty),
     acknowledgeExposure: (id) => call(exposureMod, 'acknowledgeExposure', { id }),
+
+    getAssistantAdmin: () => call(assistantAdminMod, 'getAssistantAdmin', empty),
+    addPiiRule: (input) => call(assistantAdminMod, 'addPiiRule', input),
+    removePiiRule: (id) => call(assistantAdminMod, 'removePiiRule', { id }),
+    setPiiAck: (targetKey) => call(assistantAdminMod, 'setPiiAck', { targetKey }),
+    clearPiiAck: (targetKey) => call(assistantAdminMod, 'clearPiiAck', { targetKey }),
+    suggestPiiColumns: () => call(assistantMod, 'suggestPiiColumns'),
 
     getSettings: () => call(settingsMod, 'getSettings', empty),
     previewSetting: (key, value) => call(settingsMod, 'previewSetting', { key, value }),

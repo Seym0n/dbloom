@@ -191,6 +191,10 @@ export const AUTH_ENV = {
   settingsLock: 'DBLOOM_SETTINGS_LOCK',
   maintenance: 'DBLOOM_MAINTENANCE',
   loginNotice: 'DBLOOM_LOGIN_NOTICE',
+  assistantEnabled: 'DBLOOM_ASSISTANT_ENABLED',
+  assistantModel: 'DBLOOM_AI_MODEL',
+  assistantAutoAllowed: 'DBLOOM_ASSISTANT_AUTO_ALLOWED',
+  assistantHidePiiNames: 'DBLOOM_ASSISTANT_HIDE_PII_NAMES',
 } as const
 
 // ---- Limits (fixed in code; section 5.4, 5.8, ST-059, 064, 082, 088) ------------------------------------------
@@ -767,6 +771,7 @@ export type SettingSpec<T> = {
 const ms = z.number().int().min(0)
 export const LOGIN_NOTICE_MAX = 300
 export const INFO_BANNER_MAX = 500
+export const ASSISTANT_MODEL_MAX = 100
 /** Plain text of a site setting: length-limited, no control characters (a newline only where `multiline`). */
 const siteText = (max: number, multiline: boolean) =>
   z
@@ -929,6 +934,14 @@ export const AUTH_SETTINGS = {
   maintenanceOn: { st: 'ST-218', source: 'ui_within_env', env: AUTH_ENV.maintenance, default: false, schema: z.boolean() },
   /** ST-218: absolute end time in epoch milliseconds, 0 = none. */
   maintenanceEndsAt: { st: 'ST-218', source: 'ui_within_env', floor: 0, default: 0, schema: z.number().int().min(0) },
+  /** ST-225: the switch of the AI assistant. The endpoint and key are `.env` only (ST-223, ST-224); with no endpoint the assistant is unavailable whatever this says. */
+  assistantEnabled: { st: 'ST-225', source: 'ui_within_env', env: AUTH_ENV.assistantEnabled, default: true, schema: z.boolean() },
+  /** ST-225: the model name sent to the configured endpoint. Plain text without spaces or control characters. */
+  assistantModel: { st: 'ST-225', source: 'ui_within_env', env: AUTH_ENV.assistantModel, default: '', ceiling: ASSISTANT_MODEL_MAX, schema: z.string().max(ASSISTANT_MODEL_MAX).regex(/^[^\s\u0000-\u001f\u007f]*$/, 'no spaces or control characters') },
+  /** SPEC/34 FR-AST-004: off takes auto mode away from every conversation. */
+  assistantAutoAllowed: { st: 'FR-AST-004', source: 'ui_within_env', env: AUTH_ENV.assistantAutoAllowed, default: true, schema: z.boolean() },
+  /** SPEC/34 FR-AST-016: names of PII columns are not sent to the AI; they appear as `col_n`. */
+  assistantHidePiiNames: { st: 'FR-AST-016', source: 'ui_within_env', env: AUTH_ENV.assistantHidePiiNames, default: false, schema: z.boolean() },
 } as const satisfies Record<string, SettingSpec<unknown>>
 
 export type AuthSettingKey = keyof typeof AUTH_SETTINGS

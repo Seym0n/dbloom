@@ -4,7 +4,7 @@
  * scans `src/server` and fails on a literal purpose outside this set and on an entry with no caller, so a new
  * administrative action cannot skip step-up silently. The window (ST-034) is one value for all purposes.
  */
-export type StepUpArea = 'settings' | 'users' | 'invites' | 'audit' | 'account'
+export type StepUpArea = 'settings' | 'users' | 'invites' | 'audit' | 'account' | 'assistant'
 
 export const STEP_UP_SET = {
   'settings.write': 'settings',
@@ -17,6 +17,7 @@ export const STEP_UP_SET = {
   'invite.revoke': 'invites',
   'recovery.issue': 'invites',
   'audit.export': 'audit',
+  'assistant.rule': 'assistant',
   'passkey.add': 'account',
   'passkey.remove': 'account',
   'totp.add': 'account',

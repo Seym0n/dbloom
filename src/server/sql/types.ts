@@ -414,4 +414,10 @@ export type CompletionSchema = {
 export type ExportSource = { db?: string; text: string; limits: Partial<SqlLimits> }
 
 /** The assistant runs read-only statements through this entry point (module assistant). */
-export type AssistantRunRequest = { db?: string; text: string; conversationId: string }
+export type AssistantRunRequest = {
+  db?: string
+  text: string
+  conversationId: string
+  /** Set only by the assistant module after the user approved this exact statement (INSERT and UPDATE). */
+  approvedWrite?: boolean
+}

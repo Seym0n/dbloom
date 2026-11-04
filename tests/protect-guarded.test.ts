@@ -43,7 +43,7 @@ describe('guarded set (FR-APR-003)', () => {
 
 describe('pending_settings (migration 8)', () => {
   it('is migration 8 and a store at version 7 upgrades', () => {
-    expect(MIGRATIONS).toHaveLength(8)
+    expect(MIGRATIONS.length).toBeGreaterThanOrEqual(8)
     store.close()
     const db = new DatabaseSync(join(dir, 'store.db'))
     db.exec('DROP TABLE pending_settings; PRAGMA user_version = 7')

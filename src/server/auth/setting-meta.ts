@@ -16,7 +16,7 @@ import {
 } from './types'
 
 export type SettingKind = 'number' | 'boolean' | 'choice' | 'list' | 'text' | 'object'
-export const SETTING_GROUPS = ['signin', 'passwords', 'sessions', 'throttling', 'links', 'vault', 'targets', 'audit', 'site', 'system'] as const
+export const SETTING_GROUPS = ['signin', 'passwords', 'sessions', 'throttling', 'links', 'vault', 'targets', 'audit', 'site', 'assistant', 'system'] as const
 export type SettingGroup = (typeof SETTING_GROUPS)[number]
 export type SettingUnit = 'count' | 'minutes' | 'hours' | 'days' | 'characters' | 'milliseconds' | 'none'
 
@@ -82,4 +82,8 @@ export const SETTING_META = {
   infoBanner: text('site'),
   maintenanceOn: bool('site'),
   maintenanceEndsAt: n('site', 'milliseconds'),
+  assistantEnabled: bool('assistant'),
+  assistantModel: text('assistant'),
+  assistantAutoAllowed: bool('assistant'),
+  assistantHidePiiNames: bool('assistant'),
 } as const satisfies Record<AuthSettingKey, SettingMeta>

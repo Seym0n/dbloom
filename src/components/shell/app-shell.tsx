@@ -5,6 +5,7 @@ import { LogOut, Menu, MessageSquare, Plus, UserRound, X } from 'lucide-react'
 import { BrandName } from '~/components/brand'
 import { TableView } from '~/components/grid/table-view'
 import { ConnectionLost } from '~/components/connection-lost'
+import { AssistantHost } from '~/components/assistant/assistant-host'
 import { SessionEndedDialog } from '~/components/session-ended-dialog'
 import { SqlTab, type SqlTabMeta } from '~/components/sql/sql-tab'
 import { getSqlLimits } from '~/components/sql/server-api'
@@ -103,33 +104,6 @@ const targetLabel = (s: SessionInfo['target']) => `${s.host}:${s.port}`
 
 // The io screens read databases, tables and columns through the shell's own server functions.
 wireIoCatalog()
-
-function AssistantPanel({ onClose }: { onClose: () => void }) {
-  return (
-    <aside
-      aria-labelledby="assistant-title"
-      className="fixed inset-0 z-30 flex flex-col bg-surface md:static md:z-auto md:w-[var(--assistant-width)] md:shrink-0 md:border-l md:border-border"
-    >
-      <div className="flex h-12 items-center justify-between px-5">
-        <h2 id="assistant-title" className="text-base font-semibold">
-          {t('assistant.title')}
-        </h2>
-        <Button variant="ghost" size="icon" aria-label={t('assistant.close')} onClick={onClose}>
-          <X size={16} aria-hidden />
-        </Button>
-      </div>
-      <p className="px-5 text-sm text-muted">{t('assistant.body')}</p>
-      <div className="mt-auto p-5">
-        <input
-          disabled
-          aria-label={t('assistant.input')}
-          placeholder={t('assistant.input')}
-          className="h-10 w-full rounded-[var(--radius-control)] border border-control bg-raised px-3 text-sm placeholder:text-faint"
-        />
-      </div>
-    </aside>
-  )
-}
 
 const tabButtonId = (id: string) => `tab-${id.replace(/[^A-Za-z0-9_-]/g, '_')}`
 
@@ -682,7 +656,7 @@ export function AppShell({
             </div>
           )}
         </div>
-        {assistantOpen && <AssistantPanel onClose={() => setAssistantOpen(false)} />}
+        {assistantOpen && <AssistantHost onClose={() => setAssistantOpen(false)} onOpenSql={(db, sql) => openSql(db || undefined, sql)} />}
       </main>
       <UploadStatusPanel
         items={uploads.items}

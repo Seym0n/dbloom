@@ -6,9 +6,10 @@ import authConnections from './auth-connections.json'
 import audit from './audit.json'
 import exposure from './exposure.json'
 import settings from './settings.json'
+import assistant from './assistant.json'
 
 /** One flat catalogue from the base file and the per-module namespace files (auth-*.json). */
-const messages = { ...en, ...authSetup, ...authSignin, ...authAccount, ...authConnections, ...audit, ...exposure, ...settings }
+const messages = { ...en, ...authSetup, ...authSignin, ...authAccount, ...authConnections, ...audit, ...exposure, ...settings, ...assistant }
 
 export type MessageKey = keyof typeof messages
 

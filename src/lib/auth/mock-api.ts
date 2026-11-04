@@ -7,6 +7,7 @@
  * MOCK_RECOVERY_CODE), carol (enrol only), dave (must change password), erin (throttled after two wrong passwords).
  */
 import { createMockAuditApi } from './mock-audit'
+import { createMockAssistantAdmin } from './mock-assistant-admin'
 import { createMockExposureApi } from './mock-exposure'
 import { createMockSettings } from './mock-settings'
 import type { LoginMode, PrefImportProblem, SessionInfo, SessionState } from '~/server/auth/types'
@@ -646,6 +647,7 @@ export function createMockAuthApi(initial?: MockScenario): AuthApi {
     ...createMockAuditApi({ flag, wait, needStepUp, username: owner }),
     ...createMockExposureApi({ flag, wait, who: () => current().u.displayName || current().u.username }),
     ...settingsMock.api,
+    ...createMockAssistantAdmin({ flag, wait, needStepUp, who: () => current().u.displayName || current().u.username }),
     listConnections: async () => {
       resetIdle(true)
       return connectionApi.listConnections()

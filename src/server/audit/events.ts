@@ -85,6 +85,13 @@ export const AUDIT_EVENTS = [
   'settings.confirm',
   'settings.cancel',
   'settings.revert',
+  // the AI assistant (SPEC/34): calls, approvals, refusals, mode switches, markings
+  'assistant.call',
+  'assistant.approve',
+  'assistant.deny',
+  'assistant.refuse',
+  'assistant.mode',
+  'assistant.rule',
 ] as const
 
 export type AuditEventName = (typeof AUDIT_EVENTS)[number]

@@ -26,6 +26,7 @@
   "settings.group.targets": "Database connections",
   "settings.group.audit": "Audit and notices",
   "settings.group.site": "Site messages and maintenance",
+  "settings.group.assistant": "AI assistant",
   "settings.group.system": "System",
 
   "settings.source.limit": "Limited by the operator",
@@ -152,5 +153,9 @@
   "settings.key.loginNotice": "Notice on the sign-in page",
   "settings.key.infoBanner": "Banner for signed-in users",
   "settings.key.maintenanceOn": "Maintenance mode",
-  "settings.key.maintenanceEndsAt": "Maintenance ends at"
+  "settings.key.maintenanceEndsAt": "Maintenance ends at",
+  "settings.key.assistantEnabled": "AI assistant is on",
+  "settings.key.assistantModel": "AI model name",
+  "settings.key.assistantAutoAllowed": "Users may let the assistant run queries without asking each time",
+  "settings.key.assistantHidePiiNames": "Hide the names of PII columns from the AI"
 }

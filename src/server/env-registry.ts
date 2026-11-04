@@ -106,7 +106,16 @@ export const ENV_VARS: readonly EnvVar[] = [
     'DBLOOM_LOGIN_WINDOW_MINUTES', 'DBLOOM_LOGIN_ADDRESS_FAILURES', 'DBLOOM_INVITE_HOURS', 'DBLOOM_RECOVERY_LINK_HOURS',
     'DBLOOM_VAULT_PASSPHRASE_MIN', 'DBLOOM_VAULT_AUTOLOCK_MINUTES', 'DBLOOM_PERSONAL_PROFILES',
     'DBLOOM_ALLOW_EMPTY_TARGET_PASSWORD', 'DBLOOM_DENY_ROOT_TARGET', 'DBLOOM_LOGIN_RECALL', 'DBLOOM_STEPUP_MINUTES', 'DBLOOM_AUTOREVERT_MINUTES',
+    'DBLOOM_ASSISTANT_ENABLED', 'DBLOOM_AI_MODEL', 'DBLOOM_ASSISTANT_AUTO_ALLOWED', 'DBLOOM_ASSISTANT_HIDE_PII_NAMES',
   ].map(authOverride),
+
+  v('assistant', 'AI assistant', 'DBLOOM_AI_BASE_URL', 'string', '', 'Base URL of an OpenAI-compatible chat API (https://host/v1). Empty = the assistant is unavailable and nothing is sent anywhere.'),
+  v('assistant', 'AI assistant', 'DBLOOM_AI_API_KEY', 'secret', '', 'API key of the AI service. Never shown, never logged.'),
+  v('assistant', 'AI assistant', 'DBLOOM_AI_API_KEY_FILE', 'path', '', 'File holding the API key (Docker secret).'),
+  v('assistant', 'AI assistant', 'DBLOOM_AI_ALLOW_PRIVATE', 'bool', 'false', 'Allow the AI endpoint on a private or loopback address (a local model server).'),
+  v('assistant', 'AI assistant', 'DBLOOM_AI_MAX_ROWS', 'int', '50', 'Rows of one result that may go to the AI (PII cells as tokens).', { min: 1, max: 200 }),
+  v('assistant', 'AI assistant', 'DBLOOM_AI_MAX_STEPS', 'int', '8', 'Model-to-tool round trips for one user message.', { min: 1, max: 20 }),
+  v('assistant', 'AI assistant', 'DBLOOM_PII_COLUMNS', 'list', '', 'Columns whose values the AI never sees, as db.table.column (a part may be *), for example `*.*.email,shop.customers.*`. Added to the markings kept in the store.'),
 
   v('sql', 'SQL', 'DBLOOM_SQL_DISABLED', 'bool', 'false', 'Turns the SQL module off.'),
   v('sql', 'SQL', 'DBLOOM_SQL_PARSER', 'string', '', '`off` is the parser kill switch.'),

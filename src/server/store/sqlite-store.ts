@@ -28,6 +28,7 @@ import {
   type IoTemplateStore,
   type TemplateKind,
 } from '../io/store'
+import { ASSISTANT_SCHEMA, createSqliteAssistantStore, type AssistantStore } from '../assistant/store'
 import { MAX_TEMPLATES } from '../io/types'
 import type { SessionRecord, Store } from './store'
 import type {
@@ -222,6 +223,10 @@ export const MIGRATIONS: ((db: DatabaseSync) => void)[] = [
       CREATE INDEX IF NOT EXISTS pending_settings_status ON pending_settings(status);
     `)
   },
+  // 9: conversations, PII markings and their acknowledgements of the AI assistant (SPEC/34). No result rows, no token map.
+  (db) => {
+    db.exec(ASSISTANT_SCHEMA)
+  },
 ]
 
 /** Applies pending migrations in one transaction; refuses a database newer than the code. */
@@ -261,6 +266,7 @@ export type SqliteStore = Store & {
   prefs: PrefsStore
   ioPrefs: IoPrefsStore
   ioTemplates: IoTemplateStore
+  assistant: AssistantStore
   /** The open database, for services that bring their own statements (preferences backend). */
   db: DatabaseSync
 }
@@ -438,6 +444,7 @@ export function openSqliteStore(path: string, options: Partial<SqlStateOptions> 
   const prefs = createSqlitePrefs(db)
   const ioPrefs = createSqliteIoPrefs(db)
   const ioTemplates = createSqliteIoTemplates(db)
+  const assistant = createSqliteAssistantStore(db)
 
   const insert = db.prepare(
     'INSERT INTO sessions (id_hash, target_key, user_name, created_at, last_seen_at, expires_at) VALUES (?, ?, ?, ?, ?, ?)',
@@ -470,6 +477,7 @@ export function openSqliteStore(path: string, options: Partial<SqlStateOptions> 
     prefs,
     ioPrefs,
     ioTemplates,
+    assistant,
     accounts,
     db,
     close: () => db.close(),

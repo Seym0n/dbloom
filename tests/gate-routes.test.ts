@@ -46,6 +46,9 @@ const NON_CREDENTIAL = new Set(
     'getStructureLists previewStructure executeStructure getTableDefinition',
     'listAuditEvents listOwnAuditEvents getAuditStatus startAuditExport getExposure acknowledgeExposure',
     'getSettings previewSetting setSetting resetSetting confirmPending cancelPending',
+    'getAssistantStatus listAssistantConversations createAssistantConversation openAssistantConversation sendAssistantMessage pollAssistantTurn',
+    'resolveAssistantCall setAssistantMode stopAssistantTurn renameAssistantConversation deleteAssistantConversation suggestPiiColumns',
+    'getAssistantAdmin addPiiRule removePiiRule setPiiAck clearPiiAck',
   ]
     .join(' ')
     .split(/\s+/),
