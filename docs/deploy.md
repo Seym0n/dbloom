@@ -121,13 +121,22 @@ Edge and serverless hosting are not supported. Every topology prints its warning
 - **Getting back in.** On the host, `dbloom settings list` prints every setting with its source and lock; `dbloom settings reset <key>` removes a stored value (the same limits and locks apply, no step-up, audited as `cli`); `dbloom maintenance off` removes the stored switch. A running server picks a change made from the command line up within a few seconds.
 - **Not on the page yet.** The settings of target policy, import and export, history and display (SPEC/12 sections 3.3 to 3.5) are still read from the environment only; they move to the page when their modules read them through the settings resolver (`SPEC/FUTURE.md`, FU-settings-ext).
 
+## Protected settings and auto-revert
+
+- **Which settings.** Ten settings can lock administrators out if set wrongly: `mfaScope`, `mfaRoles`, `mfaFactors`, `primaryCredentials`, `loginFailures`, `loginBackoffCapMs`, `loginWindowMs`, `loginAddressFailures`, `adminSessionIdleMs`, `adminSessionAbsoluteMs`. The settings page marks each with "reverts in N minutes unless confirmed after signing in again".
+- **What happens on a change.** A protected change applies at once (after the usual second factor) and is audited as `settings.pending`. If nobody confirms it, the server puts the previous value back at the deadline and audits `settings.revert`. A second change to the same key moves the deadline and keeps the first original value.
+- **Confirming.** An administrator signs in again (a session started after the change), opens `/admin/settings` and presses Confirm (`settings.confirm`). The session that made the change cannot confirm it, so a change that breaks sign-in cannot be confirmed by accident. Revert now (`settings.cancel`) puts the old value back without a second factor. Other admin pages show one line with a link while a change waits.
+- **The deadline.** `DBLOOM_AUTOREVERT_MINUTES` (1 to 15, default 5; environment only). The deadline is an absolute time in the store: a restart keeps it, a change that is overdue at start is reverted before the server listens, and nobody has to be signed in. The revert audit row is best effort: a failing audit sink does not stop the revert.
+- **Getting back in.** `dbloom settings pending` lists waiting changes. `dbloom settings reset <key>` and `dbloom maintenance off` mark the waiting change `superseded`: nothing is restored later. If a protected change locks everybody out, wait for the deadline or run the reset on the host.
+- **Not included.** No countdown on the page and no count of affected users (`SPEC/FUTURE.md`, FU-protect-impact-count, FU-protect-cooling-off, FU-protect-versioned-rollback).
+
 ## Backup, upgrade, rollback
 
 - **Back up the `/data` volume and the server key.** The store holds users, factors and encrypted profiles; the key (`DBLOOM_SECRET_KEY` or the file in `DBLOOM_SECRET_KEY_FILE`) lives outside the volume on purpose. Without the key, TOTP secrets and recovery codes in a backup are unusable; with the volume alone, nobody can read them. Store them in different places.
 - **Rotate the server key:** set the new key as `DBLOOM_SECRET_KEY` and the old one as `DBLOOM_SECRET_KEY_PREVIOUS`, restart, run `node .output/cli/dbloom.mjs rotate-secret`, then remove the previous key.
 - **Upgrade:** build or pull the new image and redeploy. Take a volume backup first.
 - **Rollback:** redeploy the previous image. If a newer version changed the store, restore the pre-upgrade backup instead; whether an older version can open a newer store is not tested.
-- **Container commands** (run as the app user, `docker exec <container> node .output/cli/dbloom.mjs <command>`): `setup-token`, `recover <user>`, `sessions revoke <user>`, `rotate-secret`, `exposure`, `audit export`, `settings list`, `settings reset <key>`, `maintenance off`.
+- **Container commands** (run as the app user, `docker exec <container> node .output/cli/dbloom.mjs <command>`): `setup-token`, `recover <user>`, `sessions revoke <user>`, `rotate-secret`, `exposure`, `audit export`, `settings list`, `settings reset <key>`, `settings pending`, `maintenance off`.
 
 ## Variable reference
 
