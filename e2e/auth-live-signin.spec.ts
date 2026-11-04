@@ -213,6 +213,64 @@ test('SCN-077 direct mode names itself and keeps no credentials in the browser',
   }
 })
 
-// Not implemented (SPEC/26 15.6): ST-074 / FR-AUT-019 "direct mode with ST-074 on preselects the last named server". The
-// setting is read but the direct login form has no named-server list and no recall.
-test.fixme('SCN-077 direct mode: the last named server is preselected (ST-074)', async () => {})
+test('SCN-077 direct mode with ST-074 on: the last named server and user name are preselected, no password is kept', async ({ page }) => {
+  const direct = await startServer({
+    DBLOOM_LOGIN_MODE: 'direct',
+    DBLOOM_AUTO_SETUP: 'direct',
+    DBLOOM_LOGIN_RECALL: 'true',
+    DBLOOM_DIRECT_TARGETS: '127.0.0.1:33064,127.0.0.1:33061',
+  })
+  try {
+    await page.goto(direct.baseURL + '/')
+    await expect(h1(page)).toHaveText('Sign in to a database server')
+    // nothing remembered yet, and the named servers are offered as suggestions
+    await expect(page.locator('#server')).toHaveValue('')
+    await expect(page.locator('#server-targets option')).toHaveCount(2)
+    expect(await page.locator('#server-targets option').evaluateAll((os) => os.map((o) => (o as HTMLOptionElement).value))).toEqual(['127.0.0.1:33064', '127.0.0.1:33061'])
+    await page.locator('#server').fill('127.0.0.1:33061')
+    await page.getByLabel('User name').fill('root')
+    await page.getByLabel('Password', { exact: true }).fill('root')
+    await page.getByRole('button', { name: 'Sign in', exact: true }).click()
+    await expect(page.getByText('127.0.0.1:33061').first()).toBeVisible()
+
+    const stored = await page.evaluate(() => ({ recall: localStorage.getItem('dbloom.recall'), all: JSON.stringify({ ...localStorage, ...sessionStorage }) }))
+    expect(JSON.parse(stored.recall!)).toEqual({ server: '127.0.0.1:33061', username: 'root' })
+    expect(stored.all).not.toContain('"password"')
+    expect(stored.all.match(/root/g)).toHaveLength(1) // the user name in the recall entry only
+
+    await page.getByRole('button', { name: 'Log out' }).click()
+    await expect(h1(page)).toHaveText('Sign in to a database server')
+    await expect(page.locator('#server')).toHaveValue('127.0.0.1:33061')
+    await expect(page.getByLabel('User name')).toHaveValue('root')
+    await expect(page.getByLabel('Password', { exact: true })).toHaveValue('')
+
+    // a remembered server that is no longer on the list is not preselected
+    await direct.restart({ DBLOOM_LOGIN_MODE: 'direct', DBLOOM_AUTO_SETUP: 'direct', DBLOOM_LOGIN_RECALL: 'true', DBLOOM_DIRECT_TARGETS: '127.0.0.1:33064' })
+    await page.reload()
+    await expect(h1(page)).toHaveText('Sign in to a database server')
+    await expect(page.locator('#server')).toHaveValue('')
+    await expect(page.locator('#server-targets option')).toHaveCount(1)
+  } finally {
+    await direct.stop()
+  }
+})
+
+test('SCN-077 direct mode with ST-074 off remembers nothing, whatever the browser holds', async ({ page }) => {
+  const direct = await startServer({ DBLOOM_LOGIN_MODE: 'direct', DBLOOM_AUTO_SETUP: 'direct', DBLOOM_DIRECT_TARGETS: '127.0.0.1:33064' })
+  try {
+    await page.goto(direct.baseURL + '/')
+    await page.evaluate(() => localStorage.setItem('dbloom.recall', JSON.stringify({ server: '127.0.0.1:33064', username: 'root' })))
+    await page.reload()
+    await expect(page.locator('#server')).toHaveValue('')
+    await expect(page.getByLabel('User name')).toHaveValue('')
+    await page.locator('#server').fill('127.0.0.1:33064')
+    await page.getByLabel('User name').fill('root')
+    await page.getByLabel('Password', { exact: true }).fill('root')
+    await page.getByRole('button', { name: 'Sign in', exact: true }).click()
+    await expect(page.getByText('127.0.0.1:33064').first()).toBeVisible()
+    // the entry the test planted is not touched and not refreshed
+    expect(await page.evaluate(() => localStorage.getItem('dbloom.recall'))).toBe(JSON.stringify({ server: '127.0.0.1:33064', username: 'root' }))
+  } finally {
+    await direct.stop()
+  }
+})

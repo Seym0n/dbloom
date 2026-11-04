@@ -24,7 +24,7 @@ let admin: Account
 
 test.beforeAll(async ({ browser }) => {
   // Administrators hold two full sessions at most (the default of ST-071 for the role).
-  server = await startServer({ DBLOOM_SESSIONS_PER_ADMIN: '2' })
+  server = await startServer({ DBLOOM_SESSIONS_PER_ADMIN: '2', DBLOOM_SESSION_IDLE_MINUTES: '3' })
   const page = await browser.newPage()
   admin = await runSetupWizard(page, server, { username: 'ana' })
   await page.close()
@@ -141,6 +141,69 @@ test('SCN-074 an administrator disables a user with an open session: the next re
   await adminPage.context().close()
 })
 
-// Not covered live (SPEC/26 15.6): the idle limit of an administrator has a floor of 5 minutes, and the two-minute
-// warning with "Stay signed in" (SEC-UIX-109, FR-AUT-017) is not built in the UI.
-test.fixme('SCN-074 the idle warning appears two minutes before the limit and "Stay signed in" renews it', async () => {})
+const IDA_TEMP = 'temporary pass phrase 22'
+const IDA_PASSWORD = 'an idle user phrase 2026'
+
+/** A user who is not an administrator (the idle limit of 3 minutes of this server applies to them), signed in at the picker. */
+async function idaSession(browser: import('@playwright/test').Browser, create: boolean): Promise<Page> {
+  if (create) {
+    const adminPage = await newSession(browser)
+    await adminPage.getByRole('link', { name: 'Users' }).click()
+    await adminPage.getByRole('button', { name: 'Create user' }).first().click()
+    const d = dialog(adminPage, 'Create a user')
+    await d.getByLabel('User name').fill('ida')
+    await d.getByLabel('Temporary password').fill(IDA_TEMP)
+    await d.getByRole('button', { name: 'Create user' }).click()
+    const done = dialog(adminPage, 'User created')
+    await done.getByLabel('I passed it on').check()
+    await done.getByRole('button', { name: 'Done' }).click()
+    await adminPage.context().close()
+  }
+  const ctx = await browser.newContext()
+  const page = await ctx.newPage()
+  await openSignIn(page, server)
+  await fillSignIn(page, 'ida', create ? IDA_TEMP : IDA_PASSWORD)
+  if (create) {
+    const change = dialog(page, 'Choose a new password')
+    await change.getByLabel('Current password').fill(IDA_TEMP)
+    await change.getByLabel('New password', { exact: true }).fill(IDA_PASSWORD)
+    await change.getByLabel('New password again').fill(IDA_PASSWORD)
+    await change.getByRole('button', { name: 'Change password' }).click()
+  }
+  await expect(h1(page)).toHaveText('Connect to a database')
+  return page
+}
+const idaLastSeen = () =>
+  storeQuery<{ t: number }>(server, "SELECT MAX(last_seen_at) AS t FROM sessions WHERE user_id = (SELECT id FROM users WHERE username_key = 'ida')")?.[0]?.t ?? 0
+
+test('SCN-074 the idle warning opens two minutes before the limit; Stay signed in renews the session on the server', async ({ browser }) => {
+  test.setTimeout(240_000)
+  const page = await idaSession(browser, true)
+  const before = idaLastSeen()
+  // idle limit 3 minutes, warning at 1 minute of silence
+  const warning = dialog(page, 'Still there?')
+  await expect(warning).toBeVisible({ timeout: 100_000 })
+  await expect(warning.getByTestId('idle-remaining')).toHaveText(/You will be signed out in [12]:\d\d\./)
+  expect(idaLastSeen()).toBe(before) // looking at the limit does not extend it
+  await warning.getByRole('button', { name: 'Stay signed in' }).click()
+  await expect(warning).toBeHidden()
+  expect(idaLastSeen()).toBeGreaterThan(before)
+  await page.reload()
+  await expect(h1(page)).toHaveText('Connect to a database') // still signed in
+  await page.context().close()
+})
+
+test('SCN-074 without an answer the session ends: the neutral session-ended dialog replaces the warning', async ({ browser }) => {
+  const ctx = await browser.newContext()
+  const page = await ctx.newPage()
+  await page.clock.install()
+  await openSignIn(page, server)
+  await fillSignIn(page, 'ida', IDA_PASSWORD)
+  await expect(h1(page)).toHaveText('Connect to a database')
+  await page.clock.fastForward('02:00') // into the last two minutes of the 3-minute limit as the page counts them
+  await expect(dialog(page, 'Still there?')).toBeVisible()
+  await page.clock.fastForward('02:00') // past the limit
+  await expect(dialog(page, 'Your session has ended')).toBeVisible()
+  await expect(dialog(page, 'Still there?')).toBeHidden()
+  await ctx.close()
+})

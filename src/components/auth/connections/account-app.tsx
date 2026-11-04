@@ -3,6 +3,7 @@ import { QueryClientProvider, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
 import { StepUpProvider } from '~/components/auth/account/step-up'
 import { IdleWarning } from '~/components/auth/idle-warning'
+import { SessionEndedDialog } from '~/components/session-ended-dialog'
 import { AppShell } from '~/components/shell/app-shell'
 import type { AccountSessionView } from '~/lib/auth/api'
 import { setCsrfToken } from '~/lib/csrf'
@@ -67,16 +68,20 @@ function AccountAppInner({
 
   if (!active) {
     return (
-      <ConnectionHome
-        isAdmin={isAdmin}
-        banner={session.banner}
-        maintenance={session.maintenance}
-        onSignOut={onSignOut}
-        onOpened={(info) => {
-          select(info.connectionId)
-          void router.invalidate()
-        }}
-      />
+      <>
+        {/* The picker needs the neutral dialog too: when the idle limit passes here the page must say so. */}
+        <SessionEndedDialog defaults={{ server: '', username: '' }} onSignedIn={() => undefined} onAccountSignIn={onSignOut} />
+        <ConnectionHome
+          isAdmin={isAdmin}
+          banner={session.banner}
+          maintenance={session.maintenance}
+          onSignOut={onSignOut}
+          onOpened={(info) => {
+            select(info.connectionId)
+            void router.invalidate()
+          }}
+        />
+      </>
     )
   }
 

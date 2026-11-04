@@ -83,7 +83,7 @@ export const getLoginPageInfo = createServerFn({ method: 'GET' })
     const site = store.accounts.getSite()
     const mode = site.loginMode ?? 'direct'
     // Direct and stateless installs have no stored settings: the notice comes from `DBLOOM_LOGIN_NOTICE`, and there is no maintenance mode.
-    if (mode !== 'account') return { mode, siteName: site.siteName ?? 'DBLoom', passwordEnabled: false, passkeyEnabled: false, autofocus: false, notice: computeSetting('loginNotice', undefined).effective as string }
+    if (mode !== 'account') return { mode, siteName: site.siteName ?? 'DBLoom', passwordEnabled: false, passkeyEnabled: false, autofocus: false, notice: computeSetting('loginNotice', undefined).effective as string, ...(mode === 'direct' ? { targets: getRuntime().config.allowedTargets, recall: computeSetting('loginRecall', undefined).effective === true } : {}) }
     const settings = getSignInServices().deps.settings.resolve()
     return {
       mode,

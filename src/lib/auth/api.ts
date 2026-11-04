@@ -67,6 +67,10 @@ export type LoginPageInfo = {
   notice?: string
   /** Maintenance mode (ST-218); absent in direct mode and in the mock layer until it has a flag. */
   maintenance?: MaintenanceView
+  /** Direct mode: the named servers (DBLOOM_DIRECT_TARGETS), offered as suggestions on the login form. */
+  targets?: string[]
+  /** Direct mode: DBLOOM_LOGIN_RECALL is on (ST-074): the form keeps the last server and user name in this browser. */
+  recall?: boolean
 }
 
 /** Account session as `getSessionInfo` returns it in account mode (vault, theme and language are part of it; the mock may omit them). */
@@ -86,7 +90,7 @@ export type DirectSessionView = {
 /** What the front page needs to decide between setup, login, the half-signed-in states and the app. */
 export type AuthBoot =
   | { kind: 'setup_pending' }
-  | { kind: 'direct'; session: DirectSessionView | null }
+  | { kind: 'direct'; session: DirectSessionView | null; info?: LoginPageInfo }
   | { kind: 'account'; info: LoginPageInfo; session: AccountSessionView | null }
 
 export type SetupStateResponse =
@@ -293,7 +297,7 @@ export function createServerAuthApi(): AuthApi {
         if (session) setCsrfToken(session.csrf)
         return { kind: 'account', info, session }
       }
-      return { kind: 'direct', session: raw && !('state' in raw) ? (raw as DirectSessionView) : null }
+      return { kind: 'direct', session: raw && !('state' in raw) ? (raw as DirectSessionView) : null, ...(info ? { info } : {}) }
     },
     getLoginPageInfo: () => call(authMod, 'getLoginPageInfo'),
     passwordSignIn: (input) => call(authMod, 'passwordSignIn', input),

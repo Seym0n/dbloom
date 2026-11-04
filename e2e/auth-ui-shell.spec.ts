@@ -63,12 +63,16 @@ test.describe('idle warning', () => {
     await expect(page.getByRole('dialog', { name: 'Your session has ended' })).toBeHidden()
   })
 
-  test('without an answer the session ends', async ({ page }) => {
+  test('without an answer the session ends, on the connection picker as well as in the shell', async ({ page }) => {
     await page.route(/_serverFn/, (route) => route.abort())
     await mockSetting(page, 'dbloom.authMock.idleMs', '4000')
-    await toShell(page)
+    // the picker is where a short limit runs out first: the neutral dialog must be there too
+    await openMock(page, 'login')
+    await signInAs(page, 'alice')
     await expect(page.getByRole('dialog', { name: 'Your session has ended' })).toBeVisible({ timeout: 15_000 })
     await expect(page.getByRole('dialog', { name: 'Still there?' })).toBeHidden()
+    await page.getByRole('button', { name: 'Sign in again' }).click()
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Sign in to DBLoom')
   })
 })
 

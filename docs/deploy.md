@@ -76,6 +76,7 @@ Edge and serverless hosting are not supported. Every topology prints its warning
 ## Behaviour to know
 
 - **Origin rule.** Every POST needs a matching `Origin` or `Sec-Fetch-Site: same-origin`. Scripts and `curl` against the API must send `Origin`.
+- **Direct mode login page.** The servers named in `DBLOOM_DIRECT_TARGETS` are offered as suggestions in the server field. With `DBLOOM_LOGIN_RECALL=true` the page also remembers the last server and user name in the browser (local storage, no password, no token) and fills them in again when that server is still on the list. Off by default; with it off the page reads and writes nothing.
 - **Cookies** are always `Secure` (the `__Host-` prefix needs it). `http://localhost` works in Chrome and Firefox, not in Safari. Sub-path deployment is not supported.
 - **Headers sent:** HSTS (https origin only, one year, no preload; see `DBLOOM_HSTS*`), nosniff, no-referrer, noindex, COOP, Permissions-Policy. CORS is off; `OPTIONS` answers 405. CSP is planned for the `hardening` module.
 - **Known deviations:** built files under `/assets/*` are served before the request gate (public build output); there is no slow-read protection.

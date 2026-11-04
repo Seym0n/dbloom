@@ -26,7 +26,7 @@ export function AuthHome({ boot, open }: { boot: HomeData; open: OpenSearch }) {
     case 'setup_pending':
       return null
     case 'direct':
-      return boot.session ? <AppShell session={boot.session} open={open} /> : <LoginPage />
+      return boot.session ? <AppShell session={boot.session} open={open} /> : <LoginPage info={boot.info} />
     case 'account': {
       const { session } = boot
       if (!session) return <AccountLogin info={boot.info} onSignedIn={() => router.invalidate()} />
