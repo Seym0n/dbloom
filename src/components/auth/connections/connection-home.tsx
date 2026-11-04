@@ -1,3 +1,5 @@
+import { ExposureBanner } from '~/components/auth/exposure/exposure-banner'
+import { InfoBanner, MaintenanceNotice } from '~/components/auth/settings/site-notices'
 import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { ArrowLeft } from 'lucide-react'
@@ -6,7 +8,7 @@ import { AuthFrame, AuthHeading } from '~/components/auth/auth-frame'
 import { TabList, panelId, tabId } from '~/components/auth/tab-list'
 import { Button } from '~/components/ui/button'
 import { Dialog } from '~/components/ui/dialog'
-import type { ConnectionInfo } from '~/server/auth/types'
+import type { ConnectionInfo, MaintenanceView } from '~/server/auth/types'
 import { ConnectPanel } from './connect-panel'
 import { ProfilesManager } from './profiles-manager'
 import { VaultPanel } from './vault-panel'
@@ -22,10 +24,21 @@ export function ManagePanel() {
 }
 
 /** The front page of a signed-in account without an open connection: replaces the "no connection yet" placeholder. */
-export function ConnectionHome({ onOpened, onSignOut, isAdmin }: { onOpened: (info: ConnectionInfo) => void; onSignOut: () => void; isAdmin: boolean }) {
+export function ConnectionHome({ onOpened, onSignOut, isAdmin, banner, maintenance }: { onOpened: (info: ConnectionInfo) => void; onSignOut: () => void; isAdmin: boolean; banner?: string; maintenance?: MaintenanceView }) {
   const [managing, setManaging] = useState(false)
   return (
     <AuthFrame wide>
+      {isAdmin && (
+        <div className="mb-4">
+          <ExposureBanner />
+        </div>
+      )}
+      {(banner || maintenance?.active) && (
+        <div className="mb-4 flex flex-col gap-3">
+          <MaintenanceNotice maintenance={maintenance} audience={isAdmin ? 'admin' : 'user'} />
+          <InfoBanner text={banner} />
+        </div>
+      )}
       {managing ? (
         <>
           <Button variant="ghost" className="-ml-2 mb-4" onClick={() => setManaging(false)}>
@@ -50,6 +63,16 @@ export function ConnectionHome({ onOpened, onSignOut, isAdmin }: { onOpened: (in
         {isAdmin && (
           <Link to="/admin/audit" className="press inline-flex h-8 items-center rounded-[var(--radius-control)] px-3 text-sm font-medium text-muted hover:bg-active hover:text-ink">
             {t('audit.nav')}
+          </Link>
+        )}
+        {isAdmin && (
+          <Link to="/admin/exposure" className="press inline-flex h-8 items-center rounded-[var(--radius-control)] px-3 text-sm font-medium text-muted hover:bg-active hover:text-ink">
+            {t('exposure.nav')}
+          </Link>
+        )}
+        {isAdmin && (
+          <Link to="/admin/settings" className="press inline-flex h-8 items-center rounded-[var(--radius-control)] px-3 text-sm font-medium text-muted hover:bg-active hover:text-ink">
+            {t('settings.nav')}
           </Link>
         )}
         <Button variant="ghost" onClick={onSignOut}>

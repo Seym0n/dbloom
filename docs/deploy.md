@@ -102,13 +102,32 @@ Edge and serverless hosting are not supported. Every topology prints its warning
 - **Addresses in notices** follow `DBLOOM_AUDIT_ANONYMISE_IP`.
 - **Behind a proxy** the address is the one the proxy reports (`DBLOOM_TRUST_PROXY`); without a correct proxy setting every user looks like they come from the proxy and no new location is ever seen.
 
+## Exposure page
+
+- **What it shows.** `/admin/exposure` (administrators, account mode) lists the exposure report of the running process, the same lines and warnings as `docker exec <container> node .output/cli/dbloom.mjs exposure` for the same environment, marked "as at start". It adds warnings that depend on the running state: no second factor enforced, first-run setup still open, a failing external audit sink, and "administration pages are reachable from any address" (until the administration plane ships), and a status block with readiness, login mode, store state, schema version, version and audit sink status. No secret and no key value is shown.
+- **Banner.** On a non-loopback bind, administrators see a banner on the connection home and on the admin pages while any warning is unacknowledged. It never blocks use, and ordinary users never see it. On a loopback-only bind the warnings are listed but no banner is raised.
+- **Acknowledging.** An administrator can acknowledge a warning on the page. This is recorded as `exposure.ack` in the audit log (and refused when the audit log cannot be written). The acknowledgement lasts until the next restart; the warning then shows again. It never hides the warning from the page.
+- **Readiness detail.** `/api/ready` returns its detail body (state, mode, store, version) to loopback peers and to a request carrying a valid administrator session cookie; every other caller gets the fixed `{"ready":...}` body.
+
+## Settings and maintenance mode
+
+- **The page.** `/admin/settings` (administrators, account mode) lists the 36 account-mode settings with the value in effect, where it comes from (built-in default, operator default from `.env`, set on the page, or limited by the operator), the allowed range and the stored value when it differs. Direct and stateless installs have no settings page. Settings that only the environment can set (for example the authenticator code tolerance and the hashing cost) are listed read-only.
+- **Limits.** Each setting has a lowest and highest value fixed in the program. A value outside them is refused, never cut to fit. A few settings take their limit from the environment: the required second-factor scope and roles (a floor the page cannot lower), the grace period (a ceiling), and the allowed second factors and sign-in credentials (the page can only narrow the list). For every other setting the environment variable is the default.
+- **Locks.** `DBLOOM_SETTINGS_LOCK` (comma separated setting names, for example `mfaScope,loginFailures`) fixes those settings at their environment value or default: the page shows them read-only and a stored value is ignored. An unknown name refuses start. The names are the ones `dbloom settings list` prints.
+- **Changing a setting.** Every change needs a recent second factor and writes an audit row (`settings.change`, `settings.reset`) with the old and the new value **before** the value is stored. When the audit row cannot be written, nothing is changed and the page says so. Two administrators editing the same setting: the second save is refused and the page shows the value that is stored now. A stored value that falls outside a limit that was tightened later is applied clamped and noted once in the audit log (`settings.clamped`); the stored value is not rewritten and the page shows both.
+- **Narrowing.** Before the allowed second factors or sign-in credentials are narrowed, the page asks the server how many active users would be left with no allowed option. A count above zero refuses the change.
+- **Sign-in notice and banner.** The notice (at most 300 characters) is shown above the sign-in form to everyone; the banner (at most 500) after sign-in. Both are plain text: markup is shown as typed. `DBLOOM_LOGIN_NOTICE` sets the default of the notice and is the only source in direct mode; the banner exists in account mode only.
+- **Maintenance mode.** Switched on from the page (optionally with an end time), it refuses every non-administrator: sign-in is refused after the password or passkey proved the user, and every server function and download answers "maintenance". Sessions that are already open are kept, only blocked. Administrators and the command line are exempt, and `/api/health` and `/api/ready` are not affected. The end time is checked on every request, so it ends by itself even across a restart. `DBLOOM_MAINTENANCE=true` forces it on and the page cannot switch it off. Schema changes need no switch: a migration runs before the server starts listening. Maintenance mode does not exist in direct mode.
+- **Getting back in.** On the host, `dbloom settings list` prints every setting with its source and lock; `dbloom settings reset <key>` removes a stored value (the same limits and locks apply, no step-up, audited as `cli`); `dbloom maintenance off` removes the stored switch. A running server picks a change made from the command line up within a few seconds.
+- **Not on the page yet.** The settings of target policy, import and export, history and display (SPEC/12 sections 3.3 to 3.5) are still read from the environment only; they move to the page when their modules read them through the settings resolver (`SPEC/FUTURE.md`, FU-settings-ext).
+
 ## Backup, upgrade, rollback
 
 - **Back up the `/data` volume and the server key.** The store holds users, factors and encrypted profiles; the key (`DBLOOM_SECRET_KEY` or the file in `DBLOOM_SECRET_KEY_FILE`) lives outside the volume on purpose. Without the key, TOTP secrets and recovery codes in a backup are unusable; with the volume alone, nobody can read them. Store them in different places.
 - **Rotate the server key:** set the new key as `DBLOOM_SECRET_KEY` and the old one as `DBLOOM_SECRET_KEY_PREVIOUS`, restart, run `node .output/cli/dbloom.mjs rotate-secret`, then remove the previous key.
 - **Upgrade:** build or pull the new image and redeploy. Take a volume backup first.
 - **Rollback:** redeploy the previous image. If a newer version changed the store, restore the pre-upgrade backup instead; whether an older version can open a newer store is not tested.
-- **Container commands** (run as the app user, `docker exec <container> node .output/cli/dbloom.mjs <command>`): `setup-token`, `recover <user>`, `sessions revoke <user>`, `rotate-secret`, `exposure`, `audit export`.
+- **Container commands** (run as the app user, `docker exec <container> node .output/cli/dbloom.mjs <command>`): `setup-token`, `recover <user>`, `sessions revoke <user>`, `rotate-secret`, `exposure`, `audit export`, `settings list`, `settings reset <key>`, `maintenance off`.
 
 ## Variable reference
 
@@ -149,6 +168,10 @@ Generated from `src/server/env-registry.ts` by `node scripts/gen-env-docs.mjs`; 
 | `DBLOOM_NOTICE_LOCATION_DAYS` | int (7 to 365) | `90` | Days an account remembers the networks (/24 IPv4, /48 IPv6) it signed in from; a sign-in from another network raises a notice to administrators. |
 | **Audit** | | | |
 | `DBLOOM_AUDIT_RETENTION_DAYS` | int (90 to 1095) | `365` | Days the audit log keeps rows; older rows are purged daily (the purge is itself audited). |
+| **Settings** | | | |
+| `DBLOOM_SETTINGS_LOCK` | list |  | Setting keys (e.g. mfaScope,loginFailures) the settings page shows read-only at their `.env` value or default; a stored value is ignored. An unknown key refuses startup. |
+| `DBLOOM_MAINTENANCE` | bool | `false` | Maintenance mode forced on: users are refused, administrators and the CLI are not. The settings page cannot switch it off. |
+| `DBLOOM_LOGIN_NOTICE` | string |  | Plain text shown above the sign-in form (at most 300 characters, no control characters). Default of the setting; the page may override it. |
 | **Targets** | | | |
 | `DBLOOM_DIRECT_TARGETS` | list |  | Direct mode: servers users may connect to, host:port list (SEC-TGT-018). |
 | `DBLOOM_DIRECT_FREE_FORM_ACK` | bool | `false` | Direct mode: accept free-form targets (only behind other protections). |

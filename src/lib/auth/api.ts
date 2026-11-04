@@ -19,11 +19,14 @@ import { createMockAuthApi } from './mock-api'
 import type { AuditFilter, AuditRow, OwnAuditRow, Page } from '~/server/audit/query'
 import type { AuditStatus } from '~/server/audit/service'
 import type { ExportFormat } from '~/server/audit/formats'
+import type { ExposureAnswer } from '~/server/exposure-service'
+import type { PreviewAnswer, SettingsAnswer, SettingsView } from '~/server/settings-service'
 import type {
   AccountSessionInfo,
   ConnectionInfo,
   InviteInfo,
   LoginMode,
+  MaintenanceView,
   MfaMethod,
   OpenConnectionInput,
   PasskeyInfo,
@@ -58,6 +61,10 @@ export type LoginPageInfo = {
   passwordEnabled: boolean
   passkeyEnabled: boolean
   autofocus: boolean
+  /** Login notice (ST-216): plain text above the sign-in form; empty or absent = none. */
+  notice?: string
+  /** Maintenance mode (ST-218); absent in direct mode and in the mock layer until it has a flag. */
+  maintenance?: MaintenanceView
 }
 
 /** Account session as `getSessionInfo` returns it in account mode (vault, theme and language are part of it; the mock may omit them). */
@@ -163,6 +170,16 @@ export interface AuthApi {
   getAuditStatus(): Promise<AuditStatus>
   startAuditExport(input: AuditFilter & { format: ExportFormat }): Promise<{ token: string; rows: number; truncated: boolean; filename: string }>
 
+  // ---- exposure page (SPEC/31) ----------------------------------------------------------------------------
+  getExposure(): Promise<ExposureAnswer>
+  acknowledgeExposure(id: string): Promise<{ ok: true }>
+
+  // ---- settings page (SPEC/32); a refusal of the write is an answer `{ ok: false, error }`, not a thrown error ----
+  getSettings(): Promise<SettingsView>
+  previewSetting(key: string, value: unknown): Promise<PreviewAnswer>
+  setSetting(key: string, value: unknown, basedOn: number | null): Promise<SettingsAnswer>
+  resetSetting(key: string, basedOn: number | null): Promise<SettingsAnswer>
+
   // ---- invites and recovery (FR-AUT-015, 016) ------------------------------------------------------------
   issueInvite(input: { role: Role; lifetimeMs?: number }): Promise<{ link: string; expiresAt: number }>
   listInvites(): Promise<InviteInfo[]>
@@ -216,6 +233,8 @@ const inviteMod = () => import('~/server/auth/invites.functions') as Promise<Mod
 const recoveryMod = () => import('~/server/auth/recovery.functions') as Promise<Mod>
 const accountMod = () => import('~/server/account.functions') as Promise<Mod>
 const prefsMod = () => import('~/server/prefs.functions') as Promise<Mod>
+const exposureMod = () => import('~/server/exposure.functions') as Promise<Mod>
+const settingsMod = () => import('~/server/settings.functions') as Promise<Mod>
 const auditMod = () => import('~/server/audit.functions') as Promise<Mod>
 const sessionMod = () => import('~/server/session.functions') as Promise<Mod>
 
@@ -297,6 +316,14 @@ export function createServerAuthApi(): AuthApi {
     listOwnAuditEvents: (input) => call(auditMod, 'listOwnAuditEvents', input),
     getAuditStatus: () => call(auditMod, 'getAuditStatus', empty),
     startAuditExport: (input) => call(auditMod, 'startAuditExport', input),
+
+    getExposure: () => call(exposureMod, 'getExposure', empty),
+    acknowledgeExposure: (id) => call(exposureMod, 'acknowledgeExposure', { id }),
+
+    getSettings: () => call(settingsMod, 'getSettings', empty),
+    previewSetting: (key, value) => call(settingsMod, 'previewSetting', { key, value }),
+    setSetting: (key, value, basedOn) => call(settingsMod, 'setSetting', { key, value, basedOn }),
+    resetSetting: (key, basedOn) => call(settingsMod, 'resetSetting', { key, basedOn }),
 
     issueInvite: (input) => call(inviteMod, 'issueInvite', input),
     listInvites: () => call(inviteMod, 'listInvites', empty),

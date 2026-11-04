@@ -172,3 +172,26 @@ Ideas that were discussed and deliberately postponed. They are **not requirement
 
 **Related:** `27-module-server.md` FR-SVR-010.
 
+## FU-settings-ext: settings of target policy, io, history and display on the settings page
+
+**Idea:** Register the remaining "UI within ENV bounds" rows of `12-settings.md` (sections 3.3 to 3.5: target allow and deny, timeouts, row caps, upload and export limits, history, version check, language) in the settings registry so the page edits them.
+
+**Why deferred:** Their consumers read the environment (`Config`) directly, so a stored value would change nothing. Each owning module must first read its value through the settings resolver; the registry and page then take the key with no change (owner decision 2026-11-03, `32-module-admin-settings.md` Q1).
+
+**Related:** `32-module-admin-settings.md`, `12-settings.md` ST-101 to ST-164, ST-209 to ST-215.
+
+## FU-settings-transfer: settings export and import (ST-220)
+
+**Idea:** Export the settings as versioned JSON and import them again, each key validated against the same limits, one audit entry per key, no step-up bypass.
+
+**Why deferred:** Not needed for the first administrator release (`32-module-admin-settings.md` section 9).
+
+**Related:** `12-settings.md` ST-220.
+
+## FU-settings-per-key-limits: operator limits per setting
+
+**Idea:** Environment variables that set the lowest and highest value of a single setting (SEC-TGT-142 as written), beyond the fixed bounds and the lock list.
+
+**Why deferred:** Owner decision 2026-11-03 (`32-module-admin-settings.md` Q2): about 70 more variables for little gain; `DBLOOM_SETTINGS_LOCK` is the operator's fence.
+
+**Related:** `32-module-admin-settings.md`, `12-settings.md` section 2.

@@ -16,6 +16,7 @@ import type {
   RegistrationResponseJSON,
 } from '@simplewebauthn/server'
 import type { TlsMode } from '../config'
+import type { SettingGroup, SettingKind, SettingUnit } from './setting-meta'
 import type { TargetPool } from '../db/target-pool'
 import type { LiveSession } from '../sessions'
 import type { SessionRecord, Store } from '../store/store'
@@ -115,7 +116,7 @@ export type { TlsMode } from '../config'
 export const TLS_MODES = ['verify', 'skip-verify', 'off'] as const satisfies readonly TlsMode[]
 
 /** Host CLI commands (FR-AUT-030). */
-export const CLI_COMMANDS = ['setup-token', 'recover', 'sessions revoke', 'rotate-secret'] as const
+export const CLI_COMMANDS = ['setup-token', 'recover', 'sessions revoke', 'rotate-secret', 'settings list', 'settings reset', 'maintenance off'] as const
 export type CliCommand = (typeof CLI_COMMANDS)[number]
 
 // ---- Names, cookies, headers, environment ------------------------------------------------------------------
@@ -186,6 +187,9 @@ export const AUTH_ENV = {
   denyRootTarget: 'DBLOOM_DENY_ROOT_TARGET',
   loginRecall: 'DBLOOM_LOGIN_RECALL',
   stepUpMinutes: 'DBLOOM_STEPUP_MINUTES',
+  settingsLock: 'DBLOOM_SETTINGS_LOCK',
+  maintenance: 'DBLOOM_MAINTENANCE',
+  loginNotice: 'DBLOOM_LOGIN_NOTICE',
 } as const
 
 // ---- Limits (fixed in code; section 5.4, 5.8, ST-059, 064, 082, 088) ------------------------------------------
@@ -429,6 +433,7 @@ export const AUTH_ERROR_CODES = [
   'profile_limit',
   'target_policy',
   'setup_pending',
+  'maintenance',
 ] as const
 export type AuthErrorCode = (typeof AUTH_ERROR_CODES)[number]
 
@@ -687,7 +692,14 @@ export type AccountSessionInfo = {
   idleExpiresAt: number
   absoluteExpiresAt: number
   stepUpUntil: number | null
+  /** Information banner (ST-219), full sessions only; absent or empty = none. */
+  banner?: string
+  /** Maintenance mode (ST-218) as users see it; administrators are exempt but are told. */
+  maintenance?: MaintenanceView
 }
+
+/** `active` = users are refused now; `endsAt` = epoch ms of the announced end, null when open ended or forced by `.env`. */
+export type MaintenanceView = { active: boolean; endsAt: number | null }
 
 // ---- Setup state (FR-AUT-001 to 003) ------------------------------------------------------------------------
 
@@ -736,6 +748,14 @@ export type SettingSpec<T> = {
 }
 
 const ms = z.number().int().min(0)
+export const LOGIN_NOTICE_MAX = 300
+export const INFO_BANNER_MAX = 500
+/** Plain text of a site setting: length-limited, no control characters (a newline only where `multiline`). */
+const siteText = (max: number, multiline: boolean) =>
+  z
+    .string()
+    .max(max)
+    .refine((s) => !(multiline ? /[\u0000-\u0009\u000b-\u001f\u007f]/ : /[\u0000-\u001f\u007f]/).test(s), 'control characters')
 const roleList = z.array(z.enum(ROLES)).max(ROLES.length)
 const factorList = z.array(z.enum(FACTOR_KINDS)).min(1).max(FACTOR_KINDS.length)
 const primaryList = z.array(z.enum(PRIMARY_CREDENTIALS)).min(1).max(PRIMARY_CREDENTIALS.length)
@@ -882,6 +902,14 @@ export const AUTH_SETTINGS = {
   noticeBurstMinutes: { st: 'ST-207', source: 'ui_within_env', env: AUTH_ENV.noticeBurstMinutes, envUnit: 1, floor: 1, default: 10, ceiling: 60, schema: z.number().int().min(1).max(60) },
   noticeLocationDays: { st: 'ST-207', source: 'ui_within_env', env: AUTH_ENV.noticeLocationDays, envUnit: 1, floor: 7, default: 90, ceiling: 365, schema: z.number().int().min(7).max(365) },
   stepUpWindowMs: { st: 'ST-034', source: 'env', env: AUTH_ENV.stepUpMinutes, floor: 1 * MINUTE_MS, default: STEPUP_WINDOW_DEFAULT_MS, ceiling: 15 * MINUTE_MS, schema: ms },
+  /** ST-216: plain text above the sign-in form. `.env` value is the default (and the only source in direct mode). */
+  loginNotice: { st: 'ST-216', source: 'ui_within_env', env: AUTH_ENV.loginNotice, default: '', ceiling: LOGIN_NOTICE_MAX, schema: siteText(LOGIN_NOTICE_MAX, false) },
+  /** ST-219: plain text banner for signed-in users (newlines allowed). */
+  infoBanner: { st: 'ST-219', source: 'ui_within_env', default: '', ceiling: INFO_BANNER_MAX, schema: siteText(INFO_BANNER_MAX, true) },
+  /** ST-218: `DBLOOM_MAINTENANCE` truthy forces it on; the UI can only switch it on or off when it is not forced. */
+  maintenanceOn: { st: 'ST-218', source: 'ui_within_env', env: AUTH_ENV.maintenance, default: false, schema: z.boolean() },
+  /** ST-218: absolute end time in epoch milliseconds, 0 = none. */
+  maintenanceEndsAt: { st: 'ST-218', source: 'ui_within_env', floor: 0, default: 0, schema: z.number().int().min(0) },
 } as const satisfies Record<string, SettingSpec<unknown>>
 
 export type AuthSettingKey = keyof typeof AUTH_SETTINGS
@@ -907,6 +935,33 @@ export const SETUP_SITE_SETTING_KEYS = [
   'loginAutofocus',
 ] as const satisfies readonly AuthSettingKey[]
 export type SetupSiteSettingKey = (typeof SETUP_SITE_SETTING_KEYS)[number]
+
+/** Where the effective value of a key comes from, as the settings page names it (SEC-TGT-150). */
+export type SettingSourceLabel = 'limit' | 'ui_override' | 'env_default' | 'built_in'
+/** A setting value as it travels to the page: plain JSON. */
+export type SettingValue = string | number | boolean | null | SettingValue[] | { [key: string]: SettingValue }
+export type SettingDescription = {
+  key: AuthSettingKey
+  st: string
+  group: SettingGroup
+  kind: SettingKind
+  unit: SettingUnit
+  factor: number
+  choices?: readonly string[]
+  /** Stored value as saved, or null when none (or it no longer parses: then `storedIgnored`). */
+  stored: SettingValue
+  storedIgnored: boolean
+  effective: SettingValue
+  source: SettingSourceLabel
+  limits: { floor?: SettingValue; ceiling?: SettingValue; envelope?: SettingValue[] }
+  /** `DBLOOM_SETTINGS_LOCK` names the key: shown read-only at its `.env` value. */
+  locked: boolean
+  /** `.env` forces the value on (maintenance mode): the UI cannot lower it. */
+  forced: boolean
+  editable: boolean
+  updatedAt: number | null
+  updatedBy: string | null
+}
 
 /** Effective values (`resolveAuthSettings()`), plus the `.env`-only values that are not in the table. */
 export type ResolvedAuthSettings = { [K in AuthSettingKey]: z.infer<(typeof AUTH_SETTINGS)[K]['schema']> } & {
@@ -1205,6 +1260,7 @@ export const AUTH_SERVER_FUNCTIONS = {
     'dismissNotice',
   ],
   audit: ['listAuditEvents', 'listOwnAuditEvents', 'getAuditStatus', 'startAuditExport'],
+  exposure: ['getExposure', 'acknowledgeExposure'],
   users: ['listUsers', 'createUser', 'setUserStatus', 'setUserRole', 'deleteUser', 'revokeUserSessions'],
   invites: ['issueInvite', 'listInvites', 'revokeInvite', 'invitePasskeyOptions', 'redeemInvite', 'issueRecovery', 'recoveryPasskeyOptions', 'redeemRecovery'],
   connections: ['listConnections', 'openConnection', 'closeConnection'],
@@ -1368,6 +1424,8 @@ export interface AccountStore {
   setSite(values: Partial<SiteState>): void
   getSettings(): SettingRow[]
   setSetting(row: SettingRow): void
+  /** Removes the stored value of a key (reset to the default); true when a row existed. */
+  deleteSetting(key: AuthSettingKey): boolean
 
   // users
   createUser(user: User): void
@@ -1458,6 +1516,8 @@ export const SESSIONS_NEW_COLUMNS = ['kind', 'user_id', 'state', 'mfa_at', 'step
 export interface AuthSettingsResolver {
   /** Precedence of SEC-TGT-150: `.env` limits, stored value, `.env` default, built-in default; clamped on read. */
   resolve(): ResolvedAuthSettings
+  /** Stored, effective, source, limits, lock and editability of every key the page lists (SPEC/32 FR-ASE-001). */
+  describe(): SettingDescription[]
   /** Wizard step 3 and the admin module; validated and clamped before writing. */
   write(values: Partial<Pick<ResolvedAuthSettings, SetupSiteSettingKey>>, by: string): void
 }

@@ -3,6 +3,7 @@ import { createMiddleware } from '@tanstack/react-start'
 import { getCookie, getRequestHeader } from '@tanstack/react-start/server'
 import { CSRF_HEADER, SESSION_ENDED } from '~/lib/csrf'
 import { csrfClientMiddleware, sameOriginMiddleware, setupGateMiddleware, SESSION_COOKIE } from './middleware'
+import { assertNotInMaintenance } from './maintenance'
 import { getRuntime } from './runtime'
 import { isStateless, ownerKeyOf } from './sql/state'
 import { getPrefsService } from './auth/prefs/runtime'
@@ -33,6 +34,7 @@ const prefsMiddleware = createMiddleware({ type: 'function' })
     const account = sessions.resolveAccount(token, { background: false })
     if (account) {
       if (!sessions.verifyCsrf(account, presented) || account.state !== 'full') throw new Error(SESSION_ENDED)
+      assertNotInMaintenance(getRuntime(), account.user)
       const ctx: PrefsContext = { ownerKey: stateless ? account.idHash : account.ownerKey, user: account.user, stateless }
       return next({ context: { prefs: ctx } })
     }

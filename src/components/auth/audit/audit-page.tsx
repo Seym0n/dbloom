@@ -4,6 +4,8 @@ import { Link } from '@tanstack/react-router'
 import { ArrowLeft, Download } from 'lucide-react'
 import { t } from '~/i18n'
 import { BrandName } from '~/components/brand'
+import { ExposureBanner } from '~/components/auth/exposure/exposure-banner'
+import { SiteNotices } from '~/components/auth/settings/site-notices'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { Select } from '~/components/ui/select'
@@ -56,6 +58,8 @@ export function AuditPage({ mode, initialActor }: { mode: 'account' | 'direct'; 
               <p className="max-w-[60ch] text-sm text-muted">{t('audit.lead')}</p>
             </div>
           </header>
+          {mode === 'account' && <ExposureBanner />}
+          {mode === 'account' && <SiteNotices />}
           {mode === 'direct' ? <DirectNotice /> : <AuditLog {...(initialActor ? { initialActor } : {})} />}
         </div>
       </main>

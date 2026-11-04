@@ -8,6 +8,8 @@ import { clientHintOf, PRE_AUTH_MAX_AGE_SECONDS } from './auth/signin'
 import { throwAuthError } from './auth/error-transport'
 import { getSignInServices } from './auth/signin-runtime'
 import { getSecurityServices } from './auth/security-runtime'
+import { computeSetting } from './auth/settings'
+import { maintenanceView } from './maintenance'
 import {
   AuthError,
   PRE_AUTH_COOKIE,
@@ -80,7 +82,8 @@ export const getLoginPageInfo = createServerFn({ method: 'GET' })
     const { store } = getRuntime()
     const site = store.accounts.getSite()
     const mode = site.loginMode ?? 'direct'
-    if (mode !== 'account') return { mode, siteName: site.siteName ?? 'DBLoom', passwordEnabled: false, passkeyEnabled: false, autofocus: false }
+    // Direct and stateless installs have no stored settings: the notice comes from `DBLOOM_LOGIN_NOTICE`, and there is no maintenance mode.
+    if (mode !== 'account') return { mode, siteName: site.siteName ?? 'DBLoom', passwordEnabled: false, passkeyEnabled: false, autofocus: false, notice: computeSetting('loginNotice', undefined).effective as string }
     const settings = getSignInServices().deps.settings.resolve()
     return {
       mode,
@@ -88,6 +91,8 @@ export const getLoginPageInfo = createServerFn({ method: 'GET' })
       passwordEnabled: settings.primaryCredentials.includes('password'),
       passkeyEnabled: settings.primaryCredentials.includes('passkey') && settings.mfaFactors.includes('passkey'),
       autofocus: settings.loginAutofocus,
+      notice: settings.loginNotice,
+      maintenance: maintenanceView(settings, process.env, Date.now()),
     }
   })
 

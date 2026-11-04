@@ -6,6 +6,7 @@ import { appearanceOf } from './auth/prefs/runtime'
 import { ownerKeyOf } from './sql/state'
 import type { Runtime } from './runtime'
 import { loginModeOf } from './session-context'
+import { maintenanceView } from './maintenance'
 import type { AccountContext, AccountSessionInfo, ConnectionInfo, ResolvedAuthSettings, VaultStatus } from './auth/types'
 import type { PrefsServiceExt } from './auth/prefs/service'
 
@@ -22,7 +23,10 @@ export type SessionInfoResult = DirectSessionInfo | AccountSessionInfo
 export type SessionInfoDeps = {
   runtime: Pick<Runtime, 'sessions' | 'config' | 'store' | 'setup'>
   token: string | undefined
-  settings: () => Pick<ResolvedAuthSettings, 'adminSessionIdleMs' | 'stepUpWindowMs'>
+  settings: () => Pick<ResolvedAuthSettings, 'adminSessionIdleMs' | 'stepUpWindowMs' | 'infoBanner' | 'maintenanceOn' | 'maintenanceEndsAt'>
+  /** Clock and environment of the maintenance rule; default the real ones. */
+  now?: () => number
+  env?: NodeJS.ProcessEnv
   prefs: (stateless: boolean) => Pick<PrefsServiceExt, 'get'>
   stateless: boolean
   connections: (ctx: AccountContext) => ConnectionInfo[]
@@ -53,6 +57,9 @@ export function buildSessionInfo(d: SessionInfoDeps): SessionInfoResult | null {
       idleExpiresAt: row.lastSeenAt + idleMs,
       absoluteExpiresAt: row.expiresAt,
       stepUpUntil: context.stepupAt === null ? null : context.stepupAt + settings.stepUpWindowMs,
+      maintenance: maintenanceView(settings, d.env ?? process.env, (d.now ?? Date.now)()),
+      // The information banner (ST-219) is for signed-in users only, never before the second factor.
+      ...(full && settings.infoBanner ? { banner: settings.infoBanner } : {}),
     }
   }
   const session = sessions.resolve(d.token)

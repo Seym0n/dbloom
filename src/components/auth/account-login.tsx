@@ -10,6 +10,7 @@ import { authenticateWithPasskey, usePasskeysSupported } from '~/lib/auth/webaut
 import { setCsrfToken } from '~/lib/csrf'
 import { AuthFrame, AuthHeading, ErrorNote, FormField } from './auth-frame'
 import { PasswordField } from './password-field'
+import { LoginNotices } from './settings/site-notices'
 
 /**
  * Account-mode sign-in (FR-AUT-006, 007, 026). Every failure shows the same fixed text; a throttle shows a countdown.
@@ -57,6 +58,7 @@ export function AccountLogin({ info, onSignedIn }: { info: LoginPageInfo; onSign
   return (
     <AuthFrame>
       <AuthHeading title={t('auth.login.title', { site: info.siteName })} lead={t('auth.login.lead')} />
+      <LoginNotices notice={info.notice} maintenance={info.maintenance} />
       <div className="flex flex-col gap-4">
         {info.passwordEnabled && (
           <form onSubmit={submit} className="flex flex-col gap-4" noValidate>

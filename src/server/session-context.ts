@@ -9,11 +9,12 @@
  */
 import type { TargetPool } from './db/target-pool'
 import { getAccountServices } from './auth/account-runtime'
+import { assertNotInMaintenance } from './maintenance'
 import type { Runtime } from './runtime'
 import type { LiveSession } from './sessions'
 import { AuthError, STATE_ALLOWED_FUNCTIONS, type AccountContext, type AccountLiveSession, type LoginMode, type SessionState } from './auth/types'
 
-export type SessionContextRuntime = Pick<Runtime, 'sessions'> & Partial<Pick<Runtime, 'setup'>>
+export type SessionContextRuntime = Pick<Runtime, 'sessions'> & Partial<Pick<Runtime, 'setup' | 'settings'>>
 /** Resolved target session; `sessionIdHash` is the real session id hash (`idHash` is the scope key). */
 export type TargetSession = AccountLiveSession & { sessionIdHash: string }
 
@@ -52,6 +53,8 @@ export async function resolveTargetSession(
   }
   const resolved = sessions.resolveTarget(input.token, input.connectionId, { background: input.background })
   if (!resolved || (input.requireCsrf !== false && !sessions.verifyCsrf(resolved, input.csrf))) return undefined
+  // Maintenance mode (ST-218): throws `maintenance` for a user; raw routes turn it into their neutral refusal.
+  assertNotInMaintenance(runtime, resolved.user)
   let pool = resolved.pool
   if (poolIsClosed(pool)) {
     try {

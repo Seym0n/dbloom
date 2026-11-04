@@ -76,6 +76,10 @@ export const AUDIT_EVENTS = [
   'audit.purge',
   'audit.export',
   'audit.sink',
+  'exposure.ack',
+  // the settings editor (SPEC/32); `settings.clamped` is in the auth-account list above
+  'settings.change',
+  'settings.reset',
 ] as const
 
 export type AuditEventName = (typeof AUDIT_EVENTS)[number]

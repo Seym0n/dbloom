@@ -65,6 +65,10 @@ export const ENV_VARS: readonly EnvVar[] = [
   v(C, 'Notices', 'DBLOOM_NOTICE_LOCATION_DAYS', 'int', '90', 'Days an account remembers the networks (/24 IPv4, /48 IPv6) it signed in from; a sign-in from another network raises a notice to administrators.', { min: 7, max: 365 }),
   v(C, 'Audit', 'DBLOOM_AUDIT_RETENTION_DAYS', 'int', '365', 'Days the audit log keeps rows; older rows are purged daily (the purge is itself audited).', { min: 90, max: 1095 }),
 
+  v(C, 'Settings', 'DBLOOM_SETTINGS_LOCK', 'list', '', 'Setting keys (e.g. mfaScope,loginFailures) the settings page shows read-only at their `.env` value or default; a stored value is ignored. An unknown key refuses startup.'),
+  v('auth', 'Settings', 'DBLOOM_MAINTENANCE', 'bool', 'false', 'Maintenance mode forced on: users are refused, administrators and the CLI are not. The settings page cannot switch it off.'),
+  v('auth', 'Settings', 'DBLOOM_LOGIN_NOTICE', 'string', '', 'Plain text shown above the sign-in form (at most 300 characters, no control characters). Default of the setting; the page may override it.'),
+
   v(C, 'Targets', 'DBLOOM_DIRECT_TARGETS', 'list', '', 'Direct mode: servers users may connect to, host:port list (SEC-TGT-018).'),
   v(C, 'Targets', 'DBLOOM_DIRECT_FREE_FORM_ACK', 'bool', 'false', 'Direct mode: accept free-form targets (only behind other protections).'),
   v(C, 'Targets', 'DBLOOM_ALLOW_LOOPBACK', 'bool', 'false', 'Allow loopback target addresses (SEC-TGT-030).'),

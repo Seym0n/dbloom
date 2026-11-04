@@ -133,6 +133,7 @@
   "auth.error.target_policy.root_denied": "Signing in as the database user root is not allowed on this server.",
   "auth.error.target_policy.empty_password": "Signing in with an empty database password is not allowed on this server.",
   "auth.error.setup_pending": "Setup is not finished yet.",
+  "auth.error.maintenance": "DBLoom is in maintenance mode. Try again later.",
   "auth.error.session_ended": "Your session has ended. Sign in again.",
   "auth.error.gone": "Setup is already complete.",
   "auth.error.setup_session": "The setup session expired. Enter the setup token again.",

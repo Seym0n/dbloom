@@ -69,6 +69,8 @@ function AccountAppInner({
     return (
       <ConnectionHome
         isAdmin={isAdmin}
+        banner={session.banner}
+        maintenance={session.maintenance}
         onSignOut={onSignOut}
         onOpened={(info) => {
           select(info.connectionId)

@@ -15,6 +15,8 @@ import { allowedUserActions, sortUsers } from '~/lib/auth/connections-logic'
 import { describeError } from '~/lib/auth/messages'
 import { useAction } from '~/lib/auth/use-action'
 import type { InviteInfo, Role, UserSummary } from '~/server/auth/types'
+import { ExposureBanner } from '~/components/auth/exposure/exposure-banner'
+import { SiteNotices } from '~/components/auth/settings/site-notices'
 import { NoticesPanel } from './notices-panel'
 import { CreateUserDialog, formatWhen, InviteDialog, LinkShownDialog, RoleSelect } from './user-dialogs'
 
@@ -43,6 +45,8 @@ export function UsersPage({ meId }: { meId: string | undefined }) {
               <p className="max-w-[60ch] text-sm text-muted">{t('auth.users.lead')}</p>
             </div>
           </header>
+          <ExposureBanner />
+          <SiteNotices />
           <UsersSection meId={meId} />
           <NoticesPanel />
           <InvitesSection />

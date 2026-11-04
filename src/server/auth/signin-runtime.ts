@@ -10,7 +10,9 @@ import { lazyBreachedList } from './breached'
 import { createPasswordService } from './password'
 import { createSignInService, type SignInDeps } from './signin'
 import { createStepUp } from './stepup'
-import { createAuthSettingsResolver } from './settings'
+import { auditSettingClamp, createAuthSettingsResolver } from './settings'
+import { onSettingsChanged } from '../settings-runtime'
+import { maintenanceBlocks, maintenanceView } from '../maintenance'
 import { OwnTotp } from './totp'
 import { getPrefsService } from './prefs/runtime'
 import { createUserService } from './users'
@@ -31,15 +33,17 @@ export function getSignInServices(): SignInServices {
   if (services) return services
   const runtime = getRuntime()
   const store = runtime.store.accounts
-  const resolver = createAuthSettingsResolver(store)
+  const resolver = createAuthSettingsResolver(store, process.env, { onClamp: auditSettingClamp })
   // Settings are re-read on a short cache; the limiter takes the values it has at start (a change applies on restart).
   let cached: { at: number; value: ReturnType<typeof resolver.resolve> } | undefined
+  onSettingsChanged(() => (cached = undefined))
   const settings = {
     resolve() {
       const now = Date.now()
       if (!cached || now - cached.at > 5_000) cached = { at: now, value: resolver.resolve() }
       return cached.value
     },
+    describe: resolver.describe,
     write: resolver.write,
   }
   const loaded = loadSecretKey(process.env)
@@ -62,6 +66,7 @@ export function getSignInServices(): SignInServices {
     totp: new OwnTotp(),
     codes: createRecoveryCodeService(loaded.ring),
     ring: loaded.ring,
+    maintenanceBlocks: (user) => maintenanceBlocks(maintenanceView(settings.resolve(), process.env, Date.now()), user),
     challenges,
     webauthn: createWebAuthnService({
       challenges,

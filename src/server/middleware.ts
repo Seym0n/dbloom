@@ -3,6 +3,7 @@ import { getCookie, getRequestHeader, setResponseHeader } from '@tanstack/react-
 import { CONNECTION_HEADER, CSRF_HEADER, SESSION_ENDED, getConnectionId, getCsrfToken } from '~/lib/csrf'
 import { throwAuthError } from './auth/error-transport'
 import { BACKGROUND_HEADER } from './auth/types'
+import { assertNotInMaintenance } from './maintenance'
 import { getRuntime } from './runtime'
 import { assertSetupDone, resolveTargetSession, stateGate } from './session-context'
 
@@ -49,6 +50,8 @@ export const accountStateMiddleware = (fn?: string) =>
       if (!context || !sessions.verifyCsrf(context, getRequestHeader(CSRF_HEADER))) throw new Error(SESSION_ENDED)
       try {
         stateGate(context.state, fn)
+        // Maintenance mode (ST-218): users are refused, administrators pass. `signOut` is a public function and stays open.
+        assertNotInMaintenance(getRuntime(), context.user)
       } catch (error) {
         return throwAuthError(error)
       }

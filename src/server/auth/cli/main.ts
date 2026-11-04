@@ -3,6 +3,7 @@ import { join } from 'node:path'
 import { createRecoveryService } from '../recovery'
 import { loadSecretKey } from '../secret-key'
 import { createAuthSettingsResolver } from '../settings'
+import { createSettingsWriter } from '../settings-write'
 import { createThrottle } from '../throttle'
 import { tokens } from '../tokens'
 import { createUserService } from '../users'
@@ -60,6 +61,11 @@ export async function main(
       recovery,
       users,
       audit: (event, fields) => audit(event, fields),
+      settings: {
+        describe: () => resolver.describe(),
+        // Best-effort audit on purpose: the owner must be able to undo a setting even when the audit log is unavailable.
+        reset: (key, basedOn) => createSettingsWriter({ store: store.accounts, env, audit: (event, fields) => audit(event, fields) }).reset(key, basedOn, 'cli'),
+      },
     })
     write(result.stdout)
     return result.exitCode

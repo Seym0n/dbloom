@@ -1,5 +1,6 @@
 import { CONNECTION_HEADER, CONNECTION_PARAM, CSRF_HEADER } from '../../lib/csrf'
 import { SESSION_COOKIE } from '../middleware'
+import { AuthError } from '../auth/types'
 import { resolveTargetSession } from '../session-context'
 import type { Runtime } from '../runtime'
 import type { LiveSession } from '../sessions'
@@ -51,14 +52,19 @@ async function sessionOf(
   // Account mode: the connection comes in a header, or in a query parameter where a link cannot set one (FR-AUT-018).
   const connectionId = request.headers.get(CONNECTION_HEADER) ?? new URL(request.url).searchParams.get(CONNECTION_PARAM) ?? undefined
   const csrf = request.headers.get(CSRF_HEADER) ?? undefined
-  const session = await resolveTargetSession(runtime, {
-    token: cookieOf(request, SESSION_COOKIE),
-    connectionId,
-    csrf,
-    requireCsrf,
-    background: false,
-  })
-  return session
+  try {
+    return await resolveTargetSession(runtime, {
+      token: cookieOf(request, SESSION_COOKIE),
+      connectionId,
+      csrf,
+      requireCsrf,
+      background: false,
+    })
+  } catch (error) {
+    // Maintenance mode refuses a user: the same neutral answer as a missing session.
+    if (error instanceof AuthError) return undefined
+    throw error
+  }
 }
 
 /** `GET /api/rows/cell/<id>`: one use, 60 seconds, owning session only. */

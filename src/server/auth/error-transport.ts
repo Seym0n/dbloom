@@ -8,11 +8,11 @@ import { audit } from '../audit'
 import { AuthError, type AuthErrorBody, type AuthErrorCode } from './types'
 
 /** Pure part: body and status of an error; `undefined` for a non-`AuthError` without fallback. */
-export function authErrorResponse(error: unknown, fallback?: AuthErrorCode): { body: AuthErrorBody; status: 401 | 403 | 429 } | undefined {
+export function authErrorResponse(error: unknown, fallback?: AuthErrorCode): { body: AuthErrorBody; status: 401 | 403 | 429 | 503 } | undefined {
   if (!(error instanceof AuthError) && !fallback) return undefined
   const body: AuthErrorBody = error instanceof AuthError ? { code: error.code, ...error.detail } : { code: fallback! }
   if (body.code === 'auth_throttled') body.retryAfterSeconds ??= 1
-  const status = body.code === 'auth_throttled' ? 429 : body.code === 'stepup_required' ? 403 : 401
+  const status = body.code === 'auth_throttled' ? 429 : body.code === 'stepup_required' ? 403 : body.code === 'maintenance' ? 503 : 401
   return { body, status }
 }
 

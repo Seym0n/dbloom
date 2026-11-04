@@ -12,7 +12,8 @@ import { log } from './log'
 import { createSqlitePrefsBackend, type PrefsBackend } from './auth/prefs/backend'
 import { createTargetConnectRules } from './auth/connections'
 import { configurePrefsService, getPrefsService } from './auth/prefs/runtime'
-import { createAuthSettingsResolver } from './auth/settings'
+import { auditSettingClamp, createAuthSettingsResolver } from './auth/settings'
+import { onSettingsChanged } from './settings-runtime'
 import { InstanceLock } from './lifecycle/instance-lock'
 import { registerShutdownStep } from './lifecycle/shutdown'
 import { createSetupRuntime } from './auth/setup-runtime'
@@ -20,7 +21,7 @@ import { evaluateStart } from './auth/start-gate'
 import { createThrottle } from './auth/throttle'
 import { AUTH_SETTINGS, type ResolvedAuthSettings, type Throttle } from './auth/types'
 import type { SetupApi } from './auth/setup'
-import { buildExposure } from './exposure'
+import { buildExposure, type ExposureReport } from './exposure'
 import { assertDirectTargets, loadConfigWithWarnings, type Config } from './config'
 import type { IoPrefsStore } from './io/store'
 import type { PrefsStore } from './rows/prefs'
@@ -39,6 +40,9 @@ export type Runtime = {
   setup: SetupApi
   /** One backoff throttle for sign-in, vault failures, target connects and setup (FR-AUT-007). */
   throttle: Throttle
+  /** Exposure report built at start (the admin page shows it "as at start"). */
+  exposure: ExposureReport
+  startedAt: number
   /** Resolved account settings, cached for 5 s. */
   settings: () => ResolvedAuthSettings
   /**
@@ -118,8 +122,9 @@ export function getRuntime(): Runtime {
     registerShutdownStep({ name: 'audit-file', order: 30, run: () => fileSink.close() })
   }
   // Account-mode limits come from the settings resolver; a short cache keeps it off the per-request path.
-  const resolver = createAuthSettingsResolver(store.accounts)
+  const resolver = createAuthSettingsResolver(store.accounts, process.env, { onClamp: auditSettingClamp })
   let cached: { at: number; value: ResolvedAuthSettings } | undefined
+  onSettingsChanged(() => (cached = undefined))
   const settings = () => {
     const now = Date.now()
     if (!cached || now - cached.at > 5_000) cached = { at: now, value: resolver.resolve() }
@@ -181,6 +186,6 @@ export function getRuntime(): Runtime {
       }
     },
   })
-  runtime = { config, sessions, auth, store, setup, throttle, settings, ...(statelessPrefs ? { statelessPrefs } : {}) }
+  runtime = { config, sessions, auth, store, setup, throttle, settings, exposure, startedAt: Date.now(), ...(statelessPrefs ? { statelessPrefs } : {}) }
   return runtime
 }

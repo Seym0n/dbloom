@@ -253,7 +253,7 @@ describe('sessions, hooks, users, prefs on a real store', () => {
     const mode = { kind: 'ready', mode: 'account' } as const
     const base = {
       runtime: { sessions, config: { ...config, readOnly: false }, store, setup: { startupState: () => mode } } as never,
-      settings: () => ({ adminSessionIdleMs: 1000, stepUpWindowMs: 5000 }),
+      settings: () => ({ adminSessionIdleMs: 1000, stepUpWindowMs: 5000, infoBanner: '', maintenanceOn: false, maintenanceEndsAt: 0 }),
       prefs: () => prefs,
       stateless: false,
       connections: () => [],

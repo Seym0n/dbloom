@@ -2,6 +2,7 @@ import { isAbsolute } from 'node:path'
 import { isIP } from 'node:net'
 import { z } from 'zod'
 import { ENV_VARS, ENV_NAMES, type EnvVar } from './env-registry'
+import { AUTH_SETTING_KEYS, AUTH_SETTINGS, LOGIN_NOTICE_MAX } from './auth/types'
 import { parseCidrEntry } from './net/cidr'
 import { isLoopbackHost, parsePublicOrigin } from './net/origin'
 
@@ -64,6 +65,8 @@ export type Config = {
   noticeBurstFailures: number
   noticeBurstMinutes: number
   noticeLocationDays: number
+  /** DBLOOM_SETTINGS_LOCK: registry keys the settings page cannot change (SPEC/32 FR-ASE-006). */
+  settingsLock: string[]
   /** Absolute path of the external audit file, or undefined for stdout only. */
   auditFile: string | undefined
   auditAnonymiseIp: 'off' | 'truncate' | 'hash'
@@ -310,6 +313,14 @@ export function loadConfigWithWarnings(env: NodeJS.ProcessEnv = process.env): Lo
   }
 
   const n = (name: string, def: number) => (strict(env, name) as number | undefined) ?? def
+  const settingsLock = listOf(env, 'DBLOOM_SETTINGS_LOCK') ?? []
+  const unknownLock = settingsLock.filter((k) => !(AUTH_SETTING_KEYS as string[]).includes(k))
+  if (unknownLock.length > 0) throw new ConfigError(`DBLOOM_SETTINGS_LOCK names unknown setting keys: ${unknownLock.join(', ')}`)
+  strict(env, 'DBLOOM_MAINTENANCE')
+  const notice = raw(env, 'DBLOOM_LOGIN_NOTICE')
+  if (notice !== undefined && !AUTH_SETTINGS.loginNotice.schema.safeParse(notice).success) {
+    throw new ConfigError(`DBLOOM_LOGIN_NOTICE must be plain text of at most ${LOGIN_NOTICE_MAX} characters without control characters`)
+  }
   const config: Config = {
     dataDir: env.DBLOOM_DATA_DIR ?? './data',
     allowedTargets: (env.DBLOOM_DIRECT_TARGETS ?? '')
@@ -349,6 +360,7 @@ export function loadConfigWithWarnings(env: NodeJS.ProcessEnv = process.env): Lo
     noticeBurstFailures: n('DBLOOM_NOTICE_BURST_FAILURES', 10),
     noticeBurstMinutes: n('DBLOOM_NOTICE_BURST_MINUTES', 10),
     noticeLocationDays: n('DBLOOM_NOTICE_LOCATION_DAYS', 90),
+    settingsLock,
     auditFile: auditSinkFile(env),
     auditAnonymiseIp: ((strict(env, 'DBLOOM_AUDIT_ANONYMISE_IP') as string | undefined) ?? 'off') as Config['auditAnonymiseIp'],
     logLevel,

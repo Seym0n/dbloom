@@ -7,6 +7,8 @@
  * MOCK_RECOVERY_CODE), carol (enrol only), dave (must change password), erin (throttled after two wrong passwords).
  */
 import { createMockAuditApi } from './mock-audit'
+import { createMockExposureApi } from './mock-exposure'
+import { createMockSettings } from './mock-settings'
 import type { LoginMode, PrefImportProblem, SessionInfo, SessionState } from '~/server/auth/types'
 import { clearMockConnections, createMockConnectionApi, mockOpenConnections } from './mock-connections'
 import { MOCK_PREF_DEFAULTS, MOCK_USER_SCOPED, mockValid } from './mock-prefs'
@@ -310,7 +312,11 @@ export function createMockAuthApi(initial?: MockScenario): AuthApi {
     }
   }
 
-  const loginInfo = (): LoginPageInfo => ({ mode: state.mode, siteName: 'DBLoom', passwordEnabled: true, passkeyEnabled: true, autofocus: false })
+  const settingsMock = createMockSettings({ flag, wait, needStepUp, who: () => current().u.displayName || current().u.username })
+  const loginInfo = (): LoginPageInfo => {
+    const site = settingsMock.site()
+    return { mode: state.mode, siteName: 'DBLoom', passwordEnabled: true, passkeyEnabled: true, autofocus: false, notice: site.notice, maintenance: site.maintenance }
+  }
 
   const connectionApi = createMockConnectionApi({ fail, wait, flag, needStepUp, policy, state, makeUser: user, save })
 
@@ -436,6 +442,8 @@ export function createMockAuthApi(initial?: MockScenario): AuthApi {
               idleExpiresAt: idleUntil(),
               absoluteExpiresAt: Date.now() + 12 * 3_600_000,
               stepUpUntil: null,
+              maintenance: settingsMock.site().maintenance,
+              ...(s.state === 'full' && settingsMock.site().banner ? { banner: settingsMock.site().banner } : {}),
             }
           : null,
       }
@@ -458,6 +466,8 @@ export function createMockAuthApi(initial?: MockScenario): AuthApi {
         return fail('auth_failed')
       }
       state.failures[key] = 0
+      // Maintenance mode (ST-218): refused after the password proved the user; administrators pass.
+      if (settingsMock.site().maintenance.active && u.role !== 'admin') return fail('maintenance')
       return wait(outcome(u.username, stateAfterPassword(u)))
     },
     mfaOptions: async (method) => {
@@ -634,6 +644,8 @@ export function createMockAuthApi(initial?: MockScenario): AuthApi {
     // ---- users, invites and recovery links, connections, vault and profiles: mock-connections.ts
     ...connectionApi,
     ...createMockAuditApi({ flag, wait, needStepUp, username: owner }),
+    ...createMockExposureApi({ flag, wait, who: () => current().u.displayName || current().u.username }),
+    ...settingsMock.api,
     listConnections: async () => {
       resetIdle(true)
       return connectionApi.listConnections()

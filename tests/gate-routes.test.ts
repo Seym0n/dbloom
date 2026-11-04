@@ -44,7 +44,8 @@ const NON_CREDENTIAL = new Set(
     'getRowPrefs setRowPref getSessionInfo logout runSql confirmSql cancelSql explainSql planAnalyseSql estimateAffected',
     'listHistory deleteHistory saveBookmark listBookmarks renameBookmark deleteBookmark getCompletionSchema getSqlLimits',
     'getStructureLists previewStructure executeStructure getTableDefinition',
-    'listAuditEvents listOwnAuditEvents getAuditStatus startAuditExport',
+    'listAuditEvents listOwnAuditEvents getAuditStatus startAuditExport getExposure acknowledgeExposure',
+    'getSettings previewSetting setSetting resetSetting',
   ]
     .join(' ')
     .split(/\s+/),

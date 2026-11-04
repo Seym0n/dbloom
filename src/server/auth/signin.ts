@@ -50,6 +50,8 @@ export type SignInDeps = {
   webauthn: WebAuthnService
   /** Notice detector; the service makes its own from the store and the settings when absent. */
   notices?: NoticeDetector
+  /** Maintenance mode (ST-218): true when this user may not sign in now (a user while maintenance is active). Absent = never. */
+  maintenanceBlocks?: (user: User) => boolean
   now?: () => number
 }
 
@@ -146,6 +148,13 @@ export function createSignInService(deps: SignInDeps): SignInService {
     notices.completedSignIn(user, address)
   }
 
+  /** Called after the credential proved the user: a refused sign-in leaves no session and does not count as a failed attempt. */
+  const refuseInMaintenance = (user: User, method: 'password' | 'passkey') => {
+    if (!deps.maintenanceBlocks?.(user)) return
+    audit('auth.signin', { outcome: 'refused', method, reason: 'maintenance', subject: user.id })
+    throw new AuthError('maintenance')
+  }
+
   return {
     async passwordSignIn(input, meta) {
       const settings = deps.settings.resolve()
@@ -177,6 +186,7 @@ export function createSignInService(deps: SignInDeps): SignInService {
         }
       }
 
+      refuseInMaintenance(user, 'password')
       const state = stateAfterPassword(deps, user, at)
       // The account key resets only when no second factor is left to guess (else 5 code guesses per password would be free).
       if (state !== 'pending_mfa') throttle.reset(acctKey(user))
@@ -330,6 +340,7 @@ export function createSignInService(deps: SignInDeps): SignInService {
       if (!result.userVerified) return failedOut(user.id)
       store.updatePasskey(credential.id, { counter: result.newCounter, lastUsedAt: at, backedUp: result.backedUp })
       throttle.reset(acctKey(user))
+      refuseInMaintenance(user, 'passkey')
       const state = stateAfterFactor(user)
       const session = sessions.createAccount(user, state, { clientHint: meta.clientHint, address: meta.address })
       notifyEvicted(user, session.evicted)

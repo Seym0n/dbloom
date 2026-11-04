@@ -17,6 +17,8 @@ import { Route as SetupRouteImport } from './routes/setup'
 import { Route as AccountIndexRouteImport } from './routes/account.index'
 import { Route as AccountPreferencesRouteImport } from './routes/account.preferences'
 import { Route as AdminAuditRouteImport } from './routes/admin.audit'
+import { Route as AdminExposureRouteImport } from './routes/admin.exposure'
+import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as ApiReadyRouteImport } from './routes/api/ready'
@@ -65,6 +67,16 @@ const AccountPreferencesRoute = AccountPreferencesRouteImport.update({
 const AdminAuditRoute = AdminAuditRouteImport.update({
   id: '/admin/audit',
   path: '/admin/audit',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminExposureRoute = AdminExposureRouteImport.update({
+  id: '/admin/exposure',
+  path: '/admin/exposure',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/admin/settings',
+  path: '/admin/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminUsersRoute = AdminUsersRouteImport.update({
@@ -121,6 +133,8 @@ export interface FileRoutesByFullPath {
   '/setup': typeof SetupRoute
   '/account/preferences': typeof AccountPreferencesRoute
   '/admin/audit': typeof AdminAuditRoute
+  '/admin/exposure': typeof AdminExposureRoute
+  '/admin/settings': typeof AdminSettingsRoute
   '/admin/users': typeof AdminUsersRoute
   '/api/health': typeof ApiHealthRoute
   '/api/ready': typeof ApiReadyRoute
@@ -139,6 +153,8 @@ export interface FileRoutesByTo {
   '/setup': typeof SetupRoute
   '/account/preferences': typeof AccountPreferencesRoute
   '/admin/audit': typeof AdminAuditRoute
+  '/admin/exposure': typeof AdminExposureRoute
+  '/admin/settings': typeof AdminSettingsRoute
   '/admin/users': typeof AdminUsersRoute
   '/api/health': typeof ApiHealthRoute
   '/api/ready': typeof ApiReadyRoute
@@ -159,6 +175,8 @@ export interface FileRoutesById {
   '/setup': typeof SetupRoute
   '/account/preferences': typeof AccountPreferencesRoute
   '/admin/audit': typeof AdminAuditRoute
+  '/admin/exposure': typeof AdminExposureRoute
+  '/admin/settings': typeof AdminSettingsRoute
   '/admin/users': typeof AdminUsersRoute
   '/api/health': typeof ApiHealthRoute
   '/api/ready': typeof ApiReadyRoute
@@ -180,6 +198,8 @@ export interface FileRouteTypes {
     | '/setup'
     | '/account/preferences'
     | '/admin/audit'
+    | '/admin/exposure'
+    | '/admin/settings'
     | '/admin/users'
     | '/api/health'
     | '/api/ready'
@@ -198,6 +218,8 @@ export interface FileRouteTypes {
     | '/setup'
     | '/account/preferences'
     | '/admin/audit'
+    | '/admin/exposure'
+    | '/admin/settings'
     | '/admin/users'
     | '/api/health'
     | '/api/ready'
@@ -217,6 +239,8 @@ export interface FileRouteTypes {
     | '/setup'
     | '/account/preferences'
     | '/admin/audit'
+    | '/admin/exposure'
+    | '/admin/settings'
     | '/admin/users'
     | '/api/health'
     | '/api/ready'
@@ -236,6 +260,8 @@ export interface RootRouteChildren {
   RecoverRoute: typeof RecoverRoute
   SetupRoute: typeof SetupRoute
   AdminAuditRoute: typeof AdminAuditRoute
+  AdminExposureRoute: typeof AdminExposureRoute
+  AdminSettingsRoute: typeof AdminSettingsRoute
   AdminUsersRoute: typeof AdminUsersRoute
   ApiHealthRoute: typeof ApiHealthRoute
   ApiReadyRoute: typeof ApiReadyRoute
@@ -303,6 +329,20 @@ declare module '@tanstack/react-router' {
       path: '/admin/audit'
       fullPath: '/admin/audit'
       preLoaderRoute: typeof AdminAuditRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/exposure': {
+      id: '/admin/exposure'
+      path: '/admin/exposure'
+      fullPath: '/admin/exposure'
+      preLoaderRoute: typeof AdminExposureRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/admin/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/users': {
@@ -391,6 +431,8 @@ const rootRouteChildren: RootRouteChildren = {
   RecoverRoute: RecoverRoute,
   SetupRoute: SetupRoute,
   AdminAuditRoute: AdminAuditRoute,
+  AdminExposureRoute: AdminExposureRoute,
+  AdminSettingsRoute: AdminSettingsRoute,
   AdminUsersRoute: AdminUsersRoute,
   ApiHealthRoute: ApiHealthRoute,
   ApiReadyRoute: ApiReadyRoute,

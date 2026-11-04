@@ -346,6 +346,7 @@ export function openSqliteStore(path: string, options: Partial<SqlStateOptions> 
       setSite: (values) => { for (const [k, v] of Object.entries(values)) run('INSERT INTO site(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value', k, JSON.stringify(v)) },
       getSettings: () => many<{ key: AuthSettingKey; value: string; updated_at: number; updated_by: string }>('SELECT key,value,updated_at,updated_by FROM settings ORDER BY key').map((r): SettingRow => ({ key: r.key, value: r.value, updatedAt: r.updated_at, updatedBy: r.updated_by })),
       setSetting: (r) => void run('INSERT INTO settings(key,value,updated_at,updated_by) VALUES(?,?,?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at=excluded.updated_at,updated_by=excluded.updated_by', r.key, r.value, r.updatedAt, r.updatedBy),
+      deleteSetting: (key) => run('DELETE FROM settings WHERE key=?', key).changes === 1,
       createUser: (u) => void run('INSERT INTO users VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)', u.id, u.username, u.usernameKey, u.displayName, u.role, u.status, u.securityVersion, u.mustChangePassword ? 1 : 0, u.tempPasswordExpiresAt, u.webauthnUserId, u.createdAt, u.updatedAt, u.createdBy, u.lastSignInAt),
       getUser: (id) => { const r = one<UserRow>('SELECT * FROM users WHERE id=?', id); return r ? userFrom(r) : undefined },
       getUserByKey: (key) => { const r = one<UserRow>('SELECT * FROM users WHERE username_key=?', key); return r ? userFrom(r) : undefined },

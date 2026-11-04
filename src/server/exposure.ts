@@ -1,19 +1,39 @@
+import { createHash } from 'node:crypto'
 import { loadConfigWithWarnings, type Config } from './config'
 
 /**
  * Exposure report (FR-SVR-011, SEC-TGT-125, DEP-TGT-122). Pure: reads the environment, prints effective settings and the
  * warnings that apply today. Never a secret, never a key value; paths and counts only.
  */
+/** A warning with a stable id: the id survives rewording and is what an acknowledgement refers to (SPEC/31 FR-AEX-001). */
+export type ExposureWarning = { id: string; text: string }
+
 export type ExposureReport = {
   lines: [label: string, value: string][]
+  /** The texts, exactly as the command line and the startup log print them. */
   warnings: string[]
+  /** The same warnings with ids, one to one with `warnings`. */
+  items: ExposureWarning[]
 }
+
+/** Ids of the warnings that `loadConfigWithWarnings` produces; any other text gets an id from its hash. */
+export function configWarningId(text: string): string {
+  const unknown = /^Unknown variable (\S+) is ignored/.exec(text)
+  if (unknown) return `unknown-variable:${unknown[1]}`
+  if (text.startsWith('DBLOOM_TRUST_PROXY=true is deprecated')) return 'trust-proxy-deprecated'
+  if (text.startsWith('DBLOOM_HSTS=off')) return 'hsts-off'
+  if (text.startsWith('Debug logging is enabled in production')) return 'debug-logging'
+  return `config-${createHash('sha256').update(text).digest('hex').slice(0, 8)}`
+}
+
+/** A bind address that only this machine can reach. */
+export const isLoopbackBind = (host: string): boolean => host === '127.0.0.1' || host === '::1' || host === 'localhost'
 
 const list = (xs: string[]) => (xs.length === 0 ? '(none)' : xs.join(', '))
 
 export function buildExposure(config: Config, env: NodeJS.ProcessEnv, configWarnings: string[] = []): ExposureReport {
   const loginMode = env.DBLOOM_LOGIN_MODE?.trim() || (config.store === 'none' ? 'direct' : 'chosen by setup wizard')
-  const loopbackBind = config.host === '127.0.0.1' || config.host === '::1' || config.host === 'localhost'
+  const loopbackBind = isLoopbackBind(config.host)
   const scheme = config.publicOrigin ? config.publicOrigin.split(':')[0]! : 'http (loopback only)'
   const direct = loginMode === 'direct'
   const freeForm = direct && config.allowedTargets.length === 0 && config.freeFormAck
@@ -54,15 +74,19 @@ export function buildExposure(config: Config, env: NodeJS.ProcessEnv, configWarn
     ['diagnostics', config.allowDebug || config.logLevel === 'debug' ? `log level ${config.logLevel}, debug allowed` : `log level ${config.logLevel}`],
   ]
 
-  const warnings = [...configWarnings]
-  if (!loopbackBind && config.publicOrigin?.startsWith('http:')) warnings.push('Public origin is not https')
-  if (config.trustProxyLegacy) warnings.push('Legacy trust-proxy accepts any private-range peer')
-  if (freeForm) warnings.push('Direct mode accepts any database target (free-form)')
-  if (config.tls === 'skip-verify' || config.tls === 'off') warnings.push(`Target TLS is ${config.tls}`)
-  if (config.allowLoopback || config.allowPrivate) warnings.push('Targets on loopback or private networks are allowed')
-  if (config.allowedHosts.some((h) => h.includes('*'))) warnings.push('Allowed hosts contain a wildcard')
-  if (config.probeAllow.some((c) => c === '0.0.0.0/0' || c === '::/0')) warnings.push('Probe endpoints are open to every address')
-  return { lines, warnings: [...new Set(warnings)] }
+  const items: ExposureWarning[] = configWarnings.map((text) => ({ id: configWarningId(text), text }))
+  const warn = (id: string, text: string) => void items.push({ id, text })
+  if (!loopbackBind && config.publicOrigin?.startsWith('http:')) warn('origin-not-https', 'Public origin is not https')
+  if (config.trustProxyLegacy) warn('legacy-trust-proxy', 'Legacy trust-proxy accepts any private-range peer')
+  if (freeForm) warn('direct-free-form', 'Direct mode accepts any database target (free-form)')
+  if (config.tls === 'skip-verify' || config.tls === 'off') warn('target-tls', `Target TLS is ${config.tls}`)
+  if (config.allowLoopback || config.allowPrivate) warn('private-targets', 'Targets on loopback or private networks are allowed')
+  if (config.allowedHosts.some((h) => h.includes('*'))) warn('wildcard-hosts', 'Allowed hosts contain a wildcard')
+  if (config.probeAllow.some((c) => c === '0.0.0.0/0' || c === '::/0')) warn('probe-open', 'Probe endpoints are open to every address')
+  // One entry per text (as the command line always did); the first id wins.
+  const seen = new Set<string>()
+  const unique = items.filter((w) => (seen.has(w.text) ? false : (seen.add(w.text), true)))
+  return { lines, warnings: unique.map((w) => w.text), items: unique }
 }
 
 export function renderExposure(report: ExposureReport): string {
