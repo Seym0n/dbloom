@@ -155,7 +155,7 @@ export function createAccountSecurity(d: SecurityDeps): AccountSecurityService {
       const ok = record ? await d.password.verify(record.phc, input.currentPassword) : await d.password.dummyVerify(input.currentPassword)
       if (!ok) {
         throttle.fail(`acct:${user.usernameKey}`)
-        audit('account.password', { outcome: 'failed', subject: user.id })
+        audit('user.password_changed', { outcome: 'failed', actor: user.id, subject: user.id })
         throw new AuthError('auth_failed')
       }
       const s = d.settings.resolve()
@@ -178,7 +178,7 @@ export function createAccountSecurity(d: SecurityDeps): AccountSecurityService {
         notice(user.id, 'password_changed', at)
       })
       throttle.reset(`acct:${user.usernameKey}`)
-      audit('account.password', { outcome: 'ok', subject: user.id, sessionsEnded: result.ended.length })
+      audit('user.password_changed', { outcome: 'ok', actor: user.id, subject: user.id, sessionsEnded: result.ended.length })
       return { token: result.token, csrf: ctx.csrf, state }
     },
 
@@ -220,7 +220,7 @@ export function createAccountSecurity(d: SecurityDeps): AccountSecurityService {
         result = securityEvent(ctx, token, user, at, afterEnrol(ctx, at))
         notice(user.id, 'factor_added', at)
       })
-      audit('account.factor', { action: 'passkey_added', subject: user.id, uv: verified.uvInitial })
+      audit('factor.added', { action: 'passkey_added', factor: 'passkey', actor: user.id, subject: user.id, uv: verified.uvInitial })
       return { token: result.token, ...(recoveryCodes ? { recoveryCodes } : {}) }
     },
 
@@ -244,7 +244,7 @@ export function createAccountSecurity(d: SecurityDeps): AccountSecurityService {
         result = securityEvent(ctx, token, user, at)
         notice(user.id, 'factor_removed', at)
       })
-      audit('account.factor', { action: 'passkey_removed', subject: user.id })
+      audit('factor.removed', { action: 'passkey_removed', factor: 'passkey', actor: user.id, subject: user.id })
       return { token: result.token }
     },
 
@@ -286,7 +286,7 @@ export function createAccountSecurity(d: SecurityDeps): AccountSecurityService {
         notice(user.id, 'factor_added', at)
       })
       secret.fill(0)
-      audit('account.factor', { action: 'totp_set', subject: user.id })
+      audit('factor.added', { action: 'totp_set', factor: 'totp', actor: user.id, subject: user.id })
       return { token: result.token, ...(recoveryCodes ? { recoveryCodes } : {}) }
     },
 
@@ -302,7 +302,7 @@ export function createAccountSecurity(d: SecurityDeps): AccountSecurityService {
         result = securityEvent(ctx, token, user, at)
         notice(user.id, 'factor_removed', at)
       })
-      audit('account.factor', { action: 'totp_removed', subject: user.id })
+      audit('factor.removed', { action: 'totp_removed', factor: 'totp', actor: user.id, subject: user.id })
       return { token: result.token }
     },
 
@@ -311,7 +311,7 @@ export function createAccountSecurity(d: SecurityDeps): AccountSecurityService {
       sensitive(ctx, 'recovery.regenerate')
       if (!hasFactor(store, user.id)) throw new AuthError('auth_failed')
       const recoveryCodes = issueCodes(user, now())
-      audit('account.factor', { action: 'recovery_regenerated', subject: user.id })
+      audit('codes.regenerated', { action: 'recovery_regenerated', actor: user.id, subject: user.id })
       return { recoveryCodes }
     },
 
@@ -329,7 +329,7 @@ export function createAccountSecurity(d: SecurityDeps): AccountSecurityService {
         result = securityEvent(ctx, token, user, at)
         notice(user.id, 'factor_removed', at)
       })
-      audit('account.factor', { action: 'mfa_disabled', subject: user.id })
+      audit('factor.removed', { action: 'mfa_disabled', factor: 'mfa', actor: user.id, subject: user.id })
       return { token: result.token }
     },
 

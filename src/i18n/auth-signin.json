@@ -37,7 +37,7 @@
   "auth.mfa.passkeyUse": "Use passkey",
   "auth.mfa.submit": "Continue",
   "auth.mfa.checking": "Checking…",
-  "auth.mfa.otherAccount": "Sign in as someone else",
+  "auth.mfa.otherAccount": "Sign out",
   "auth.mfa.restart": "Back to sign-in",
   "auth.passkey.defaultName": "My passkey",
   "auth.passkey.lead": "A passkey lets you confirm with your fingerprint, face, screen lock or a security key.",

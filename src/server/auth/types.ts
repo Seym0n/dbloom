@@ -717,6 +717,8 @@ export type AccountSessionInfo = {
   banner?: string
   /** Maintenance mode (ST-218) as users see it; administrators are exempt but are told. */
   maintenance?: MaintenanceView
+  /** The operator's connection security (DBLOOM_TARGET_TLS), full sessions only: the floor and the default of the connection forms. */
+  targetTls?: TlsMode
 }
 
 /** `active` = users are refused now; `endsAt` = epoch ms of the announced end, null when open ended or forced by `.env`. */

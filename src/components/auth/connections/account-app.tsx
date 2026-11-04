@@ -6,6 +6,7 @@ import { IdleWarning } from '~/components/auth/idle-warning'
 import { SessionEndedDialog } from '~/components/session-ended-dialog'
 import { AppShell } from '~/components/shell/app-shell'
 import type { AccountSessionView } from '~/lib/auth/api'
+import { TargetTlsContext } from '~/lib/auth/target-tls'
 import { setCsrfToken } from '~/lib/csrf'
 import { createQueryClient } from '~/lib/session-state'
 import {
@@ -29,7 +30,9 @@ export function AccountApp(props: {
 }) {
   return (
     <StepUpProvider>
-      <AccountAppInner {...props} />
+      <TargetTlsContext.Provider value={props.session.targetTls ?? 'verify'}>
+        <AccountAppInner {...props} />
+      </TargetTlsContext.Provider>
       <IdleWarning idleExpiresAt={props.session.idleExpiresAt} />
     </StepUpProvider>
   )

@@ -444,6 +444,7 @@ export function createMockAuthApi(initial?: MockScenario): AuthApi {
               absoluteExpiresAt: Date.now() + 12 * 3_600_000,
               stepUpUntil: null,
               maintenance: settingsMock.site().maintenance,
+              ...(s.state === 'full' ? { targetTls: flag('target-tls-off') ? ('off' as const) : ('verify' as const) } : {}),
               ...(s.state === 'full' && settingsMock.site().banner ? { banner: settingsMock.site().banner } : {}),
             }
           : null,

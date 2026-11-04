@@ -82,7 +82,7 @@ test.describe('second factor', () => {
   })
 
   test('other account signs out and returns to sign-in', async ({ page }) => {
-    await page.getByRole('button', { name: 'Sign in as someone else' }).click()
+    await page.getByRole('button', { name: 'Sign out', exact: true }).click()
     await expect(h1(page)).toHaveText('Sign in to DBLoom')
   })
 })

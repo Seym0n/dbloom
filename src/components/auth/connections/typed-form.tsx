@@ -5,18 +5,20 @@ import { PasswordField } from '~/components/auth/password-field'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { Select } from '~/components/ui/select'
-import { EMPTY_TYPED, splitHostPort, toOpenInput, validateTyped, type TlsMode, type TypedErrors, type TypedForm } from '~/lib/auth/connections-logic'
+import { EMPTY_TYPED, splitHostPort, tlsDefaultFrom, tlsModesFrom, toOpenInput, validateTyped, type TlsMode, type TypedErrors, type TypedForm } from '~/lib/auth/connections-logic'
+import { useTargetTls } from '~/lib/auth/target-tls'
 import type { ShownError } from '~/lib/auth/messages'
-import { TLS_MODES, type OpenConnectionInput } from '~/server/auth/types'
+import type { OpenConnectionInput } from '~/server/auth/types'
 
 export const tlsLabel = (m: TlsMode) => t(`auth.conn.tls.${m}`)
 
 export function TlsSelect({ value, onChange, label = t('auth.conn.tls') }: { value: TlsMode; onChange: (v: TlsMode) => void; label?: string }) {
+  const floor = useTargetTls()
   return (
     <FormField label={label}>
       {(field) => (
         <Select {...field} value={value} onChange={(e) => onChange(e.target.value as TlsMode)}>
-          {TLS_MODES.map((m) => (
+          {tlsModesFrom(floor).map((m) => (
             <option key={m} value={m}>
               {tlsLabel(m)}
             </option>
@@ -49,7 +51,8 @@ export function TypedConnectForm({
   onSubmit: (input: OpenConnectionInput) => void | Promise<unknown>
   submitLabel?: string
 }) {
-  const [form, setForm] = useState<TypedForm>(EMPTY_TYPED)
+  const floor = useTargetTls()
+  const [form, setForm] = useState<TypedForm>(() => ({ ...EMPTY_TYPED, tls: tlsDefaultFrom(floor) }))
   const [errors, setErrors] = useState<TypedErrors>({})
   const set = <K extends keyof TypedForm>(key: K, value: TypedForm[K]) => setForm((f) => ({ ...f, [key]: value }))
 

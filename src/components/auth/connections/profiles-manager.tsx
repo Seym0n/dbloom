@@ -7,7 +7,8 @@ import { Button } from '~/components/ui/button'
 import { Checkbox } from '~/components/ui/checkbox'
 import { Input } from '~/components/ui/input'
 import { authApi } from '~/lib/auth/api'
-import { EMPTY_PROFILE, profileToForm, toSaveInput, validateProfile, vaultView, type ProfileErrors, type ProfileForm } from '~/lib/auth/connections-logic'
+import { EMPTY_PROFILE, profileToForm, tlsAtLeast, tlsDefaultFrom, toSaveInput, validateProfile, vaultView, type ProfileErrors, type ProfileForm } from '~/lib/auth/connections-logic'
+import { useTargetTls } from '~/lib/auth/target-tls'
 import { describeError } from '~/lib/auth/messages'
 import { useAction } from '~/lib/auth/use-action'
 import type { ProfileInfo } from '~/server/auth/types'
@@ -20,7 +21,12 @@ const errorText = (e: 'required' | 'invalid' | undefined) => (e ? t(e === 'requi
 type Outcome = { kind: 'ok' } | { kind: 'failed'; message: string }
 
 function ProfileDialog({ profile, unlocked, onClose, onSaved }: { profile: ProfileInfo | null; unlocked: boolean; onClose: () => void; onSaved: (note: string) => void }) {
-  const [form, setForm] = useState<ProfileForm>(profile ? profileToForm(profile) : EMPTY_PROFILE)
+  const floor = useTargetTls()
+  const [form, setForm] = useState<ProfileForm>(() => {
+    if (!profile) return { ...EMPTY_PROFILE, tls: tlsDefaultFrom(floor) }
+    const stored = profileToForm(profile)
+    return { ...stored, tls: tlsAtLeast(stored.tls, floor) }
+  })
   const [errors, setErrors] = useState<ProfileErrors>({})
   const [testResult, setTestResult] = useState<Outcome | null>(null)
   const [canSaveAnyway, setCanSaveAnyway] = useState(false)

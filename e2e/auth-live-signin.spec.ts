@@ -59,7 +59,7 @@ test('SCN-066 password then TOTP: the cookie changes with each state; a reused c
   await page.getByLabel('Code from your authenticator app').fill(usedCode)
   await page.getByRole('button', { name: 'Continue' }).click()
   await expect(page.getByRole('alert')).toHaveText(MFA_FAILED)
-  await expect(page.getByRole('button', { name: 'Sign in as someone else' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Sign out', exact: true })).toBeVisible()
 
   // A recovery code (case and dashes do not matter) gets in once.
   const code = ana.recoveryCodes!.shift()!
@@ -78,7 +78,7 @@ test('SCN-066 password then TOTP: the cookie changes with each state; a reused c
   await expect(page.getByRole('alert')).toHaveText(MFA_FAILED)
 
   // The remaining count dropped by one (10 at setup, one used).
-  await page.getByRole('button', { name: 'Sign in as someone else' }).click()
+  await page.getByRole('button', { name: 'Sign out', exact: true }).click()
   await expect(h1(page)).toHaveText('Sign in to DBLoom')
   await signInWithRecovery(page, server, ana)
   await page.goto(server.baseURL + '/account')

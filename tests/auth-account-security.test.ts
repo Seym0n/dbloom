@@ -133,6 +133,20 @@ describe('changePassword (FR-AUT-005, SCN-074)', () => {
     expect(store.accounts.listNotices(user.id)).toHaveLength(0)
   })
 
+  it('audits with the contract names: a failed and a changed password are user.password_changed, never the old account.password', async () => {
+    const r = rig()
+    const user = await create(r, 'ana')
+    const s = session(r, user, 'full', false)
+    await code(r.security.changePassword(s.ctx(), s.token, { currentPassword: 'wrong wrong wrong', newPassword: NEW_PASSWORD }))
+    await r.security.changePassword(s.ctx(), s.token, { currentPassword: PASSWORD, newPassword: NEW_PASSWORD })
+    const lines = logs.filter((l) => l.includes('user.password_changed'))
+    expect(lines).toHaveLength(2)
+    expect(lines[0]).toContain('failed')
+    expect(lines[1]).toContain('ok')
+    for (const l of lines) expect(l).toContain(user.id)
+    expect(logs.join(String.fromCharCode(10))).not.toContain('account.password')
+  })
+
   it('ends other sessions, regenerates the current token, keeps csrf and adds a notice', async () => {
     const r = rig()
     const user = await create(r, 'ana')
@@ -215,6 +229,11 @@ describe('TOTP (FR-AUT-008, 010, 012)', () => {
     expect(row.sealed).not.toContain(start.secret)
     expect(row.lastStep).toBeGreaterThan(0)
     expect(logs.join('\n')).not.toContain(start.secret)
+    // The audit row has the contract name and names the user as actor (finding h)
+    const added = logs.filter((l) => l.includes('factor.added') && l.includes('totp_set'))
+    expect(added).toHaveLength(1)
+    expect(added[0]).toContain(user.id)
+    expect(logs.join('\n')).not.toContain('account.factor')
     // The pending secret is gone: a second confirm fails.
     s.token = r.sessions.transition(s.token, { stepupAt: clock.t }).token
     expect(await code(Promise.resolve().then(() => r.security.totpConfirm(s.ctx(), s.token, codeAt(secret))))).toBe('mfa_failed')

@@ -340,3 +340,34 @@ test.describe('phone width', () => {
     expect(box!.x + box!.width).toBeLessThanOrEqual(375)
   })
 })
+
+test.describe('connection security follows the operator (finding f)', () => {
+  test('with DBLOOM_TARGET_TLS verify the form starts on verify and offers nothing weaker', async ({ page }) => {
+    await toPicker(page)
+    await page.getByRole('tab', { name: 'Type credentials' }).click()
+    const tls = page.getByLabel('Connection security')
+    await expect(tls).toHaveValue('verify')
+    await expect(tls.locator('option')).toHaveText(['Encrypted, check the certificate'])
+  })
+
+  test('with DBLOOM_TARGET_TLS off the form starts on "Not encrypted" and may be made stricter', async ({ page }) => {
+    await flags(page, 'target-tls-off')
+    await toPicker(page)
+    await page.getByRole('tab', { name: 'Type credentials' }).click()
+    const tls = page.getByLabel('Connection security')
+    await expect(tls).toHaveValue('off')
+    await expect(tls.locator('option')).toHaveText(['Encrypted, check the certificate', 'Encrypted, do not check the certificate', 'Not encrypted'])
+    await tls.selectOption('verify')
+    await expect(tls).toHaveValue('verify')
+  })
+
+  test('a new profile starts on the operator setting too', async ({ page }) => {
+    await flags(page, 'target-tls-off')
+    await toPicker(page)
+    await page.getByRole('button', { name: 'Manage profiles and vault' }).click()
+    await expect(h1(page)).toHaveText('Profiles and vault')
+    await createVault(page)
+    await page.getByRole('button', { name: 'New profile' }).click()
+    await expect(dialog(page, 'New profile').getByLabel('Connection security')).toHaveValue('off')
+  })
+})

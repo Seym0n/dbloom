@@ -57,7 +57,7 @@ describe('actor and address', () => {
   it('auth and account events attribute the subject user as actor; others do not', () => {
     store.db.exec(`INSERT INTO users (id, username, username_key, display_name, role, status, webauthn_user_id, created_at, updated_at, created_by) VALUES ('u1','ann','ann','Ann','user','active','w1',1,1,'system')`)
     audit('auth.signin', { outcome: 'ok', subject: 'u1' })
-    audit('account.factor', { action: 'totp_set', subject: 'u1' })
+    audit('factor.added', { action: 'totp_set', factor: 'totp', actor: 'u1', subject: 'u1' })
     audit('invite.revoke', { id: 'i1', subject: 'u1' })
     const r = rows()
     expect(r[0]).toMatchObject({ actor_id: 'u1', actor_name: 'ann', actor_kind: 'user' })

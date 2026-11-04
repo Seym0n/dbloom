@@ -55,7 +55,7 @@ for (const scheme of ['light', 'dark'] as const) {
       await signInAs(page, 'bob')
       await expect(h1(page)).toHaveText('Confirm it is you')
       await clean(page)
-      await page.getByRole('button', { name: 'Sign in as someone else' }).click()
+      await page.getByRole('button', { name: 'Sign out', exact: true }).click()
       await signInAs(page, 'carol')
       await expect(h1(page)).toHaveText('Add a second factor')
       await clean(page)

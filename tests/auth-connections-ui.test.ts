@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import {
+  tlsAtLeast,
+  tlsDefaultFrom,
+  tlsModesFrom,
   EMPTY_PROFILE,
   EMPTY_TYPED,
   allowedUserActions,
@@ -145,5 +148,21 @@ describe('users', () => {
     const p = generateTempPassword()
     expect(p).toMatch(/^[a-km-zA-HJ-NP-Z2-9]{20}$/)
     expect(generateTempPassword()).not.toBe(p)
+  })
+})
+
+
+describe('connection security floor (finding f)', () => {
+  it('offers the modes at least as strict as the operator setting, strictest first', () => {
+    expect(tlsModesFrom('verify')).toEqual(['verify'])
+    expect(tlsModesFrom('skip-verify')).toEqual(['verify', 'skip-verify'])
+    expect(tlsModesFrom('off')).toEqual(['verify', 'skip-verify', 'off'])
+  })
+  it('starts on the operator setting; a weaker stored value is shown as the floor', () => {
+    expect(tlsDefaultFrom('off')).toBe('off')
+    expect(tlsDefaultFrom('verify')).toBe('verify')
+    expect(tlsAtLeast('off', 'verify')).toBe('verify')
+    expect(tlsAtLeast('skip-verify', 'off')).toBe('skip-verify')
+    expect(tlsAtLeast('verify', 'skip-verify')).toBe('verify')
   })
 })

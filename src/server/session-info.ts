@@ -58,6 +58,7 @@ export function buildSessionInfo(d: SessionInfoDeps): SessionInfoResult | null {
       absoluteExpiresAt: row.expiresAt,
       stepUpUntil: context.stepupAt === null ? null : context.stepupAt + settings.stepUpWindowMs,
       maintenance: maintenanceView(settings, d.env ?? process.env, (d.now ?? Date.now)()),
+      ...(full ? { targetTls: config.tls } : {}),
       // The information banner (ST-219) is for signed-in users only, never before the second factor.
       ...(full && settings.infoBanner ? { banner: settings.infoBanner } : {}),
     }

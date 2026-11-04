@@ -194,7 +194,7 @@ describe('sign-in and session info', () => {
     setting('maintenanceOn', true)
     setting('maintenanceEndsAt', clock + 5_000)
     const base = {
-      runtime: { sessions: r.sessions, config: { sessionIdleMs: 1, readOnly: false }, store, setup: { startupState: () => ({ kind: 'ready', mode: 'account' }) } } as never,
+      runtime: { sessions: r.sessions, config: { sessionIdleMs: 1, readOnly: false, tls: 'off' }, store, setup: { startupState: () => ({ kind: 'ready', mode: 'account' }) } } as never,
       settings: () => r.resolver.resolve(),
       prefs: () => ({ get: () => ({}) }) as never,
       stateless: false,
@@ -205,8 +205,11 @@ describe('sign-in and session info', () => {
     }
     const full = r.sessions.createAccount(user, 'full', META)
     expect(buildSessionInfo({ ...base, token: full.token })).toMatchObject({ banner: 'Backup tonight', maintenance: { active: true, endsAt: clock + 5_000 } })
+    // the operator's connection security rides along for the connection forms (finding f), full sessions only
+    expect(buildSessionInfo({ ...base, token: full.token })).toMatchObject({ targetTls: 'off' })
     const pending = r.sessions.createAccount(user, 'pending_mfa', META)
     const half = buildSessionInfo({ ...base, token: pending.token })!
+    expect(half).not.toHaveProperty('targetTls')
     expect(half).toMatchObject({ maintenance: { active: true } })
     expect(half).not.toHaveProperty('banner')
     setting('infoBanner', '')

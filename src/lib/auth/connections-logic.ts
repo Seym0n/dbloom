@@ -13,6 +13,17 @@ import {
 
 export type TlsMode = (typeof TLS_MODES)[number]
 
+const TLS_STRICTNESS: Record<TlsMode, number> = { off: 0, 'skip-verify': 1, verify: 2 }
+
+/** The connection security a form may offer: the operator's DBLOOM_TARGET_TLS is the floor, a user may be stricter, never weaker (FR-AUT-022). */
+export const tlsModesFrom = (floor: TlsMode): TlsMode[] => TLS_MODES.filter((m) => TLS_STRICTNESS[m] >= TLS_STRICTNESS[floor])
+
+/** What a form starts on: the operator's own setting, so a server without TLS needs no hand-made choice. */
+export const tlsDefaultFrom = (floor: TlsMode): TlsMode => floor
+
+/** A stored value weaker than the floor is shown as the floor (the server applies the same rule). */
+export const tlsAtLeast = (value: TlsMode, floor: TlsMode): TlsMode => (TLS_STRICTNESS[value] >= TLS_STRICTNESS[floor] ? value : floor)
+
 // ---- Active connection (sessionStorage, header `x-dbloom-connection`) ------------------------------------------
 
 export function getStoredConnectionId(): string | null {
