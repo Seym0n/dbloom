@@ -157,134 +157,136 @@ Edge and serverless hosting are not supported. Every topology prints its warning
 
 Generated from `src/server/env-registry.ts` by `node scripts/gen-env-docs.mjs`; CI fails when this table is out of date. `.env.example` is generated from the same registry.
 
+The **Need** column: **required** means startup is refused without it (under the condition named); **conditional** means it is needed only in the mode named, often one of two variables; **optional** means there is a default or the feature stays off.
+
 <!-- env-table:start -->
-| Variable | Type | Default | Description |
-|---|---|---|---|
-| **Listener** | | | |
-| `DBLOOM_HOST` | string | `127.0.0.1` | Bind address. A non-loopback value needs DBLOOM_PUBLIC_ORIGIN and DBLOOM_TRUST_PROXY. The image sets 0.0.0.0. |
-| `PORT` | int (1 to 65535) | `3000` | Listen port. |
-| `DBLOOM_PUBLIC_ORIGIN` | string |  | Public origin scheme://host[:port], no path. https unless the host is loopback. Required for account mode and non-loopback bind. |
-| `DBLOOM_ALLOWED_HOSTS` | list |  | Comma separated Host values answered (default: host of the origin). Wildcards only on a loopback bind. |
-| `DBLOOM_TRUST_PROXY` | list |  | Trusted reverse proxies as CIDR list, e.g. 10.0.0.0/8,172.16.0.0/12. Legacy `true` is accepted with a warning. |
-| `DBLOOM_PROXY_HOPS` | int (0 to 16) | `0` | Optional number of trusted proxy hops in X-Forwarded-For (0 = rightmost untrusted entry). |
-| `DBLOOM_TLS` | enum (proxy, own) | `proxy` | TLS is terminated by a `proxy`. `own` is reserved and refused. |
-| `DBLOOM_HSTS` | enum (on, off) | `on` | Strict-Transport-Security on https origins. `off` is allowed with a warning. |
-| `DBLOOM_HSTS_MAX_AGE` | int (0 to 63072000) | `31536000` | HSTS max-age in seconds. |
-| `DBLOOM_HSTS_SUBDOMAINS` | bool | `false` | Add includeSubDomains to HSTS. |
-| **Lifecycle** | | | |
-| `DBLOOM_SHUTDOWN_SECONDS` | int (1 to 300) | `25` | Grace period for in-flight requests after SIGTERM (keep below the container stop grace). |
-| `DBLOOM_LOG_LEVEL` | enum (debug, info, warn, error) | `info` | Log level. |
-| `DBLOOM_ALLOW_DEBUG` | bool | `false` | Allow log level debug when NODE_ENV=production (warning). |
-| `DBLOOM_PROBE_HOSTS` | list | `localhost,127.0.0.1` | Host values the health probes answer for. |
-| `DBLOOM_PROBE_ALLOW` | list | `127.0.0.0/8,::1/128` | Peers (CIDR) allowed to call the probes. |
-| **Limits** | | | |
-| `DBLOOM_BODY_LIMIT_FUNCTIONS_KIB` | int (16 to 65536) | `1024` | Request body cap of server functions in KiB. |
-| `DBLOOM_BODY_LIMIT_OTHER_KIB` | int (1 to 1024) | `64` | Request body cap of every other route in KiB. |
-| **Store** | | | |
-| `DBLOOM_STORE` | string | `sqlite` | `none` runs stateless (direct mode only, nothing persisted). |
-| `DBLOOM_DATA_DIR` | path | `./data` | Store directory (the compose file mounts a volume at /data). |
-| **Audit** | | | |
-| `DBLOOM_AUDIT_SINK` | string | `stdout` | Extra audit destination: `stdout` (default, the audit JSON line always goes to stdout) or `file:/absolute/path` (append only, mode 0600, one JSON line per event). A failing file is buffered and retried; see the deploy guide. |
-| `DBLOOM_AUDIT_ANONYMISE_IP` | enum (off, truncate, hash) | `off` | Address in stored, exported and file-sink audit records: `off`, `truncate` (IPv4 /24, IPv6 /48) or `hash` (HMAC under a server key subkey). The stdout line keeps the address. |
-| **Notices** | | | |
-| `DBLOOM_NOTICE_BURST_FAILURES` | int (3 to 20) | `10` | Failed sign-in steps for one account or one address within the window that raise a notice to administrators. |
-| `DBLOOM_NOTICE_BURST_MINUTES` | int (1 to 60) | `10` | Window in minutes for the failed-attempt notice. |
-| `DBLOOM_NOTICE_LOCATION_DAYS` | int (7 to 365) | `90` | Days an account remembers the networks (/24 IPv4, /48 IPv6) it signed in from; a sign-in from another network raises a notice to administrators. |
-| **Audit** | | | |
-| `DBLOOM_AUDIT_RETENTION_DAYS` | int (90 to 1095) | `365` | Days the audit log keeps rows; older rows are purged daily (the purge is itself audited). |
-| **Settings** | | | |
-| `DBLOOM_SETTINGS_LOCK` | list |  | Setting keys (e.g. mfaScope,loginFailures) the settings page shows read-only at their `.env` value or default; a stored value is ignored. An unknown key refuses startup. |
-| `DBLOOM_MAINTENANCE` | bool | `false` | Maintenance mode forced on: users are refused, administrators and the CLI are not. The settings page cannot switch it off. |
-| `DBLOOM_LOGIN_NOTICE` | string |  | Plain text shown above the sign-in form (at most 300 characters, no control characters). Default of the setting; the page may override it. |
-| **Targets** | | | |
-| `DBLOOM_DIRECT_TARGETS` | list |  | Direct mode: servers users may connect to, host:port list (SEC-TGT-018). |
-| `DBLOOM_DIRECT_FREE_FORM_ACK` | bool | `false` | Direct mode: accept free-form targets (only behind other protections). |
-| `DBLOOM_ALLOW_LOOPBACK` | bool | `false` | Allow loopback target addresses (SEC-TGT-030). |
-| `DBLOOM_ALLOW_PRIVATE` | bool | `false` | Allow private target addresses (SEC-TGT-030). |
-| `DBLOOM_TARGET_TLS` | enum (verify, skip-verify, off) | `verify` | TLS to targets. |
-| `DBLOOM_CONNECT_TIMEOUT_SECONDS` | int | `10` | Connect timeout to targets in seconds. |
-| `DBLOOM_READ_ONLY` | bool | `false` | Force every session read-only. |
-| `DBLOOM_STATEMENT_TIMEOUT_SECONDS` | int | `30` | Statement timeout in seconds (greater than zero). |
-| **Sessions** | | | |
-| `DBLOOM_SESSION_IDLE_MINUTES` | int | `30` | Idle session timeout in minutes. |
-| `DBLOOM_SESSION_ABSOLUTE_HOURS` | int | `12` | Absolute session lifetime in hours. |
-| **Import and export** | | | |
-| `DBLOOM_TEMP_DIR` | path |  | Staging and spool files; default <data dir>/tmp. |
-| `DBLOOM_TEMP_QUOTA_MIB` | int (1 to 10000000) | `10240` | Total size of staged and spooled files in MiB. |
-| `DBLOOM_IMPORT_MAX_MIB` | int (1 to 2048) | `2048` | Upper bound of the upload size in MiB. |
-| `DBLOOM_IMPORT_DIR` | path |  | Enables importing files from a server folder. Absolute path. |
-| `DBLOOM_UPLOAD_DIR` | path |  | Reported by the setup wizard only (auth/setup.ts). |
-| **Account mode** | | | |
-| `DBLOOM_LOGIN_MODE` | enum (account, direct) |  | Login mode: account or direct. Unset lets the setup wizard choose. |
-| `DBLOOM_AUTO_SETUP` | enum (direct) |  | Headless direct-mode install (CI, e2e): `direct`. |
-| `DBLOOM_SETUP_TOKEN` | secret |  | Fixed setup token (otherwise one is generated and printed). |
-| `DBLOOM_SETUP_TOKEN_MINUTES` | int |  | Lifetime of the generated setup token. |
-| `DBLOOM_SETUP_NETWORKS` | list |  | CIDR list that may reach setup (empty = any address). |
-| `DBLOOM_ADMIN_NETWORKS` | list |  | CIDR list of administration networks (default loopback). |
-| `DBLOOM_SECRET_KEY` | secret |  | Server key (base64) for account mode. Never commit. |
-| `DBLOOM_SECRET_KEY_FILE` | path |  | File holding the server key. |
-| `DBLOOM_SECRET_KEY_PREVIOUS` | secret |  | Previous server key during rotation. |
-| `DBLOOM_MFA_SCOPE` | string |  | Auth setting override (file 26); validated by the auth module. |
-| `DBLOOM_MFA_ROLES` | string |  | Auth setting override (file 26); validated by the auth module. |
-| `DBLOOM_MFA_GRACE_DAYS` | string |  | Auth setting override (file 26); validated by the auth module. |
-| `DBLOOM_MFA_FACTORS` | string |  | Auth setting override (file 26); validated by the auth module. |
-| `DBLOOM_PRIMARY_CREDENTIALS` | string |  | Auth setting override (file 26); validated by the auth module. |
-| `DBLOOM_TOTP_WINDOW` | string |  | Auth setting override (file 26); validated by the auth module. |
-| `DBLOOM_PASSWORD_MIN_LENGTH` | string |  | Auth setting override (file 26); validated by the auth module. |
-| `DBLOOM_BREACHED_LIST` | string |  | Auth setting override (file 26); validated by the auth module. |
-| `DBLOOM_BREACHED_CHECK` | string |  | Auth setting override (file 26); validated by the auth module. |
-| `DBLOOM_ARGON2_MEMORY_MIB` | string |  | Auth setting override (file 26); validated by the auth module. |
-| `DBLOOM_ARGON2_PASSES` | string |  | Auth setting override (file 26); validated by the auth module. |
-| `DBLOOM_ARGON2_PARALLELISM` | string |  | Auth setting override (file 26); validated by the auth module. |
-| `DBLOOM_VAULT_ARGON2_MEMORY_MIB` | string |  | Auth setting override (file 26); validated by the auth module. |
-| `DBLOOM_VAULT_ARGON2_PASSES` | string |  | Auth setting override (file 26); validated by the auth module. |
-| `DBLOOM_VAULT_ARGON2_PARALLELISM` | string |  | Auth setting override (file 26); validated by the auth module. |
-| `DBLOOM_TEMP_PASSWORD_HOURS` | string |  | Auth setting override (file 26); validated by the auth module. |
-| `DBLOOM_ADMIN_SESSION_IDLE_MINUTES` | string |  | Auth setting override (file 26); validated by the auth module. |
-| `DBLOOM_ADMIN_SESSION_ABSOLUTE_HOURS` | string |  | Auth setting override (file 26); validated by the auth module. |
-| `DBLOOM_SESSIONS_PER_USER` | string |  | Auth setting override (file 26); validated by the auth module. |
-| `DBLOOM_SESSIONS_PER_ADMIN` | string |  | Auth setting override (file 26); validated by the auth module. |
-| `DBLOOM_SESSIONS_AT_LIMIT` | string |  | Auth setting override (file 26); validated by the auth module. |
-| `DBLOOM_LOGIN_FAILURES` | string |  | Auth setting override (file 26); validated by the auth module. |
-| `DBLOOM_LOGIN_BACKOFF_CAP_MINUTES` | string |  | Auth setting override (file 26); validated by the auth module. |
-| `DBLOOM_LOGIN_WINDOW_MINUTES` | string |  | Auth setting override (file 26); validated by the auth module. |
-| `DBLOOM_LOGIN_ADDRESS_FAILURES` | string |  | Auth setting override (file 26); validated by the auth module. |
-| `DBLOOM_INVITE_HOURS` | string |  | Auth setting override (file 26); validated by the auth module. |
-| `DBLOOM_RECOVERY_LINK_HOURS` | string |  | Auth setting override (file 26); validated by the auth module. |
-| `DBLOOM_VAULT_PASSPHRASE_MIN` | string |  | Auth setting override (file 26); validated by the auth module. |
-| `DBLOOM_VAULT_AUTOLOCK_MINUTES` | string |  | Auth setting override (file 26); validated by the auth module. |
-| `DBLOOM_PERSONAL_PROFILES` | string |  | Auth setting override (file 26); validated by the auth module. |
-| `DBLOOM_ALLOW_EMPTY_TARGET_PASSWORD` | string |  | Auth setting override (file 26); validated by the auth module. |
-| `DBLOOM_DENY_ROOT_TARGET` | string |  | Auth setting override (file 26); validated by the auth module. |
-| `DBLOOM_LOGIN_RECALL` | string |  | Auth setting override (file 26); validated by the auth module. |
-| `DBLOOM_STEPUP_MINUTES` | string |  | Auth setting override (file 26); validated by the auth module. |
-| `DBLOOM_AUTOREVERT_MINUTES` | string |  | Auth setting override (file 26); validated by the auth module. |
-| `DBLOOM_ASSISTANT_ENABLED` | string |  | Auth setting override (file 26); validated by the auth module. |
-| `DBLOOM_AI_MODEL` | string |  | Auth setting override (file 26); validated by the auth module. |
-| `DBLOOM_ASSISTANT_AUTO_ALLOWED` | string |  | Auth setting override (file 26); validated by the auth module. |
-| `DBLOOM_ASSISTANT_HIDE_PII_NAMES` | string |  | Auth setting override (file 26); validated by the auth module. |
-| **AI assistant** | | | |
-| `DBLOOM_AI_BASE_URL` | string |  | Base URL of an OpenAI-compatible chat API (https://host/v1). Empty = the assistant is unavailable and nothing is sent anywhere. |
-| `DBLOOM_AI_API_KEY` | secret |  | API key of the AI service. Never shown, never logged. |
-| `DBLOOM_AI_API_KEY_FILE` | path |  | File holding the API key (Docker secret). |
-| `DBLOOM_AI_ALLOW_PRIVATE` | bool | `false` | Allow the AI endpoint on a private or loopback address (a local model server). |
-| `DBLOOM_AI_MAX_ROWS` | int (1 to 200) | `50` | Rows of one result that may go to the AI (PII cells as tokens). |
-| `DBLOOM_AI_MAX_STEPS` | int (1 to 20) | `8` | Model-to-tool round trips for one user message. |
-| `DBLOOM_PII_COLUMNS` | list |  | Columns whose values the AI never sees, as db.table.column (a part may be *), for example `*.*.email,shop.customers.*`. Added to the markings kept in the store. |
-| **SQL** | | | |
-| `DBLOOM_SQL_DISABLED` | bool | `false` | Turns the SQL module off. |
-| `DBLOOM_SQL_PARSER` | string |  | `off` is the parser kill switch. |
-| `DBLOOM_SQL_ROW_CAP` | int |  | Result row cap. |
-| `DBLOOM_SQL_RESPONSE_MB` | int |  | Response size cap in MB. |
-| `DBLOOM_SQL_CELL_KB` | int |  | Cell size cap in KB. |
-| `DBLOOM_SQL_MAX_STATEMENTS` | int |  | Statements per run. |
-| `DBLOOM_SQL_MAX_CONCURRENT_RUNS` | int |  | Concurrent runs per session. |
-| **Rows** | | | |
-| `DBLOOM_ROWS_MAX_PAGE_SIZE` | int |  | Largest page size. |
-| `DBLOOM_ROWS_EXACT_COUNT_THRESHOLD` | int |  | Exact count threshold. |
-| `DBLOOM_ROWS_VIEW_COUNT_CAP` | int |  | Count cap of views. |
-| `DBLOOM_ROWS_CELL_BYTES` | int |  | Cell size cap in bytes. |
-| `DBLOOM_ROWS_UPLOAD_BYTES` | int |  | Cell upload cap in bytes. |
-| `DBLOOM_ROWS_BULK_SIZE` | int |  | Bulk operation size. |
-| `DBLOOM_ROWS_INSERT_ROWS` | int |  | Rows per insert form. |
+| Variable | Need | Type | Default | Description |
+|---|---|---|---|---|
+| **Listener** | | | | |
+| `DBLOOM_HOST` | optional | string | `127.0.0.1` | Bind address. A non-loopback value needs DBLOOM_PUBLIC_ORIGIN and DBLOOM_TRUST_PROXY. The image sets 0.0.0.0. |
+| `PORT` | optional | int (1 to 65535) | `3000` | Listen port. |
+| `DBLOOM_PUBLIC_ORIGIN` | **required** (always in the Docker image, which binds 0.0.0.0; optional on a loopback bind) | string |  | Public origin scheme://host[:port], no path. https unless the host is loopback. Required for account mode and non-loopback bind. |
+| `DBLOOM_ALLOWED_HOSTS` | optional | list |  | Comma separated Host values answered (default: host of the origin). Wildcards only on a loopback bind. |
+| `DBLOOM_TRUST_PROXY` | **required** (always in the Docker image, which binds 0.0.0.0; optional on a loopback bind) | list |  | Trusted reverse proxies as CIDR list, e.g. 10.0.0.0/8,172.16.0.0/12. Legacy `true` is accepted with a warning. |
+| `DBLOOM_PROXY_HOPS` | optional | int (0 to 16) | `0` | Optional number of trusted proxy hops in X-Forwarded-For (0 = rightmost untrusted entry). |
+| `DBLOOM_TLS` | optional | enum (proxy, own) | `proxy` | TLS is terminated by a `proxy`. `own` is reserved and refused. |
+| `DBLOOM_HSTS` | optional | enum (on, off) | `on` | Strict-Transport-Security on https origins. `off` is allowed with a warning. |
+| `DBLOOM_HSTS_MAX_AGE` | optional | int (0 to 63072000) | `31536000` | HSTS max-age in seconds. |
+| `DBLOOM_HSTS_SUBDOMAINS` | optional | bool | `false` | Add includeSubDomains to HSTS. |
+| **Lifecycle** | | | | |
+| `DBLOOM_SHUTDOWN_SECONDS` | optional | int (1 to 300) | `25` | Grace period for in-flight requests after SIGTERM (keep below the container stop grace). |
+| `DBLOOM_LOG_LEVEL` | optional | enum (debug, info, warn, error) | `info` | Log level. |
+| `DBLOOM_ALLOW_DEBUG` | optional | bool | `false` | Allow log level debug when NODE_ENV=production (warning). |
+| `DBLOOM_PROBE_HOSTS` | optional | list | `localhost,127.0.0.1` | Host values the health probes answer for. |
+| `DBLOOM_PROBE_ALLOW` | optional | list | `127.0.0.0/8,::1/128` | Peers (CIDR) allowed to call the probes. |
+| **Limits** | | | | |
+| `DBLOOM_BODY_LIMIT_FUNCTIONS_KIB` | optional | int (16 to 65536) | `1024` | Request body cap of server functions in KiB. |
+| `DBLOOM_BODY_LIMIT_OTHER_KIB` | optional | int (1 to 1024) | `64` | Request body cap of every other route in KiB. |
+| **Store** | | | | |
+| `DBLOOM_STORE` | optional | string | `sqlite` | `none` runs stateless (direct mode only, nothing persisted). |
+| `DBLOOM_DATA_DIR` | optional | path | `./data` | Store directory (the compose file mounts a volume at /data). |
+| **Audit** | | | | |
+| `DBLOOM_AUDIT_SINK` | optional | string | `stdout` | Extra audit destination: `stdout` (default, the audit JSON line always goes to stdout) or `file:/absolute/path` (append only, mode 0600, one JSON line per event). A failing file is buffered and retried; see the deploy guide. |
+| `DBLOOM_AUDIT_ANONYMISE_IP` | optional | enum (off, truncate, hash) | `off` | Address in stored, exported and file-sink audit records: `off`, `truncate` (IPv4 /24, IPv6 /48) or `hash` (HMAC under a server key subkey). The stdout line keeps the address. |
+| **Notices** | | | | |
+| `DBLOOM_NOTICE_BURST_FAILURES` | optional | int (3 to 20) | `10` | Failed sign-in steps for one account or one address within the window that raise a notice to administrators. |
+| `DBLOOM_NOTICE_BURST_MINUTES` | optional | int (1 to 60) | `10` | Window in minutes for the failed-attempt notice. |
+| `DBLOOM_NOTICE_LOCATION_DAYS` | optional | int (7 to 365) | `90` | Days an account remembers the networks (/24 IPv4, /48 IPv6) it signed in from; a sign-in from another network raises a notice to administrators. |
+| **Audit** | | | | |
+| `DBLOOM_AUDIT_RETENTION_DAYS` | optional | int (90 to 1095) | `365` | Days the audit log keeps rows; older rows are purged daily (the purge is itself audited). |
+| **Settings** | | | | |
+| `DBLOOM_SETTINGS_LOCK` | optional | list |  | Setting keys (e.g. mfaScope,loginFailures) the settings page shows read-only at their `.env` value or default; a stored value is ignored. An unknown key refuses startup. |
+| `DBLOOM_MAINTENANCE` | optional | bool | `false` | Maintenance mode forced on: users are refused, administrators and the CLI are not. The settings page cannot switch it off. |
+| `DBLOOM_LOGIN_NOTICE` | optional | string |  | Plain text shown above the sign-in form (at most 300 characters, no control characters). Default of the setting; the page may override it. |
+| **Targets** | | | | |
+| `DBLOOM_DIRECT_TARGETS` | conditional (direct mode: set this or DBLOOM_DIRECT_FREE_FORM_ACK) | list |  | Direct mode: servers users may connect to, host:port list (SEC-TGT-018). |
+| `DBLOOM_DIRECT_FREE_FORM_ACK` | conditional (direct mode: set this or DBLOOM_DIRECT_TARGETS) | bool | `false` | Direct mode: accept free-form targets (only behind other protections). |
+| `DBLOOM_ALLOW_LOOPBACK` | optional | bool | `false` | Allow loopback target addresses (SEC-TGT-030). |
+| `DBLOOM_ALLOW_PRIVATE` | optional | bool | `false` | Allow private target addresses (SEC-TGT-030). |
+| `DBLOOM_TARGET_TLS` | optional | enum (verify, skip-verify, off) | `verify` | TLS to targets. |
+| `DBLOOM_CONNECT_TIMEOUT_SECONDS` | optional | int | `10` | Connect timeout to targets in seconds. |
+| `DBLOOM_READ_ONLY` | optional | bool | `false` | Force every session read-only. |
+| `DBLOOM_STATEMENT_TIMEOUT_SECONDS` | optional | int | `30` | Statement timeout in seconds (greater than zero). |
+| **Sessions** | | | | |
+| `DBLOOM_SESSION_IDLE_MINUTES` | optional | int | `30` | Idle session timeout in minutes. |
+| `DBLOOM_SESSION_ABSOLUTE_HOURS` | optional | int | `12` | Absolute session lifetime in hours. |
+| **Import and export** | | | | |
+| `DBLOOM_TEMP_DIR` | optional | path |  | Staging and spool files; default <data dir>/tmp. |
+| `DBLOOM_TEMP_QUOTA_MIB` | optional | int (1 to 10000000) | `10240` | Total size of staged and spooled files in MiB. |
+| `DBLOOM_IMPORT_MAX_MIB` | optional | int (1 to 2048) | `2048` | Upper bound of the upload size in MiB. |
+| `DBLOOM_IMPORT_DIR` | optional | path |  | Enables importing files from a server folder. Absolute path. |
+| `DBLOOM_UPLOAD_DIR` | optional | path |  | Reported by the setup wizard only (auth/setup.ts). |
+| **Account mode** | | | | |
+| `DBLOOM_LOGIN_MODE` | optional | enum (account, direct) |  | Login mode: account or direct. Unset lets the setup wizard choose. |
+| `DBLOOM_AUTO_SETUP` | optional | enum (direct) |  | Headless direct-mode install (CI, e2e): `direct`. |
+| `DBLOOM_SETUP_TOKEN` | optional | secret |  | Fixed setup token (otherwise one is generated and printed). |
+| `DBLOOM_SETUP_TOKEN_MINUTES` | optional | int |  | Lifetime of the generated setup token. |
+| `DBLOOM_SETUP_NETWORKS` | optional | list |  | CIDR list that may reach setup (empty = any address). |
+| `DBLOOM_ADMIN_NETWORKS` | optional | list |  | CIDR list of administration networks (default loopback). |
+| `DBLOOM_SECRET_KEY` | conditional (account mode: set this or DBLOOM_SECRET_KEY_FILE) | secret |  | Server key (base64) for account mode. Never commit. |
+| `DBLOOM_SECRET_KEY_FILE` | conditional (account mode: set this or DBLOOM_SECRET_KEY) | path |  | File holding the server key. |
+| `DBLOOM_SECRET_KEY_PREVIOUS` | optional | secret |  | Previous server key during rotation. |
+| `DBLOOM_MFA_SCOPE` | optional | string |  | Auth setting override (file 26); validated by the auth module. |
+| `DBLOOM_MFA_ROLES` | optional | string |  | Auth setting override (file 26); validated by the auth module. |
+| `DBLOOM_MFA_GRACE_DAYS` | optional | string |  | Auth setting override (file 26); validated by the auth module. |
+| `DBLOOM_MFA_FACTORS` | optional | string |  | Auth setting override (file 26); validated by the auth module. |
+| `DBLOOM_PRIMARY_CREDENTIALS` | optional | string |  | Auth setting override (file 26); validated by the auth module. |
+| `DBLOOM_TOTP_WINDOW` | optional | string |  | Auth setting override (file 26); validated by the auth module. |
+| `DBLOOM_PASSWORD_MIN_LENGTH` | optional | string |  | Auth setting override (file 26); validated by the auth module. |
+| `DBLOOM_BREACHED_LIST` | optional | string |  | Auth setting override (file 26); validated by the auth module. |
+| `DBLOOM_BREACHED_CHECK` | optional | string |  | Auth setting override (file 26); validated by the auth module. |
+| `DBLOOM_ARGON2_MEMORY_MIB` | optional | string |  | Auth setting override (file 26); validated by the auth module. |
+| `DBLOOM_ARGON2_PASSES` | optional | string |  | Auth setting override (file 26); validated by the auth module. |
+| `DBLOOM_ARGON2_PARALLELISM` | optional | string |  | Auth setting override (file 26); validated by the auth module. |
+| `DBLOOM_VAULT_ARGON2_MEMORY_MIB` | optional | string |  | Auth setting override (file 26); validated by the auth module. |
+| `DBLOOM_VAULT_ARGON2_PASSES` | optional | string |  | Auth setting override (file 26); validated by the auth module. |
+| `DBLOOM_VAULT_ARGON2_PARALLELISM` | optional | string |  | Auth setting override (file 26); validated by the auth module. |
+| `DBLOOM_TEMP_PASSWORD_HOURS` | optional | string |  | Auth setting override (file 26); validated by the auth module. |
+| `DBLOOM_ADMIN_SESSION_IDLE_MINUTES` | optional | string |  | Auth setting override (file 26); validated by the auth module. |
+| `DBLOOM_ADMIN_SESSION_ABSOLUTE_HOURS` | optional | string |  | Auth setting override (file 26); validated by the auth module. |
+| `DBLOOM_SESSIONS_PER_USER` | optional | string |  | Auth setting override (file 26); validated by the auth module. |
+| `DBLOOM_SESSIONS_PER_ADMIN` | optional | string |  | Auth setting override (file 26); validated by the auth module. |
+| `DBLOOM_SESSIONS_AT_LIMIT` | optional | string |  | Auth setting override (file 26); validated by the auth module. |
+| `DBLOOM_LOGIN_FAILURES` | optional | string |  | Auth setting override (file 26); validated by the auth module. |
+| `DBLOOM_LOGIN_BACKOFF_CAP_MINUTES` | optional | string |  | Auth setting override (file 26); validated by the auth module. |
+| `DBLOOM_LOGIN_WINDOW_MINUTES` | optional | string |  | Auth setting override (file 26); validated by the auth module. |
+| `DBLOOM_LOGIN_ADDRESS_FAILURES` | optional | string |  | Auth setting override (file 26); validated by the auth module. |
+| `DBLOOM_INVITE_HOURS` | optional | string |  | Auth setting override (file 26); validated by the auth module. |
+| `DBLOOM_RECOVERY_LINK_HOURS` | optional | string |  | Auth setting override (file 26); validated by the auth module. |
+| `DBLOOM_VAULT_PASSPHRASE_MIN` | optional | string |  | Auth setting override (file 26); validated by the auth module. |
+| `DBLOOM_VAULT_AUTOLOCK_MINUTES` | optional | string |  | Auth setting override (file 26); validated by the auth module. |
+| `DBLOOM_PERSONAL_PROFILES` | optional | string |  | Auth setting override (file 26); validated by the auth module. |
+| `DBLOOM_ALLOW_EMPTY_TARGET_PASSWORD` | optional | string |  | Auth setting override (file 26); validated by the auth module. |
+| `DBLOOM_DENY_ROOT_TARGET` | optional | string |  | Auth setting override (file 26); validated by the auth module. |
+| `DBLOOM_LOGIN_RECALL` | optional | string |  | Auth setting override (file 26); validated by the auth module. |
+| `DBLOOM_STEPUP_MINUTES` | optional | string |  | Auth setting override (file 26); validated by the auth module. |
+| `DBLOOM_AUTOREVERT_MINUTES` | optional | string |  | Auth setting override (file 26); validated by the auth module. |
+| `DBLOOM_ASSISTANT_ENABLED` | optional | string |  | Auth setting override (file 26); validated by the auth module. |
+| `DBLOOM_AI_MODEL` | optional | string |  | Auth setting override (file 26); validated by the auth module. |
+| `DBLOOM_ASSISTANT_AUTO_ALLOWED` | optional | string |  | Auth setting override (file 26); validated by the auth module. |
+| `DBLOOM_ASSISTANT_HIDE_PII_NAMES` | optional | string |  | Auth setting override (file 26); validated by the auth module. |
+| **AI assistant** | | | | |
+| `DBLOOM_AI_BASE_URL` | optional | string |  | Base URL of an OpenAI-compatible chat API (https://host/v1). Empty = the assistant is unavailable and nothing is sent anywhere. |
+| `DBLOOM_AI_API_KEY` | optional | secret |  | API key of the AI service. Never shown, never logged. |
+| `DBLOOM_AI_API_KEY_FILE` | optional | path |  | File holding the API key (Docker secret). |
+| `DBLOOM_AI_ALLOW_PRIVATE` | optional | bool | `false` | Allow the AI endpoint on a private or loopback address (a local model server). |
+| `DBLOOM_AI_MAX_ROWS` | optional | int (1 to 200) | `50` | Rows of one result that may go to the AI (PII cells as tokens). |
+| `DBLOOM_AI_MAX_STEPS` | optional | int (1 to 20) | `8` | Model-to-tool round trips for one user message. |
+| `DBLOOM_PII_COLUMNS` | optional | list |  | Columns whose values the AI never sees, as db.table.column (a part may be *), for example `*.*.email,shop.customers.*`. Added to the markings kept in the store. |
+| **SQL** | | | | |
+| `DBLOOM_SQL_DISABLED` | optional | bool | `false` | Turns the SQL module off. |
+| `DBLOOM_SQL_PARSER` | optional | string |  | `off` is the parser kill switch. |
+| `DBLOOM_SQL_ROW_CAP` | optional | int |  | Result row cap. |
+| `DBLOOM_SQL_RESPONSE_MB` | optional | int |  | Response size cap in MB. |
+| `DBLOOM_SQL_CELL_KB` | optional | int |  | Cell size cap in KB. |
+| `DBLOOM_SQL_MAX_STATEMENTS` | optional | int |  | Statements per run. |
+| `DBLOOM_SQL_MAX_CONCURRENT_RUNS` | optional | int |  | Concurrent runs per session. |
+| **Rows** | | | | |
+| `DBLOOM_ROWS_MAX_PAGE_SIZE` | optional | int |  | Largest page size. |
+| `DBLOOM_ROWS_EXACT_COUNT_THRESHOLD` | optional | int |  | Exact count threshold. |
+| `DBLOOM_ROWS_VIEW_COUNT_CAP` | optional | int |  | Count cap of views. |
+| `DBLOOM_ROWS_CELL_BYTES` | optional | int |  | Cell size cap in bytes. |
+| `DBLOOM_ROWS_UPLOAD_BYTES` | optional | int |  | Cell upload cap in bytes. |
+| `DBLOOM_ROWS_BULK_SIZE` | optional | int |  | Bulk operation size. |
+| `DBLOOM_ROWS_INSERT_ROWS` | optional | int |  | Rows per insert form. |
 <!-- env-table:end -->

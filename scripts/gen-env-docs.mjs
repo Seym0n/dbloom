@@ -11,15 +11,20 @@ const DOC = 'docs/deploy.md'
 const cell = (text) => String(text).replace(/\|/g, '\\|').replace(/\r?\n/g, ' ')
 
 export function renderTable(vars) {
-  const rows = ['| Variable | Type | Default | Description |', '|---|---|---|---|']
+  const rows = ['| Variable | Need | Type | Default | Description |', '|---|---|---|---|---|']
+  const need = (e) => {
+    if (e.need === 'required') return `**required**${e.needWhen ? ` (${cell(e.needWhen)})` : ''}`
+    if (e.need === 'conditional') return `conditional${e.needWhen ? ` (${cell(e.needWhen)})` : ''}`
+    return 'optional'
+  }
   let group = ''
   for (const e of vars) {
     if (e.group !== group) {
       group = e.group
-      rows.push(`| **${cell(group)}** | | | |`)
+      rows.push(`| **${cell(group)}** | | | | |`)
     }
     const range = e.min !== undefined && e.max !== undefined ? ` (${e.min} to ${e.max})` : e.values ? ` (${e.values.join(', ')})` : ''
-    rows.push(`| \`${e.name}\` | ${e.kind}${range} | ${e.default ? `\`${cell(e.default)}\`` : ''} | ${cell(e.doc)} |`)
+    rows.push(`| \`${e.name}\` | ${need(e)} | ${e.kind}${range} | ${e.default ? `\`${cell(e.default)}\`` : ''} | ${cell(e.doc)} |`)
   }
   return rows.join('\n')
 }

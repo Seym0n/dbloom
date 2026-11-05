@@ -21,7 +21,14 @@ LABEL org.opencontainers.image.title="DBLoom" \
 ENV NODE_ENV=production PORT=3000 DBLOOM_DATA_DIR=/data DBLOOM_HOST=0.0.0.0
 WORKDIR /app
 COPY --from=build /app/.output ./.output
-RUN mkdir /data && chown node:node /data
+# Runtime hardening: the image only runs `node`, so npm, yarn and corepack (bundled in the base image, with their own
+# findings) are removed; apt is upgraded because the pinned digest can lag the Debian security fix (CVE-2026-109518).
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends --only-upgrade apt libapt-pkg6.0 \
+    && rm -rf /var/lib/apt/lists/* /var/cache/apt/* \
+    && rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack /opt/yarn-* \
+       /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack /usr/local/bin/yarn /usr/local/bin/yarnpkg \
+    && mkdir /data && chown node:node /data
 USER node
 VOLUME /data
 EXPOSE 3000

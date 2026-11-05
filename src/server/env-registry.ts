@@ -16,11 +16,14 @@ export type EnvVar = {
   min?: number
   max?: number
   values?: readonly string[]
+  /** `required`: startup is refused without it (under `needWhen`). `conditional`: needed only in the mode `needWhen` names. Absent: optional. */
+  need?: 'required' | 'conditional'
+  needWhen?: string
   /** Module that parses it: `config` (strict here) or the owning module. */
   owner: string
 }
 
-type Extra = Partial<Pick<EnvVar, 'min' | 'max' | 'values'>>
+type Extra = Partial<Pick<EnvVar, 'min' | 'max' | 'values' | 'need' | 'needWhen'>>
 const v = (owner: string, group: string, name: string, kind: VarKind, def: string, doc: string, extra: Extra = {}): EnvVar => ({
   owner,
   group,
@@ -37,9 +40,9 @@ const authOverride = (name: string): EnvVar => v('auth', 'Account mode', name, '
 export const ENV_VARS: readonly EnvVar[] = [
   v(C, 'Listener', 'DBLOOM_HOST', 'string', '127.0.0.1', 'Bind address. A non-loopback value needs DBLOOM_PUBLIC_ORIGIN and DBLOOM_TRUST_PROXY. The image sets 0.0.0.0.'),
   v(C, 'Listener', 'PORT', 'int', '3000', 'Listen port.', { min: 1, max: 65535 }),
-  v(C, 'Listener', 'DBLOOM_PUBLIC_ORIGIN', 'string', '', 'Public origin scheme://host[:port], no path. https unless the host is loopback. Required for account mode and non-loopback bind.'),
+  v(C, 'Listener', 'DBLOOM_PUBLIC_ORIGIN', 'string', '', 'Public origin scheme://host[:port], no path. https unless the host is loopback. Required for account mode and non-loopback bind.', { need: 'required', needWhen: 'always in the Docker image, which binds 0.0.0.0; optional on a loopback bind' }),
   v(C, 'Listener', 'DBLOOM_ALLOWED_HOSTS', 'list', '', 'Comma separated Host values answered (default: host of the origin). Wildcards only on a loopback bind.'),
-  v(C, 'Listener', 'DBLOOM_TRUST_PROXY', 'list', '', 'Trusted reverse proxies as CIDR list, e.g. 10.0.0.0/8,172.16.0.0/12. Legacy `true` is accepted with a warning.'),
+  v(C, 'Listener', 'DBLOOM_TRUST_PROXY', 'list', '', 'Trusted reverse proxies as CIDR list, e.g. 10.0.0.0/8,172.16.0.0/12. Legacy `true` is accepted with a warning.', { need: 'required', needWhen: 'always in the Docker image, which binds 0.0.0.0; optional on a loopback bind' }),
   v(C, 'Listener', 'DBLOOM_PROXY_HOPS', 'int', '0', 'Optional number of trusted proxy hops in X-Forwarded-For (0 = rightmost untrusted entry).', { min: 0, max: 16 }),
   v(C, 'Listener', 'DBLOOM_TLS', 'enum', 'proxy', 'TLS is terminated by a `proxy`. `own` is reserved and refused.', { values: ['proxy', 'own'] }),
   v(C, 'Listener', 'DBLOOM_HSTS', 'enum', 'on', 'Strict-Transport-Security on https origins. `off` is allowed with a warning.', { values: ['on', 'off'] }),
@@ -69,8 +72,8 @@ export const ENV_VARS: readonly EnvVar[] = [
   v('auth', 'Settings', 'DBLOOM_MAINTENANCE', 'bool', 'false', 'Maintenance mode forced on: users are refused, administrators and the CLI are not. The settings page cannot switch it off.'),
   v('auth', 'Settings', 'DBLOOM_LOGIN_NOTICE', 'string', '', 'Plain text shown above the sign-in form (at most 300 characters, no control characters). Default of the setting; the page may override it.'),
 
-  v(C, 'Targets', 'DBLOOM_DIRECT_TARGETS', 'list', '', 'Direct mode: servers users may connect to, host:port list (SEC-TGT-018).'),
-  v(C, 'Targets', 'DBLOOM_DIRECT_FREE_FORM_ACK', 'bool', 'false', 'Direct mode: accept free-form targets (only behind other protections).'),
+  v(C, 'Targets', 'DBLOOM_DIRECT_TARGETS', 'list', '', 'Direct mode: servers users may connect to, host:port list (SEC-TGT-018).', { need: 'conditional', needWhen: 'direct mode: set this or DBLOOM_DIRECT_FREE_FORM_ACK' }),
+  v(C, 'Targets', 'DBLOOM_DIRECT_FREE_FORM_ACK', 'bool', 'false', 'Direct mode: accept free-form targets (only behind other protections).', { need: 'conditional', needWhen: 'direct mode: set this or DBLOOM_DIRECT_TARGETS' }),
   v(C, 'Targets', 'DBLOOM_ALLOW_LOOPBACK', 'bool', 'false', 'Allow loopback target addresses (SEC-TGT-030).'),
   v(C, 'Targets', 'DBLOOM_ALLOW_PRIVATE', 'bool', 'false', 'Allow private target addresses (SEC-TGT-030).'),
   v(C, 'Targets', 'DBLOOM_TARGET_TLS', 'enum', 'verify', 'TLS to targets.', { values: ['verify', 'skip-verify', 'off'] }),
@@ -93,8 +96,8 @@ export const ENV_VARS: readonly EnvVar[] = [
   v('auth', 'Account mode', 'DBLOOM_SETUP_TOKEN_MINUTES', 'int', '', 'Lifetime of the generated setup token.'),
   v('auth', 'Account mode', 'DBLOOM_SETUP_NETWORKS', 'list', '', 'CIDR list that may reach setup (empty = any address).'),
   v('auth', 'Account mode', 'DBLOOM_ADMIN_NETWORKS', 'list', '', 'CIDR list of administration networks (default loopback).'),
-  v('auth', 'Account mode', 'DBLOOM_SECRET_KEY', 'secret', '', 'Server key (base64) for account mode. Never commit.'),
-  v('auth', 'Account mode', 'DBLOOM_SECRET_KEY_FILE', 'path', '', 'File holding the server key.'),
+  v('auth', 'Account mode', 'DBLOOM_SECRET_KEY', 'secret', '', 'Server key (base64) for account mode. Never commit.', { need: 'conditional', needWhen: 'account mode: set this or DBLOOM_SECRET_KEY_FILE' }),
+  v('auth', 'Account mode', 'DBLOOM_SECRET_KEY_FILE', 'path', '', 'File holding the server key.', { need: 'conditional', needWhen: 'account mode: set this or DBLOOM_SECRET_KEY' }),
   v('auth', 'Account mode', 'DBLOOM_SECRET_KEY_PREVIOUS', 'secret', '', 'Previous server key during rotation.'),
   ...[
     'DBLOOM_MFA_SCOPE', 'DBLOOM_MFA_ROLES', 'DBLOOM_MFA_GRACE_DAYS', 'DBLOOM_MFA_FACTORS', 'DBLOOM_PRIMARY_CREDENTIALS',
@@ -137,6 +140,13 @@ export const ENV_VARS: readonly EnvVar[] = [
 export const ENV_NAMES: ReadonlySet<string> = new Set(ENV_VARS.map((e) => e.name))
 
 /** `.env.example` text generated from the registry (every variable, commented out with its default). */
+/** `Required (when)`, `Conditional (when)` or `Optional`: used by `.env.example` and the variable table of docs/deploy.md. */
+export function needText(e: Pick<EnvVar, 'need' | 'needWhen'>): string {
+  if (e.need === 'required') return `Required${e.needWhen ? ` (${e.needWhen})` : ''}`
+  if (e.need === 'conditional') return `Conditional${e.needWhen ? ` (${e.needWhen})` : ''}`
+  return 'Optional'
+}
+
 export function renderEnvExample(): string {
   const out = ['# Copy to .env. Real environment variables win over this file. Generated from src/server/env-registry.ts.']
   let group = ''
@@ -145,7 +155,7 @@ export function renderEnvExample(): string {
       group = e.group
       out.push('', `# --- ${group} ---`)
     }
-    out.push(`# ${e.doc}`, `#${e.name}=${e.default}`)
+    out.push(`# ${e.doc}`, `# ${needText(e)}.`, `#${e.name}=${e.default}`)
   }
   return out.join('\n') + '\n'
 }

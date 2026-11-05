@@ -199,7 +199,8 @@ describe.each(PRODUCTS)('export jobs on $name', ({ port, product }) => {
       expect(job.result?.error?.code).toBe('cancelled')
       expect((await download(jobId)).status).toBe(409)
       expect(existsSync(join(root, 'nothing'))).toBe(false)
-      expect(readdirSync(root).filter((f) => /^[0-9a-f]{32}$/.test(f))).toHaveLength(0)
+      // the job is terminal as soon as the cancel lands; the spool file goes when the export run unwinds, a moment later
+      await vi.waitFor(() => expect(readdirSync(root).filter((f) => /^[0-9a-f]{32}$/.test(f))).toHaveLength(0), { timeout: 5000 })
     }
     expect(auditLines('io.job.cancel')).toHaveLength(1)
   })
