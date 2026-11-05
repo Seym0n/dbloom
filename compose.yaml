@@ -1,5 +1,7 @@
 # Reference deployment (SPEC/27 FR-SVR-013): one instance, one volume, no published port. A reverse proxy (Coolify's
 # Traefik) routes to container port 3000. For a local run add compose.local.yaml.
+# Nothing is required in .env: without DBLOOM_PUBLIC_ORIGIN and DBLOOM_TRUST_PROXY the app derives the origin from the
+# proxy and trusts private-range peers (the exposure report says so). Account mode still needs DBLOOM_PUBLIC_ORIGIN.
 services:
   dbloom:
     build: .
@@ -9,9 +11,6 @@ services:
     env_file:
       - path: .env
         required: false
-    environment:
-      DBLOOM_PUBLIC_ORIGIN: ${DBLOOM_PUBLIC_ORIGIN:?set DBLOOM_PUBLIC_ORIGIN (https URL) in .env}
-      DBLOOM_TRUST_PROXY: ${DBLOOM_TRUST_PROXY:?set DBLOOM_TRUST_PROXY (CIDR of the reverse proxy network) in .env}
     volumes:
       - dbloom-data:/data
     read_only: true

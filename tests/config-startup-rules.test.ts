@@ -8,14 +8,13 @@ const nonLoop = { DBLOOM_HOST: '0.0.0.0', DBLOOM_PUBLIC_ORIGIN: ORIGIN, DBLOOM_T
 
 describe('bind rule (FR-SVR-002, Q2)', () => {
   const refused: [string, Env, string][] = [
-    ['0.0.0.0 without origin', { DBLOOM_HOST: '0.0.0.0', DBLOOM_TRUST_PROXY: PROXY }, 'DBLOOM_PUBLIC_ORIGIN'],
-    ['0.0.0.0 without proxy', { DBLOOM_HOST: '0.0.0.0', DBLOOM_PUBLIC_ORIGIN: ORIGIN }, 'DBLOOM_TRUST_PROXY'],
-    ['0.0.0.0 with proxy=false', { ...nonLoop, DBLOOM_TRUST_PROXY: 'false' }, 'DBLOOM_TRUST_PROXY'],
-    ['LAN address bare', { DBLOOM_HOST: '192.168.1.5' }, 'DBLOOM_PUBLIC_ORIGIN'],
-    ['IPv6 any', { DBLOOM_HOST: '::', DBLOOM_PUBLIC_ORIGIN: ORIGIN }, 'DBLOOM_TRUST_PROXY'],
     ['own TLS on loopback', { DBLOOM_TLS: 'own' }, 'DBLOOM_TLS'],
     ['own TLS with everything', { ...nonLoop, DBLOOM_TLS: 'own' }, 'DBLOOM_TLS'],
-    ['bad proxy list', { ...nonLoop, DBLOOM_TRUST_PROXY: 'proxy.example.com' }, 'DBLOOM_TRUST_PROXY'],
+    [
+      'bad proxy list',
+      { ...nonLoop, DBLOOM_TRUST_PROXY: 'proxy.example.com' },
+      'DBLOOM_TRUST_PROXY',
+    ],
   ]
   it.each(refused)('refuses %s', (_n, env, name) => {
     expect(() => loadConfig(env)).toThrow(new RegExp(name))
@@ -27,8 +26,17 @@ describe('bind rule (FR-SVR-002, Q2)', () => {
     ['::1', { DBLOOM_HOST: '::1' }],
     [
       'image + compose',
-      { ...nonLoop, DBLOOM_TRUST_PROXY: '172.16.0.0/12,fd00::/8', NODE_ENV: 'production', DBLOOM_DATA_DIR: '/data', PORT: '3000' },
+      {
+        ...nonLoop,
+        DBLOOM_TRUST_PROXY: '172.16.0.0/12,fd00::/8',
+        NODE_ENV: 'production',
+        DBLOOM_DATA_DIR: '/data',
+        PORT: '3000',
+      },
     ],
+    ['0.0.0.0 bare (zero-config)', { DBLOOM_HOST: '0.0.0.0' }],
+    ['LAN address bare', { DBLOOM_HOST: '192.168.1.5' }],
+    ['IPv6 any with origin only', { DBLOOM_HOST: '::', DBLOOM_PUBLIC_ORIGIN: ORIGIN }],
     ['legacy proxy true', { ...nonLoop, DBLOOM_TRUST_PROXY: 'true' }],
   ]
   it.each(accepted)('accepts %s', (_n, env) => {
@@ -41,6 +49,33 @@ describe('bind rule (FR-SVR-002, Q2)', () => {
     expect(config.trustedProxies).toEqual(['10.0.0.0/8'])
     expect(config.trustProxy).toBe(true)
     expect(warnings).toEqual([])
+  })
+})
+
+describe('zero-config bind (no origin, no proxy list)', () => {
+  it('derives the origin and trusts private-range peers, with no deprecation warning', () => {
+    const { config, warnings } = loadConfigWithWarnings({ DBLOOM_HOST: '0.0.0.0' })
+    expect(config.originDerived).toBe(true)
+    expect(config.publicOrigin).toBeUndefined()
+    expect(config.allowedHosts).toEqual(['*'])
+    expect(config.trustProxyImplicit).toBe(true)
+    expect(config.trustProxy).toBe(true)
+    expect(warnings).toEqual([])
+  })
+  it('an explicit origin or proxy list switches each part off', () => {
+    const { config } = loadConfigWithWarnings(nonLoop)
+    expect(config.originDerived).toBe(false)
+    expect(config.trustProxyImplicit).toBe(false)
+  })
+  it('explicit allowed hosts still reject wildcards on a non-loopback bind', () => {
+    expect(() => loadConfig({ DBLOOM_HOST: '0.0.0.0', DBLOOM_ALLOWED_HOSTS: '*' })).toThrow(
+      /wildcards/,
+    )
+  })
+  it('loopback bind never derives', () => {
+    const { config } = loadConfigWithWarnings({})
+    expect(config.originDerived).toBe(false)
+    expect(config.trustProxyImplicit).toBe(false)
   })
 })
 
@@ -60,37 +95,57 @@ describe('legacy DBLOOM_TRUST_PROXY (Q4)', () => {
 })
 
 describe('public origin and allowed hosts (FR-SVR-003)', () => {
-  const bad = ['db.example.com', 'ftp://x.com', 'https://x.com/path', 'https://u:p@x.com', 'https://x.com?a=1', 'http://db.example.com', 'http://10.0.0.1']
+  const bad = [
+    'db.example.com',
+    'ftp://x.com',
+    'https://x.com/path',
+    'https://u:p@x.com',
+    'https://x.com?a=1',
+    'http://db.example.com',
+    'http://10.0.0.1',
+  ]
   it.each(bad)('refuses origin %s', (o) => {
     expect(() => loadConfig({ DBLOOM_PUBLIC_ORIGIN: o })).toThrow(/DBLOOM_PUBLIC_ORIGIN/)
   })
-  const good = ['http://localhost:3000', 'http://127.0.0.1:3000', 'http://[::1]:3000', 'https://db.example.com:8443']
+  const good = [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'http://[::1]:3000',
+    'https://db.example.com:8443',
+  ]
   it.each(good)('accepts origin %s', (o) => {
     expect(loadConfig({ DBLOOM_PUBLIC_ORIGIN: o }).publicOrigin).toBe(new URL(o).origin)
   })
   it('default allowed hosts is the origin host including a non-default port', () => {
-    expect(loadConfig({ DBLOOM_PUBLIC_ORIGIN: 'https://DB.example.com:8443' }).allowedHosts).toEqual(['db.example.com:8443'])
+    expect(
+      loadConfig({ DBLOOM_PUBLIC_ORIGIN: 'https://DB.example.com:8443' }).allowedHosts,
+    ).toEqual(['db.example.com:8443'])
   })
   it('explicit list is lower-cased and trimmed', () => {
-    expect(loadConfig({ DBLOOM_ALLOWED_HOSTS: ' A.example.com , b.example.com:8080 ' }).allowedHosts).toEqual([
-      'a.example.com',
-      'b.example.com:8080',
-    ])
+    expect(
+      loadConfig({ DBLOOM_ALLOWED_HOSTS: ' A.example.com , b.example.com:8080 ' }).allowedHosts,
+    ).toEqual(['a.example.com', 'b.example.com:8080'])
   })
   it.each(['a b', 'x/y', 'http://x.com', 'x..', '-x.com'])('refuses malformed host %j', (h) => {
     expect(() => loadConfig({ DBLOOM_ALLOWED_HOSTS: h })).toThrow(/DBLOOM_ALLOWED_HOSTS/)
   })
   it('wildcards: loopback bind only', () => {
-    expect(loadConfig({ DBLOOM_ALLOWED_HOSTS: '*.localhost' }).allowedHosts).toEqual(['*.localhost'])
+    expect(loadConfig({ DBLOOM_ALLOWED_HOSTS: '*.localhost' }).allowedHosts).toEqual([
+      '*.localhost',
+    ])
     for (const h of ['*', '*.example.com']) {
-      expect(() => loadConfig({ ...nonLoop, DBLOOM_ALLOWED_HOSTS: h })).toThrow(/DBLOOM_ALLOWED_HOSTS/)
+      expect(() => loadConfig({ ...nonLoop, DBLOOM_ALLOWED_HOSTS: h })).toThrow(
+        /DBLOOM_ALLOWED_HOSTS/,
+      )
     }
   })
 })
 
 describe('store and mode rules (FR-SVR-017)', () => {
   it('stateless with account mode is refused', () => {
-    expect(() => loadConfig({ DBLOOM_STORE: 'none', DBLOOM_LOGIN_MODE: 'account' })).toThrow(/DBLOOM_STORE=none/)
+    expect(() => loadConfig({ DBLOOM_STORE: 'none', DBLOOM_LOGIN_MODE: 'account' })).toThrow(
+      /DBLOOM_STORE=none/,
+    )
   })
   const table: [Env, 'sqlite' | 'none'][] = [
     [{ DBLOOM_STORE: 'none' }, 'none'],
@@ -105,8 +160,14 @@ describe('store and mode rules (FR-SVR-017)', () => {
 
 describe('log and HSTS rules', () => {
   it('debug in production needs the acknowledgement and then warns', () => {
-    expect(() => loadConfig({ NODE_ENV: 'production', DBLOOM_LOG_LEVEL: 'debug' })).toThrow(/DBLOOM_ALLOW_DEBUG/)
-    const r = loadConfigWithWarnings({ NODE_ENV: 'production', DBLOOM_LOG_LEVEL: 'debug', DBLOOM_ALLOW_DEBUG: 'true' })
+    expect(() => loadConfig({ NODE_ENV: 'production', DBLOOM_LOG_LEVEL: 'debug' })).toThrow(
+      /DBLOOM_ALLOW_DEBUG/,
+    )
+    const r = loadConfigWithWarnings({
+      NODE_ENV: 'production',
+      DBLOOM_LOG_LEVEL: 'debug',
+      DBLOOM_ALLOW_DEBUG: 'true',
+    })
     expect(r.warnings).toHaveLength(1)
     expect(loadConfig({ DBLOOM_LOG_LEVEL: 'debug' }).logLevel).toBe('debug')
   })
@@ -134,8 +195,15 @@ describe('helpers', () => {
     expect(parseCidr(input)).toBe(out)
   })
   const hosts: [string, boolean][] = [
-    ['127.0.0.1', true], ['127.9.9.9', true], ['localhost', true], ['[::1]', true], ['::1', true],
-    ['0.0.0.0', false], ['::', false], ['10.0.0.1', false], ['example.com', false],
+    ['127.0.0.1', true],
+    ['127.9.9.9', true],
+    ['localhost', true],
+    ['[::1]', true],
+    ['::1', true],
+    ['0.0.0.0', false],
+    ['::', false],
+    ['10.0.0.1', false],
+    ['example.com', false],
   ]
   it.each(hosts)('isLoopbackHost(%s) = %s', (h, r) => {
     expect(isLoopbackHost(h)).toBe(r)

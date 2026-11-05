@@ -36,6 +36,8 @@ export function parsePublicOrigin(text: string | undefined | null): OriginResult
 export type OriginConfig = NetConfig & {
   publicOrigin?: string | undefined
   allowedHosts: readonly string[]
+  /** No configured origin on a non-loopback bind: a trusted peer's `X-Forwarded-Proto` decides the scheme. */
+  originDerived?: boolean | undefined
 }
 
 export type EffectiveScheme = {
@@ -62,6 +64,8 @@ export function effectiveScheme(
   const parts = headers.get('x-forwarded-proto')?.split(',')
   const last = parts?.[parts.length - 1]?.trim().toLowerCase()
   const forwarded = last === 'http' || last === 'https' ? last : undefined
+  // Derived origin: nothing is configured to disagree with, so the trusted proxy's scheme is the scheme.
+  if (cfg.originDerived && !origin) return { scheme: forwarded ?? scheme, ...(forwarded ? { forwarded } : {}), mismatch: false }
   return { scheme, ...(forwarded ? { forwarded } : {}), mismatch: origin?.ok === true && forwarded !== undefined && forwarded !== scheme }
 }
 

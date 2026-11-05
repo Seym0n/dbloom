@@ -36,13 +36,24 @@ describe('exposure report', () => {
   })
 
   it('never prints secret values', () => {
-    const r = run({ ...topologies['local default']!, DBLOOM_SECRET_KEY: 'sUpErSeCrEt123', DBLOOM_SETUP_TOKEN: 'tok-abc' })
+    const r = run({
+      ...topologies['local default']!,
+      DBLOOM_SECRET_KEY: 'sUpErSeCrEt123',
+      DBLOOM_SETUP_TOKEN: 'tok-abc',
+    })
     expect(r.stdout).not.toMatch(/sUpErSeCrEt123|tok-abc/)
   })
 
   it('reports a refused configuration', () => {
-    const r = run({ DBLOOM_HOST: '0.0.0.0' })
+    const r = run({ DBLOOM_TLS: 'own' })
     expect(r.exitCode).toBe(1)
-    expect(r.stdout).toContain('DBLOOM_PUBLIC_ORIGIN is required')
+    expect(r.stdout).toContain('DBLOOM_TLS=own')
+  })
+
+  it('warns when the origin and the proxy list are left to defaults', () => {
+    const r = run({ DBLOOM_HOST: '0.0.0.0' })
+    expect(r.exitCode).toBe(0)
+    expect(r.stdout).toContain('derived from each request')
+    expect(r.stdout).toContain('any private-range peer is trusted')
   })
 })

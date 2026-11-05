@@ -38,11 +38,11 @@ const C = 'config'
 const authOverride = (name: string): EnvVar => v('auth', 'Account mode', name, 'string', '', 'Auth setting override (file 26); validated by the auth module.')
 
 export const ENV_VARS: readonly EnvVar[] = [
-  v(C, 'Listener', 'DBLOOM_HOST', 'string', '127.0.0.1', 'Bind address. A non-loopback value needs DBLOOM_PUBLIC_ORIGIN and DBLOOM_TRUST_PROXY. The image sets 0.0.0.0.'),
+  v(C, 'Listener', 'DBLOOM_HOST', 'string', '127.0.0.1', 'Bind address. The image sets 0.0.0.0. On a non-loopback bind without DBLOOM_PUBLIC_ORIGIN and DBLOOM_TRUST_PROXY the app derives the origin from the proxy and trusts private-range peers (exposure warnings).'),
   v(C, 'Listener', 'PORT', 'int', '3000', 'Listen port.', { min: 1, max: 65535 }),
-  v(C, 'Listener', 'DBLOOM_PUBLIC_ORIGIN', 'string', '', 'Public origin scheme://host[:port], no path. https unless the host is loopback. Required for account mode and non-loopback bind.', { need: 'required', needWhen: 'always in the Docker image, which binds 0.0.0.0; optional on a loopback bind' }),
+  v(C, 'Listener', 'DBLOOM_PUBLIC_ORIGIN', 'string', '', 'Public origin scheme://host[:port], no path. https unless the host is loopback. Without it (direct mode) the origin, scheme and Host come from each request through the trusted proxy.', { need: 'conditional', needWhen: 'account mode, where passkeys and links need a fixed origin; recommended everywhere' }),
   v(C, 'Listener', 'DBLOOM_ALLOWED_HOSTS', 'list', '', 'Comma separated Host values answered (default: host of the origin). Wildcards only on a loopback bind.'),
-  v(C, 'Listener', 'DBLOOM_TRUST_PROXY', 'list', '', 'Trusted reverse proxies as CIDR list, e.g. 10.0.0.0/8,172.16.0.0/12. Legacy `true` is accepted with a warning.', { need: 'required', needWhen: 'always in the Docker image, which binds 0.0.0.0; optional on a loopback bind' }),
+  v(C, 'Listener', 'DBLOOM_TRUST_PROXY', 'list', '', 'Trusted reverse proxies as CIDR list, e.g. 10.0.0.0/8,172.16.0.0/12. Default on a non-loopback bind: any private-range peer (exposure warning). Legacy `true` is accepted with a warning.'),
   v(C, 'Listener', 'DBLOOM_PROXY_HOPS', 'int', '0', 'Optional number of trusted proxy hops in X-Forwarded-For (0 = rightmost untrusted entry).', { min: 0, max: 16 }),
   v(C, 'Listener', 'DBLOOM_TLS', 'enum', 'proxy', 'TLS is terminated by a `proxy`. `own` is reserved and refused.', { values: ['proxy', 'own'] }),
   v(C, 'Listener', 'DBLOOM_HSTS', 'enum', 'on', 'Strict-Transport-Security on https origins. `off` is allowed with a warning.', { values: ['on', 'off'] }),
@@ -140,7 +140,7 @@ export const ENV_VARS: readonly EnvVar[] = [
 export const ENV_NAMES: ReadonlySet<string> = new Set(ENV_VARS.map((e) => e.name))
 
 /** `.env.example` text generated from the registry (every variable, commented out with its default). */
-/** `Required (when)`, `Conditional (when)` or `Optional`: used by `.env.example` and the variable table of docs/deploy.md. */
+/** `Required (when)`, `Conditional (when)` or `Optional`: used by `.env.example` and the variable table of docs-temp/deploy.md. */
 export function needText(e: Pick<EnvVar, 'need' | 'needWhen'>): string {
   if (e.need === 'required') return `Required${e.needWhen ? ` (${e.needWhen})` : ''}`
   if (e.need === 'conditional') return `Conditional${e.needWhen ? ` (${e.needWhen})` : ''}`

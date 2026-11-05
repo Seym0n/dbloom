@@ -34,18 +34,22 @@ const list = (xs: string[]) => (xs.length === 0 ? '(none)' : xs.join(', '))
 export function buildExposure(config: Config, env: NodeJS.ProcessEnv, configWarnings: string[] = []): ExposureReport {
   const loginMode = env.DBLOOM_LOGIN_MODE?.trim() || (config.store === 'none' ? 'direct' : 'chosen by setup wizard')
   const loopbackBind = isLoopbackBind(config.host)
-  const scheme = config.publicOrigin ? config.publicOrigin.split(':')[0]! : 'http (loopback only)'
+  const scheme = config.publicOrigin ? config.publicOrigin.split(':')[0]! : config.originDerived ? 'from X-Forwarded-Proto' : 'http (loopback only)'
   const direct = loginMode === 'direct'
   const freeForm = direct && config.allowedTargets.length === 0 && config.freeFormAck
 
   const lines: ExposureReport['lines'] = [
     ['bind', `${config.host}:${config.port}${loopbackBind ? ' (loopback)' : ''}`],
-    ['public origin', config.publicOrigin ?? '(unset)'],
+    ['public origin', config.publicOrigin ?? (config.originDerived ? '(derived from each request via the proxy)' : '(unset)')],
     ['scheme', scheme],
     ['allowed hosts', list(config.allowedHosts)],
     [
       'trusted proxies',
-      config.trustProxyLegacy ? 'legacy: any private-range peer' : list(config.trustedProxies),
+      config.trustProxyImplicit
+        ? 'any private-range peer (default)'
+        : config.trustProxyLegacy
+          ? 'legacy: any private-range peer'
+          : list(config.trustedProxies),
     ],
     ['proxy hops', config.proxyHops > 0 ? String(config.proxyHops) : '(unused)'],
     [
@@ -77,11 +81,13 @@ export function buildExposure(config: Config, env: NodeJS.ProcessEnv, configWarn
   const items: ExposureWarning[] = configWarnings.map((text) => ({ id: configWarningId(text), text }))
   const warn = (id: string, text: string) => void items.push({ id, text })
   if (!loopbackBind && config.publicOrigin?.startsWith('http:')) warn('origin-not-https', 'Public origin is not https')
-  if (config.trustProxyLegacy) warn('legacy-trust-proxy', 'Legacy trust-proxy accepts any private-range peer')
+  if (config.originDerived) warn('origin-derived', 'No public origin is set: the origin comes from each request, and any Host reaching the proxy is answered')
+  if (config.trustProxyImplicit) warn('implicit-trust-proxy', 'No trusted proxy list is set: any private-range peer is trusted; set DBLOOM_TRUST_PROXY to narrow it')
+  else if (config.trustProxyLegacy) warn('legacy-trust-proxy', 'Legacy trust-proxy accepts any private-range peer')
   if (freeForm) warn('direct-free-form', 'Direct mode accepts any database target (free-form)')
   if (config.tls === 'skip-verify' || config.tls === 'off') warn('target-tls', `Target TLS is ${config.tls}`)
   if (config.allowLoopback || config.allowPrivate) warn('private-targets', 'Targets on loopback or private networks are allowed')
-  if (config.allowedHosts.some((h) => h.includes('*'))) warn('wildcard-hosts', 'Allowed hosts contain a wildcard')
+  if (!config.originDerived && config.allowedHosts.some((h) => h.includes('*'))) warn('wildcard-hosts', 'Allowed hosts contain a wildcard')
   if (config.probeAllow.some((c) => c === '0.0.0.0/0' || c === '::/0')) warn('probe-open', 'Probe endpoints are open to every address')
   // One entry per text (as the command line always did); the first id wins.
   const seen = new Set<string>()

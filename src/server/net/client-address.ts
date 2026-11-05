@@ -27,9 +27,10 @@ function trustedList(cfg: NetConfig): CidrList {
 
 /** Is the (TCP) peer a declared proxy? */
 export function isTrustedPeer(peer: string | undefined | null, cfg: NetConfig): boolean {
-  if (!normaliseAddress(peer)) return false
-  if (trustedList(cfg).contains(peer)) return true
-  return cfg.trustProxyLegacy && PRIVATE_RANGES.contains(peer)
+  const p = normaliseAddress(peer)
+  if (!p) return false
+  if (trustedList(cfg).contains(p.address)) return true
+  return cfg.trustProxyLegacy && PRIVATE_RANGES.contains(p.address)
 }
 
 /** Entries of every `X-Forwarded-For` line, in order. */

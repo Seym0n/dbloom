@@ -53,8 +53,12 @@ export type Config = {
   allowedHosts: string[]
   /** DBLOOM_TRUST_PROXY as validated CIDR strings (empty when unset or legacy `true`). */
   trustedProxies: string[]
-  /** DBLOOM_TRUST_PROXY=true (legacy, accepted for one release with a warning; Q4). */
+  /** Any private-range peer is a trusted proxy: `DBLOOM_TRUST_PROXY=true` (legacy, warned) or the implicit default. */
   trustProxyLegacy: boolean
+  /** No `DBLOOM_TRUST_PROXY` on a non-loopback bind: private-range peers are trusted (the container is not published). */
+  trustProxyImplicit: boolean
+  /** No `DBLOOM_PUBLIC_ORIGIN` on a non-loopback bind: origin, scheme and Host come from each request via the trusted proxy. */
+  originDerived: boolean
   /** DBLOOM_PROXY_HOPS: optional hop count of the rightmost-untrusted rule (0 = unused). */
   proxyHops: number
   /** DBLOOM_TLS: only `proxy` today; `own` is reserved and refused (SPEC/27 assumption 2). */
@@ -265,24 +269,24 @@ export function loadConfigWithWarnings(env: NodeJS.ProcessEnv = process.env): Lo
   }
   const proxyHops = (strict(env, 'DBLOOM_PROXY_HOPS') as number | undefined) ?? 0
 
+  // Zero-config deployment: without these two the app derives what it needs from a trusted proxy (exposure warnings).
+  const originDerived = !loopbackBind && origin === undefined
+  const trustProxyImplicit = !loopbackBind && trustText === undefined
+  if (trustProxyImplicit) trustProxyLegacy = true
+
   const allowedRaw = listOf(env, 'DBLOOM_ALLOWED_HOSTS')
   // Host matching is exact including the port, so the loopback default lists both forms.
   const loopbackNames = ['localhost', '127.0.0.1', '[::1]']
-  const defaultHosts = origin ? [origin.host] : [...loopbackNames, ...loopbackNames.map((h) => `${h}:${port}`)]
+  const defaultHosts = origin
+    ? [origin.host]
+    : originDerived
+      ? ['*']
+      : [...loopbackNames, ...loopbackNames.map((h) => `${h}:${port}`)]
   const allowedHosts = (allowedRaw ?? defaultHosts).map((h) => h.toLowerCase())
   for (const h of allowedHosts) {
     if (!HOST_ENTRY.test(h)) throw new ConfigError('DBLOOM_ALLOWED_HOSTS must list host names or addresses, optionally with a port')
-    if (h.includes('*') && !loopbackBind) {
+    if (h.includes('*') && !loopbackBind && !(originDerived && allowedRaw === undefined)) {
       throw new ConfigError('DBLOOM_ALLOWED_HOSTS must not contain wildcards when DBLOOM_HOST is not a loopback address')
-    }
-  }
-
-  if (!loopbackBind) {
-    if (!origin) throw new ConfigError('DBLOOM_PUBLIC_ORIGIN is required when DBLOOM_HOST is not a loopback address')
-    if (trustedProxies.length === 0 && !trustProxyLegacy) {
-      throw new ConfigError(
-        'DBLOOM_TRUST_PROXY must list the trusted proxy networks (CIDR) when DBLOOM_HOST is not a loopback address',
-      )
     }
   }
 
@@ -348,6 +352,8 @@ export function loadConfigWithWarnings(env: NodeJS.ProcessEnv = process.env): Lo
     allowedHosts,
     trustedProxies,
     trustProxyLegacy,
+    trustProxyImplicit,
+    originDerived,
     proxyHops,
     tlsMode: 'proxy',
     hsts: {
