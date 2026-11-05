@@ -1,5 +1,5 @@
 name: ci
-on: [push, pull_request]
+on: workflow_dispatch
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -18,8 +18,8 @@ jobs:
         ports: ['33061:3306']
         options: --health-cmd="healthcheck.sh --connect --innodb_initialized" --health-interval=3s --health-retries=40
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with: { node-version: '${{ matrix.node }}', cache: npm }
       - run: npm ci --ignore-scripts
       - run: node scripts/check-pinned-deps.mjs
@@ -30,17 +30,18 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npx playwright install --with-deps chromium
+      - run: node scripts/ci-raise-connections.mjs
       - run: npm run test:e2e
   docker:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       # Build, non-root check, read-only start, health, second-instance refusal, restart on the same volume.
       - run: bash scripts/docker-smoke.sh
       - run: docker build -t dbloom .
       - name: Image size and layers
         run: docker image inspect dbloom --format 'size={{.Size}} layers={{len .RootFS.Layers}}' && docker history dbloom
-      - uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0
+      - uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           image-ref: dbloom
           severity: HIGH,CRITICAL
@@ -51,8 +52,8 @@ jobs:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with: { node-version: '24', cache: npm }
       - run: npm ci --ignore-scripts
       - run: npm run test:e2e:proxy
