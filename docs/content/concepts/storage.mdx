@@ -1,0 +1,66 @@
+# Storage
+
+DBLoom keeps its data in one volume mounted at `/data`, and one instance must own that volume.
+
+import { Callout } from 'nextra/components'
+
+## What lives in /data
+
+- **The store.** Users, second factors, encrypted profiles, the audit log table, and assistant conversations (account mode).
+- **The setup token,** when one is generated.
+- **The import spool.** Staging and spool files. `DBLOOM_TEMP_DIR` defaults to `<data dir>/tmp`, and `DBLOOM_TEMP_QUOTA_MIB` caps the total (default `10240`).
+
+## Stateful: the default
+
+- `DBLOOM_STORE=sqlite` is the default.
+- `DBLOOM_DATA_DIR` defaults to `./data`. Compose mounts the volume at `/data`.
+- Keep the named volume mounted at `/data` on every deploy.
+
+Size the volume for your traffic and your audit retention. `DBLOOM_AUDIT_RETENTION_DAYS` accepts 90 to 1095 days (default 365). Each statement-level audit row is about 150 to 200 bytes of payload.
+
+## Stateless: nothing on disk
+
+- `DBLOOM_STORE=none` keeps nothing on disk.
+- Stateless is direct mode only. Combining it with account mode is refused at startup.
+- Audit lines go to stdout, plus any file sink you set.
+- Assistant conversations live in server memory for the session.
+- `read_only: true` in the compose file works in both modes. Writes go to `/data` and `/tmp`.
+
+## Single replica
+
+Run one replica. Two instances on one store are detected. The second one exits with:
+
+```text
+Another DBLoom instance uses this store
+```
+
+<Callout type="warning">
+
+Do not scale to two replicas. Two instances on one volume are not supported.
+
+</Callout>
+
+## What to back up
+
+1. **The `/data` volume.** Take a copy before every upgrade.
+2. **The server key.** Either `DBLOOM_SECRET_KEY` or the file in `DBLOOM_SECRET_KEY_FILE`. It lives outside the volume on purpose.
+
+Store the volume backup and the key in different places. Without the key, TOTP secrets and recovery codes in a backup cannot be read. With the volume alone, nobody can read them either.
+
+## Upgrade and rollback
+
+- **Upgrade:** build or pull the new image, take a volume backup, then redeploy.
+- **Rollback:** redeploy the previous image. If the newer version changed the store, restore the pre-upgrade backup instead. Whether an older version can open a newer store is not tested.
+
+## Rotate the server key
+
+1. Set the new key as `DBLOOM_SECRET_KEY`.
+2. Set the old key as `DBLOOM_SECRET_KEY_PREVIOUS`.
+3. Restart.
+4. Run:
+
+```sh
+docker exec <container> node .output/cli/dbloom.mjs rotate-secret
+```
+
+5. Remove `DBLOOM_SECRET_KEY_PREVIOUS`.

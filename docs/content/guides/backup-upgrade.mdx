@@ -1,0 +1,47 @@
+import { Callout } from 'nextra/components'
+
+# Backup, upgrade, rollback
+
+This page covers what to back up, how to rotate the server key, and how to upgrade or roll back the image. It is for operators of any DBLoom deployment that has a store.
+
+## Back up the volume and the server key
+
+Back up the `/data` volume and the server key. The store holds users, factors and encrypted profiles. The key (`DBLOOM_SECRET_KEY`, or the file named in `DBLOOM_SECRET_KEY_FILE`) lives outside the volume on purpose.
+
+Without the key, TOTP secrets and recovery codes in a backup are unusable. With the volume alone, nobody can read them. Store the two in different places.
+
+<Callout type="warning">
+
+Never commit the server key. Keep the volume backup and the key in separate places.
+
+</Callout>
+
+## Rotate the server key
+
+1. Set the new key as `DBLOOM_SECRET_KEY`, and set the old key as `DBLOOM_SECRET_KEY_PREVIOUS`.
+2. Restart the container.
+3. Run the rotation command:
+
+```sh
+docker exec <container> node .output/cli/dbloom.mjs rotate-secret
+```
+
+4. Remove `DBLOOM_SECRET_KEY_PREVIOUS`.
+
+## Upgrade
+
+Build or pull the new image and redeploy. Take a volume backup first.
+
+## Rollback
+
+Redeploy the previous image. If a newer version changed the store, restore the pre-upgrade backup instead.
+
+<Callout type="warning">
+
+Whether an older version can open a newer store is not tested. After a store change, the pre-upgrade backup is the way back.
+
+</Callout>
+
+## Container commands
+
+The full list of `dbloom.mjs` commands, with purposes and how to run them, is on [Container commands](/docs/guides/cli).

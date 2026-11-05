@@ -1,0 +1,42 @@
+import { Callout } from 'nextra/components'
+
+# Security notices
+
+This page explains which sign-in events raise notices for administrators, what DBLoom stores to detect new locations, and the proxy setting that makes addresses correct. It is for administrators and for operators who handle privacy obligations for their users.
+
+## What raises a notice
+
+- A burst of failed sign-in steps for one account or from one address, within the window set by `DBLOOM_NOTICE_BURST_MINUTES`. The count is set by `DBLOOM_NOTICE_BURST_FAILURES`.
+- A completed sign-in from a network the account has not used within `DBLOOM_NOTICE_LOCATION_DAYS` days.
+
+| Variable | Default | Range |
+|---|---|---|
+| `DBLOOM_NOTICE_BURST_FAILURES` | `10` | 3 to 20 |
+| `DBLOOM_NOTICE_BURST_MINUTES` | `10` | 1 to 60 |
+| `DBLOOM_NOTICE_LOCATION_DAYS` | `90` | 7 to 365 |
+
+Every active administrator gets the notice. It shows on the Users page, where it can be dismissed. Nothing is sent by email. The first sign-in of an account raises no new-location notice.
+
+## What the server remembers
+
+For each account, the store keeps the /24 (IPv4) or /48 (IPv6) networks of completed sign-ins, for the configured number of days. The memory goes with the account and is purged daily. Failed-attempt counts live in memory only and start again after a restart.
+
+<Callout type="warning">
+
+This is personal data of your users. Mention it in your own privacy notice if you need one.
+
+</Callout>
+
+## Addresses in notices
+
+Addresses follow `DBLOOM_AUDIT_ANONYMISE_IP`. See [Audit log](/docs/guides/audit-log).
+
+## Behind a proxy
+
+The address is the one the proxy reports, taken through `DBLOOM_TRUST_PROXY`.
+
+<Callout type="warning">
+
+Without a correct proxy setting, every user looks like they come from the proxy, and no new location is ever seen.
+
+</Callout>

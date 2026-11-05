@@ -1,0 +1,20 @@
+import { Callout } from 'nextra/components'
+import { EnvWizard } from '../components/env-wizard'
+
+# Setup guide
+
+Answer a few questions and get a ready `.env` file. Nothing leaves your browser.
+
+<EnvWizard />
+
+<Callout type="info">
+
+  Not sure what a line does? Every variable is explained in the [reference](/docs/reference/environment). DBLoom has about a hundred
+  settings, but everything except these lines has a sensible default.
+
+</Callout>
+
+## Next
+
+1. Deploy it: [Coolify](/docs/deploy/coolify), [Docker Compose](/docs/deploy/docker-compose) or [another platform](/docs/deploy/other-platforms).
+2. Open your domain. In account mode the first visit starts a setup wizard; print its token with `docker exec CONTAINER node .output/cli/dbloom.mjs setup-token`.

@@ -4,3 +4,6 @@ node_modules
 src/routeTree.gen.ts
 .claude
 .agents
+docs
+docs-temp
+.taste-skill

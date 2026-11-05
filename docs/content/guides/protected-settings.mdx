@@ -1,0 +1,53 @@
+import { Callout } from 'nextra/components'
+
+# Protected settings and auto-revert
+
+This page explains how DBLoom reverts changes to settings that could lock administrators out, unless an administrator confirms them. It is for administrators who change authentication or session settings.
+
+## Which settings
+
+Ten settings can lock administrators out if set wrongly:
+
+`mfaScope`, `mfaRoles`, `mfaFactors`, `primaryCredentials`, `loginFailures`, `loginBackoffCapMs`, `loginWindowMs`, `loginAddressFailures`, `adminSessionIdleMs`, `adminSessionAbsoluteMs`.
+
+The settings page marks each of them with "reverts in N minutes unless confirmed after signing in again".
+
+## What happens on a change
+
+A protected change applies at once, after the usual second factor, and is audited as `settings.pending`. If nobody confirms it, the server puts the previous value back at the deadline and audits `settings.revert`.
+
+A second change to the same key moves the deadline and keeps the first original value.
+
+## Confirming
+
+1. Sign in again. The session must start after the change.
+2. Open `/admin/settings` and press Confirm. This is audited as `settings.confirm`.
+
+The session that made the change cannot confirm it, so a change that breaks sign-in cannot be confirmed by accident.
+
+Revert now (`settings.cancel`) puts the old value back without a second factor. Other admin pages show one line with a link while a change is waiting.
+
+## The deadline
+
+`DBLOOM_AUTOREVERT_MINUTES` sets the deadline: 1 to 15 minutes, default 5. It is environment only.
+
+The deadline is an absolute time stored in the store. A restart keeps it. A change that is overdue at start is reverted before the server listens, and nobody has to be signed in. The revert audit row is best effort: a failing audit sink does not stop the revert.
+
+## Getting back in
+
+- `dbloom settings pending` lists waiting changes.
+- `dbloom settings reset <key>` and `dbloom maintenance off` mark the waiting change `superseded`.
+- If a protected change locks everybody out, wait for the deadline, or run the reset on the host.
+
+<Callout type="warning">
+
+A `superseded` change is never restored. Running `settings reset` or `maintenance off` ends the waiting revert for good.
+
+</Callout>
+
+## Not included
+
+- No countdown on the page.
+- No count of affected users.
+- No cooling-off period.
+- No versioned rollback.

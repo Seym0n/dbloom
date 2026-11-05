@@ -1,0 +1,90 @@
+import { Callout } from 'nextra/components'
+
+# AI assistant
+
+This page explains the optional AI assistant: what it does, how to connect an AI service, how personal data is protected, and the limits and audit trail. It is for administrators who connect an AI service or mark personal data.
+
+## What it is
+
+A sidebar where a user asks questions about the data of the connection they are using. The assistant writes SQL and calls two tools:
+
+- `describe_tables`: schema only.
+- `run_query`: one statement.
+
+The assistant is off until an administrator connects an AI service. Nothing is sent anywhere before that. Opening the sidebar sends nothing.
+
+## Connecting a service
+
+Any OpenAI-compatible chat API with tool calling can be used.
+
+- `DBLOOM_AI_BASE_URL`: an https address, for example `https://api.example.com/v1`. Plain http is allowed only with `DBLOOM_AI_ALLOW_PRIVATE=true`.
+- `DBLOOM_AI_API_KEY` or `DBLOOM_AI_API_KEY_FILE` (a Docker secret). Set one, never both.
+- The model name in `DBLOOM_AI_MODEL`, or on `/admin/assistant`.
+
+The address and the key are environment-only on purpose: a stolen session must not be able to redirect personal data. The key is never shown, never logged, and sent only in the `Authorization` header to that service. Redirects are refused.
+
+Private and loopback addresses are refused unless `DBLOOM_AI_ALLOW_PRIVATE=true`. Set it for a local model server such as Ollama.
+
+## Through a proxy
+
+DBLoom has no proxy setting of its own for this. Node's own support applies: set `NODE_USE_ENV_PROXY=1`, `HTTPS_PROXY` and `NO_PROXY` in the container's environment.
+
+## Personal data
+
+An administrator marks columns as `db.table.column`. A part may be `*`, for example `*.*.email` or `shop.customers.*`. Markings are set on `/admin/assistant` or in `DBLOOM_PII_COLUMNS`. The environment list is always added to the stored markings.
+
+How marked values are handled:
+
+- A marked value never goes to the AI service. It is replaced by a token such as `<email:ab12:3>`, and the same value gets the same token within one conversation. In the docs these tokens are written in code.
+- The user sees real values on screen.
+- The assistant can use a token in a `WHERE ... = '<token>'` comparison, and DBLoom puts the real value in.
+- Comparisons that could reveal a value are refused: `LIKE`, ranges, functions, `MIN`, `MAX` and guessed literals.
+- If DBLoom cannot tell where an output column comes from (for example a view, or a statement its parser cannot read), only column names and the row count are sent.
+
+<Callout type="warning">
+
+Columns that are not marked are not protected. Personal data inside free text or JSON is not protected either. Mark what matters.
+
+</Callout>
+
+## No markings yet
+
+Until an administrator marks columns, or says "there is no personal data here" for a connection, the assistant gets only column names and row counts for it. The sidebar says so.
+
+## Approval
+
+- Manual mode: every call to the database waits for the user's Approve, with the statement as it will run.
+- Auto mode (chosen per conversation, manual by default): reads run on their own. `INSERT` and `UPDATE` always ask. `DELETE`, schema changes, privileges and several statements are never run by the assistant. They open in an SQL tab, unrun.
+- `describe_tables` needs no approval.
+- An administrator can switch auto mode off for everybody with the setting "Users may let the assistant run queries without asking each time".
+- A waiting call is dropped after 10 minutes, on Stop, and when the user writes a new message.
+
+## What is kept
+
+Account mode keeps each user's conversations: text, the SQL in token form, the outcome and the row count. Result rows and tokens are never kept.
+
+After a restart the tokens are gone. A conversation reopens as text, and an old token in a statement is refused. Conversations follow the audit retention (`DBLOOM_AUDIT_RETENTION_DAYS`), and users can delete them earlier. Direct and stateless installs keep conversations in server memory for the session only.
+
+## Audit
+
+The events are `assistant.call`, `assistant.approve`, `assistant.deny`, `assistant.refuse`, `assistant.mode` and `assistant.rule`. Each records the SQL in token form, never a value or a row.
+
+Where the audit table exists, a row that cannot be written stops the call, because a write is audited before it runs. In stateless mode only the standard output and the file sink receive these events.
+
+## Limits
+
+- `DBLOOM_AI_MAX_STEPS` (default 8): model-to-tool round trips per user message.
+- `DBLOOM_AI_MAX_ROWS` (default 50, at most 200): rows of one result that may go to the assistant.
+- 20 messages per user per 10 minutes.
+- 60 seconds per request to the service.
+- 2 MiB per answer.
+
+## Injected instructions
+
+Everything the database returns is passed on as data, inside a fixed envelope. The assistant's text is shown as plain text with a few safe Markdown forms: no HTML, no images, and links only on click.
+
+The assistant cannot change the mode, the markings or an approval. It can only use the two tools, under the rules above.
+
+## Working in the database
+
+The assistant uses the user's own connection and rights. Anything the target forbids stays forbidden. A read-only connection refuses an approved write.

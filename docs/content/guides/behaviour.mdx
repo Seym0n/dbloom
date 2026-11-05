@@ -1,0 +1,51 @@
+import { Callout } from 'nextra/components'
+
+# Behaviour to know
+
+This page lists runtime behaviours that affect browsers, API clients, logs and shutdown, and that often surprise people. It is for anyone integrating with the API, testing sign-in, or running the container.
+
+## Origin rule
+
+Every POST needs a matching `Origin` header, or `Sec-Fetch-Site: same-origin`. Scripts and `curl` calls against the API must send `Origin`.
+
+## Direct mode login page
+
+The servers named in `DBLOOM_DIRECT_TARGETS` are offered as suggestions in the server field.
+
+With `DBLOOM_LOGIN_RECALL=true`, the page also remembers the last server and user name in the browser (local storage, no password, no token). It fills them in again when that server is still on the list. This is off by default. With it off, the page reads and writes nothing.
+
+## Cookies
+
+Cookies are always `Secure`, because the `__Host-` prefix needs it. `http://localhost` works in Chrome and Firefox, not in Safari. Sub-path deployment is not supported.
+
+## Headers sent
+
+- HSTS (https origin only, one year, no preload; see `DBLOOM_HSTS*`).
+- `nosniff`, `no-referrer`, `noindex`, COOP and Permissions-Policy.
+- CORS is off. `OPTIONS` answers 405.
+- CSP is planned but not yet shipped.
+
+## Known deviations
+
+- Built files under `/assets/*` are served before the request gate, because they are public build output.
+- There is no slow-read protection.
+
+## Logging
+
+Logs are JSON lines on stdout, with `X-Request-Id` and secrets redacted. The level `debug` in production needs `DBLOOM_ALLOW_DEBUG=true`. At debug level, the access line also carries the client address.
+
+## Stateless mode
+
+`DBLOOM_STORE=none` keeps nothing on disk and always runs in direct mode. Combining it with account mode is refused at startup.
+
+`read_only: true` in the compose file works in both modes. Writes go to `/data` and `/tmp`.
+
+## Shutdown
+
+On SIGTERM, readiness turns 503. In-flight requests finish for up to `DBLOOM_SHUTDOWN_SECONDS` (default 25; compose waits 30 s). Running imports and exports are marked `interrupted`, and they are not persisted across the restart. Pools close, then the store closes.
+
+<Callout type="warning">
+
+Do not set `CI` or `TEST` in the container. The server then skips its signal handling.
+
+</Callout>

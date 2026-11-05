@@ -1,0 +1,34 @@
+# What is DBLoom
+
+DBLoom is a web admin tool for MySQL 8.4 and MariaDB 10.11 that you host yourself.
+
+import { Callout } from 'nextra/components'
+
+It ships as one Docker image. You run it behind a reverse proxy that handles HTTPS, then open it in your browser.
+
+## Who it is for
+
+People and teams who run their own MySQL or MariaDB servers and want a browser tool that runs on infrastructure they control.
+
+## The two login modes
+
+- **Account mode:** people sign in to DBLoom with their own accounts, and administrators manage those accounts.
+- **Direct mode:** people sign in with the user name and password of the database server, and DBLoom has no accounts of its own.
+
+## What DBLoom is not
+
+- **Not edge or serverless.** It is a long-running container with one volume.
+- **Not a proxy.** The image contains no proxy. You bring one, such as Traefik, Caddy, nginx or Apache.
+- **Not direct TLS.** DBLoom listens on plain HTTP. `DBLOOM_TLS=own` is refused at startup.
+
+<Callout type="info">
+
+Every deployment needs a TLS proxy in front. See [Security model](/docs/concepts/security-model).
+
+</Callout>
+
+## Where to go next
+
+1. [Quickstart](/docs/quickstart): run a local instance on your computer.
+2. [Setup](/docs/setup): a guided page that creates your `.env` file.
+3. [Docker Compose deploy](/docs/deploy/docker-compose): deploy behind a TLS proxy.

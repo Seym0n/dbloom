@@ -1,0 +1,83 @@
+import { Callout } from 'nextra/components'
+
+# Settings and maintenance mode
+
+This page explains how administrators change runtime settings in the app, and how maintenance mode is switched on and off. It is for administrators and operators of account-mode installs.
+
+## The settings page
+
+`/admin/settings` (administrators, account mode) lists the 40 account-mode settings. For each one it shows:
+
+- the value in effect
+- where that value comes from: built-in default, operator default from `.env`, set on the page, or limited by the operator
+- the allowed range
+- the stored value, when it differs
+
+Direct and stateless installs have no settings page. Settings that only the environment can set (for example the authenticator code tolerance and the hashing cost) are listed read-only.
+
+## Limits
+
+Each setting has a lowest and a highest value fixed in the program. A value outside them is refused, never cut to fit.
+
+Some settings take their limit from the environment:
+
+- Required second-factor scope and roles: a floor the page cannot lower.
+- Grace period: a ceiling.
+- Allowed second factors and sign-in credentials: the page can only narrow the list.
+
+For every other setting, the environment variable is the default.
+
+## Locks
+
+`DBLOOM_SETTINGS_LOCK` takes a comma-separated list of setting names, for example `mfaScope,loginFailures`. The listed settings stay at their environment value or default. The page shows them read-only, and a stored value is ignored. An unknown name stops startup. The names are the ones `dbloom settings list` prints.
+
+## Changing a setting
+
+- Every change needs a recent second factor.
+- Each change writes an audit row (`settings.change`, `settings.reset`) with the old and new value before the value is stored. If the audit row cannot be written, nothing changes and the page says so.
+- If two administrators edit the same setting, the second save is refused and the page shows the value now stored.
+- A stored value that falls outside a limit tightened later is applied clamped, and noted once in the audit log (`settings.clamped`). The stored value is not rewritten, and the page shows both.
+
+## Narrowing factors or credentials
+
+Before the allowed second factors or sign-in credentials are narrowed, the page asks the server how many active users would be left with no allowed option. A count above zero refuses the change.
+
+## Sign-in notice and banner
+
+- The notice is up to 300 characters and is shown above the sign-in form to everyone.
+- The banner is up to 500 characters and is shown after sign-in. It exists in account mode only.
+
+Both are plain text: markup is shown as typed. `DBLOOM_LOGIN_NOTICE` sets the default of the notice and is the only source in direct mode.
+
+## Maintenance mode
+
+Switch it on from the page, optionally with an end time. While it is on, it refuses every non-administrator:
+
+- Sign-in is refused after the password or passkey has proved the user.
+- Every server function and download answers "maintenance".
+
+Sessions that are already open are kept but blocked. Administrators and the command line are exempt. `/api/health` and `/api/ready` are not affected. The end time is checked on every request, so it ends by itself, even across a restart.
+
+`DBLOOM_MAINTENANCE=true` forces maintenance mode on. The page cannot switch it off.
+
+Schema changes need no switch: a migration runs before the server starts listening. Maintenance mode does not exist in direct mode.
+
+## Getting back in
+
+Run these from the host (see [Container commands](/docs/guides/cli) for the `docker exec` form):
+
+```sh
+dbloom settings list
+dbloom settings reset <key>
+dbloom maintenance off
+```
+
+- `settings list` prints every setting with its source and lock.
+- `settings reset <key>` removes a stored value. The same limits and locks apply. No step-up is needed, and it is audited as `cli`.
+- `maintenance off` removes the stored switch.
+
+A running server picks up a change made from the command line within a few seconds.
+
+## Not on the page yet
+
+Settings for target policy, import and export, history and display are still read from the environment only. They move to the page when their modules read them through the settings resolver.

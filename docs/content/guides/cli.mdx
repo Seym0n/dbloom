@@ -1,0 +1,38 @@
+# Container commands
+
+This page lists the `dbloom.mjs` commands that the deployment guide mentions, with what each one does and how to run it, for operators who recover access, rotate keys or check settings.
+
+## How to run them
+
+Commands run as the app user inside the container:
+
+```sh
+docker exec <container> node .output/cli/dbloom.mjs <command>
+```
+
+The guides write this shorter form, for example `dbloom exposure`. It refers to the same command.
+
+## Commands
+
+| Command | Purpose |
+|---|---|
+| `setup-token` | Prints the setup token used by the first-run setup wizard (account mode). |
+| `recover <user>` | Recovery command for the named user. The deployment guide gives no further detail. |
+| `sessions revoke <user>` | Revokes sessions of the named user. The deployment guide gives no further detail. |
+| `rotate-secret` | Completes server key rotation. Run it after the new key is set and the container restarted. |
+| `exposure` | Prints the exposure report: bind, origin, hosts, proxies, HSTS, probe lists, login mode, store mode and the applicable warnings. |
+| `audit export` | Exports the audit log, for example `--since 2026-10-01 --format csv`. Writes an `audit.export` row before the first line. |
+| `settings list` | Prints every setting with its source and lock. |
+| `settings reset <key>` | Removes a stored setting value. The same limits and locks apply, no step-up is needed, and it is audited as `cli`. |
+| `settings pending` | Lists protected setting changes that are waiting for confirmation. |
+| `maintenance off` | Removes the stored maintenance mode switch. |
+
+## Examples
+
+```sh
+docker exec <container> node .output/cli/dbloom.mjs setup-token
+docker exec <container> node .output/cli/dbloom.mjs exposure
+docker exec <container> node .output/cli/dbloom.mjs audit export --since 2026-10-01 --format csv > audit.csv
+```
+
+The last line writes the export to `audit.csv` on the host.

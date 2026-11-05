@@ -1,0 +1,76 @@
+# Docker Compose
+
+Run DBLoom with Docker Compose, one replica and one volume, behind a TLS reverse proxy.
+
+import { Callout } from 'nextra/components'
+
+## Compose file
+
+Save as `compose.yaml`. Use `build: .` in a checkout, or replace it with your image reference.
+
+```yaml
+services:
+  dbloom:
+    build: .
+    expose:
+      - '3000'
+    env_file:
+      - path: .env
+        required: false
+    volumes:
+      - dbloom-data:/data
+    read_only: true
+    tmpfs:
+      - /tmp
+    restart: unless-stopped
+    stop_grace_period: 30s
+    deploy:
+      replicas: 1
+
+volumes:
+  dbloom-data:
+```
+
+`expose` opens port 3000 to other containers only. No host port is published.
+
+## Minimal .env
+
+Put this next to `compose.yaml`. Start from `.env.example` if you have it. Direct mode needs nothing in `.env`. Both variables below are optional but recommended.
+
+```ini
+DBLOOM_PUBLIC_ORIGIN=https://dbloom.example.com
+DBLOOM_TRUST_PROXY=172.18.0.0/16
+```
+
+## The two recommended variables
+
+- **`DBLOOM_PUBLIC_ORIGIN`**: the public URL with scheme and host, no path. Use `https` unless the host is loopback. Optional in direct mode, required in account mode. Recommended everywhere: it pins the domain and restores the `Host` allow-list and HSTS.
+- **`DBLOOM_TRUST_PROXY`**: CIDR list of the network your proxy connects from. DBLoom reads forwarded headers only from these addresses. Unset, any private-range peer is trusted as the proxy and the exposure report warns. The legacy value `true` still works for one release with a warning. Do not use it.
+
+## Start
+
+```sh
+docker compose up --build -d
+```
+
+Local trial on loopback only:
+
+```sh
+docker compose -f compose.yaml -f compose.local.yaml up --build
+```
+
+`compose.local.yaml` publishes `127.0.0.1:3000:3000`. Do not use it on a server.
+
+## Check the exposure report
+
+```sh
+docker compose exec dbloom node .output/cli/dbloom.mjs exposure
+```
+
+The report prints bind, origin, hosts, proxies, HSTS, probe lists, login mode and store mode, plus any warnings. Check that `origin` matches your domain and `proxies` matches your proxy network. The same report is logged at startup.
+
+<Callout type="info">
+
+The compose file does not publish a port, so the app is reachable only through your proxy. Set up the proxy next: [Reverse proxy](/docs/deploy/reverse-proxy).
+
+</Callout>

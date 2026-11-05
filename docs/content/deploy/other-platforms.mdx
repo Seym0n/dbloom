@@ -1,0 +1,76 @@
+# Other platforms
+
+Any Docker host or panel works if it meets the four requirements below.
+
+import { Callout } from 'nextra/components'
+
+<Callout type="warning">
+
+Only the proxy configs in [Reverse proxy](/docs/deploy/reverse-proxy) are tested. Coolify, Portainer stacks, Dokploy, CapRover and plain `docker run` were not tested. Nothing here is a UI walkthrough. Map the requirements onto your panel's own fields.
+
+</Callout>
+
+## What every platform must provide
+
+1. **HTTPS domain** routed to container port 3000. TLS ends at the platform's proxy.
+2. **Persistent volume** mounted at `/data`. It holds the store, the setup token and the import spool.
+3. **No published host port.** The container must be reachable only through the proxy.
+4. **One replica.** Two instances on one store are refused.
+
+Recommended extras, not required:
+
+- **`DBLOOM_PUBLIC_ORIGIN`** set to the `https` URL of that domain, no path. Optional in direct mode, required in account mode.
+- **`DBLOOM_TRUST_PROXY`** set to the CIDR of the network the proxy connects from. Unset, any private-range peer is trusted as the proxy and the exposure report warns.
+
+The proxy must also do the seven things in [What the proxy must do](/docs/deploy/reverse-proxy). Platforms that hide the proxy still need to meet them.
+
+## Example: docker run
+
+Build from a checkout, then run. There is no `-p` flag. The `-e` lines are recommended. Direct mode starts without them.
+
+```sh
+docker build -t dbloom .
+docker run -d --name dbloom \
+  --read-only --tmpfs /tmp \
+  -e DBLOOM_PUBLIC_ORIGIN=https://dbloom.example.com \
+  -e DBLOOM_TRUST_PROXY=172.18.0.0/16 \
+  -v dbloom-data:/data \
+  --restart unless-stopped \
+  --stop-timeout 30 \
+  dbloom
+```
+
+Put the proxy on a Docker network that the container also uses. Set `DBLOOM_TRUST_PROXY` to that network's CIDR to narrow trust (recommended).
+
+## Example: compose snippet
+
+Use your image reference in place of `dbloom` if you do not build from a checkout. The `environment` lines are recommended, not required.
+
+```yaml
+services:
+  dbloom:
+    image: dbloom
+    expose:
+      - '3000'
+    environment:
+      DBLOOM_PUBLIC_ORIGIN: https://dbloom.example.com
+      DBLOOM_TRUST_PROXY: 172.18.0.0/16
+    volumes:
+      - dbloom-data:/data
+    read_only: true
+    tmpfs:
+      - /tmp
+    stop_grace_period: 30s
+    deploy:
+      replicas: 1
+
+volumes:
+  dbloom-data:
+```
+
+## Not supported
+
+- **Edge and serverless hosting.** DBLoom is one long-running container with a volume.
+- **Direct TLS on the internet.** `DBLOOM_TLS=own` is refused. TLS must end at a proxy.
+- **Sub-path deployment**, for example `example.com/dbloom`.
+- **More than one replica** on one store.

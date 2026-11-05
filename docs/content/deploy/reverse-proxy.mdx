@@ -1,0 +1,118 @@
+# Reverse proxy
+
+DBLoom serves plain HTTP on port 3000, so a proxy in front must terminate TLS and forward requests correctly.
+
+import { Callout, Tabs } from 'nextra/components'
+
+## What the proxy must do
+
+DBLoom trusts forwarded headers only from peers in `DBLOOM_TRUST_PROXY`. Unset, it trusts any private-range peer (10/8, 172.16/12, 192.168/16, fc00::/7, loopback) on a non-loopback bind, and the exposure report warns. Setting a CIDR list of your proxy network is recommended, and is the safe choice if the container port could ever be reached by something other than the proxy. Your proxy must:
+
+1. **Forward the original `Host`**, with the port if it is not the default. Hosts outside `DBLOOM_ALLOWED_HOSTS` (default: the origin host) get 421.
+2. **Set `X-Forwarded-For` from the real peer**, replacing any client value. In nginx use `$remote_addr`, not `$proxy_add_x_forwarded_for`.
+3. **Set `X-Forwarded-Proto`** to the scheme the client used. If the proxy reports `http` for an `https` origin, credential pages and functions get 403.
+4. **Publish no app port.** Close port 3000 to everything but the proxy.
+5. **Cap request bodies.** The proxy is the main size limit. The app caps its own routes at 1 MiB for server functions and 64 KiB for others. Uploads have their own limit, `DBLOOM_IMPORT_MAX_MIB`.
+6. **Raise the read timeout for large imports.** Traefik: `entryPoints.<name>.transport.respondingTimeouts.readTimeout` (default 60 s). nginx: `proxy_read_timeout` and `client_max_body_size`.
+7. **Redirect http to https.** Leave HSTS to the app, which sends it on an `https` origin.
+
+<Callout type="info">
+
+Tested configs (`npm run test:e2e:proxy`, CI on `main`): Traefik 3 (full suite), Caddy 2 (headers and forwarding), nginx 1 (headers, forwarding, body cap). Apache is not tested. The reference files contain test-only lines (a catch-all Host rule, a forced-http router, `evil.example`, `tls internal`). The configs below leave them out. The reference files cap bodies at 4 MiB; raise the cap if you import larger files.
+
+</Callout>
+
+## Configs
+
+<Tabs items={['Traefik','Caddy','nginx','Apache']}>
+
+<Tabs.Tab>
+
+Dynamic config (file provider). Replace the domain and the container address. Set `readTimeout` in the static config, not here.
+
+```yaml
+http:
+  routers:
+    app:
+      rule: Host(`dbloom.example.com`)
+      entryPoints: [websecure]
+      service: app
+      middlewares: [limit]
+      tls: {}
+  middlewares:
+    limit:
+      buffering:
+        maxRequestBodyBytes: 4194304 # raise to fit your largest import
+  services:
+    app:
+      loadBalancer:
+        servers:
+          - url: http://172.30.0.2:3000
+```
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+Replace the domain and the container address. Caddy's reference config has no body cap or read timeout, and this minimal config adds none. Caddy is tested for headers and forwarding only.
+
+```caddyfile
+dbloom.example.com {
+	reverse_proxy 172.30.0.2:3000
+}
+```
+
+Do not add `disable_redirects`. Item 7 needs the http to https redirect.
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+Replace the domain, the certificate paths and the container address. The second server block is the http to https redirect (item 7). Keep `Host` and `X-Forwarded-For` exactly as shown.
+
+```nginx
+server {
+    listen 443 ssl;
+    server_name dbloom.example.com;
+    ssl_certificate     /etc/nginx/certs/fullchain.pem;
+    ssl_certificate_key /etc/nginx/certs/privkey.pem;
+
+    client_max_body_size 4m; # raise to fit your largest import
+    proxy_read_timeout 600s;
+    proxy_send_timeout 600s;
+
+    location / {
+        proxy_pass http://172.30.0.2:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Forwarded "";
+        proxy_set_header X-Forwarded-Host "";
+    }
+}
+
+server {
+    listen 80;
+    server_name dbloom.example.com;
+    return 301 https://$host$request_uri;
+}
+```
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+<Callout type="warning">
+
+Apache is not tested. The guidance below is untested.
+
+</Callout>
+
+- Use `ProxyPreserveHost On` so the original `Host` reaches DBLoom.
+- Set `X-Forwarded-For` and `X-Forwarded-Proto` yourself with `RequestHeader set`.
+- Apply items 4 to 7: close the app port, cap request bodies, raise the read timeout for imports, and redirect http to https.
+
+</Tabs.Tab>
+
+</Tabs>

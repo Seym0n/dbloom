@@ -1,0 +1,67 @@
+# Login modes
+
+DBLoom has two login modes. You choose one with `DBLOOM_LOGIN_MODE`, or leave it unset and let the setup wizard choose.
+
+import { Callout } from 'nextra/components'
+
+## Comparison
+
+| | Account mode | Direct mode |
+|---|---|---|
+| Set with | `DBLOOM_LOGIN_MODE=account` | `DBLOOM_LOGIN_MODE=direct` |
+| Who signs in | DBLoom accounts | Database user name and password |
+| Server key | Required: `DBLOOM_SECRET_KEY` or `DBLOOM_SECRET_KEY_FILE` | Not needed |
+| Public origin | Required: `DBLOOM_PUBLIC_ORIGIN` | Optional, recommended: `DBLOOM_PUBLIC_ORIGIN` |
+| Target servers | Covered in the variable reference | Listed in `DBLOOM_DIRECT_TARGETS`, or free-form with `DBLOOM_DIRECT_FREE_FORM_ACK=true` |
+| Admin pages (users, audit, exposure, settings) | Yes | No |
+| Audit log viewer | Yes, at `/admin/audit` | No. Audit lines go to stdout and any file sink |
+| Maintenance mode | Yes | No |
+| Sign-in notice | Set on the settings page, default from `DBLOOM_LOGIN_NOTICE` | `DBLOOM_LOGIN_NOTICE` only |
+| Login page memory | No | `DBLOOM_LOGIN_RECALL=true` remembers the last server and user name in the browser |
+| Stateless (`DBLOOM_STORE=none`) | Refused at startup | Allowed |
+| AI assistant conversations | Kept per user, without result rows or tokens | Kept in server memory for the session only |
+
+## Choose account mode when
+
+- Several people share one DBLoom and each needs their own sign-in.
+- You want administrators, an audit log and a settings page.
+- You can keep a server key safe and back it up.
+
+Account mode needs a server key. Set one of these, never both:
+
+```sh
+DBLOOM_SECRET_KEY=<base64 key>
+DBLOOM_SECRET_KEY_FILE=/run/secrets/dbloom_key
+```
+
+<Callout type="warning">
+
+Never commit the server key. Keep the backup of the key in a different place from the `/data` volume. See [Storage](/docs/concepts/storage).
+
+</Callout>
+
+## Choose direct mode when
+
+- One person or a small group signs in with database credentials they already have.
+- You do not need DBLoom accounts or an admin area.
+- You want nothing on disk. Set `DBLOOM_STORE=none`.
+
+Direct mode needs a list of servers users may reach, or an explicit opt-in to free-form targets:
+
+```sh
+DBLOOM_DIRECT_TARGETS=db1.internal:3306,db2.internal:3306
+```
+
+or
+
+```sh
+DBLOOM_DIRECT_FREE_FORM_ACK=true
+```
+
+`DBLOOM_DIRECT_FREE_FORM_ACK=true` lets users type any server. Use it only behind other protections, such as a proxy with mTLS or an identity-aware proxy and enforced 2FA. Free-form targets raise a warning in the exposure report. See [Security model](/docs/concepts/security-model).
+
+<Callout type="info">
+
+Set either `DBLOOM_DIRECT_TARGETS` or `DBLOOM_DIRECT_FREE_FORM_ACK`. Direct mode needs one of them.
+
+</Callout>

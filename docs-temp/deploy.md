@@ -9,18 +9,18 @@ The image never contains a proxy. Everything the proxy must do is listed in [Wha
 Local trial, loopback only:
 
 ```sh
-cp .env.example .env   # set DBLOOM_PUBLIC_ORIGIN and DBLOOM_TRUST_PROXY, see below
+cp .env.example .env   # optional: nothing is required for direct mode, see below
 docker compose -f compose.yaml -f compose.local.yaml up --build
 ```
 
-`compose.yaml` publishes no port (`expose: 3000`); `compose.local.yaml` adds `127.0.0.1:3000:3000`. The compose file refuses to start without `DBLOOM_PUBLIC_ORIGIN` and `DBLOOM_TRUST_PROXY`, because the image binds `0.0.0.0` and the start rules then require both.
+`compose.yaml` publishes no port (`expose: 3000`); `compose.local.yaml` adds `127.0.0.1:3000:3000`. Nothing is required in `.env` for direct mode. Without `DBLOOM_PUBLIC_ORIGIN` and `DBLOOM_TRUST_PROXY` the app derives the origin, scheme and Host from each request through the proxy, and trusts any private-range peer as the proxy; the exposure report warns about both. Account mode still needs `DBLOOM_PUBLIC_ORIGIN` and a server key.
 
-Required for a container:
+Recommended for a container:
 
 | Variable | Value |
 |---|---|
-| `DBLOOM_PUBLIC_ORIGIN` | `https://dbloom.example.com` (scheme and host, no path; `https` unless the host is loopback) |
-| `DBLOOM_TRUST_PROXY` | CIDR list of the proxy network, for example `172.18.0.0/16`. The legacy value `true` still works for one release with a warning and means "any private-range peer". |
+| `DBLOOM_PUBLIC_ORIGIN` | `https://dbloom.example.com` (scheme and host, no path; `https` unless the host is loopback). Pins the domain, restores the Host allow-list and HSTS. Required for account mode. |
+| `DBLOOM_TRUST_PROXY` | CIDR list of the proxy network, for example `172.18.0.0/16`. Narrows trust to your proxy. The legacy value `true` still works with a warning and means "any private-range peer". |
 
 Everything else has a default. The full list is in the [variable reference](#variable-reference).
 
@@ -30,7 +30,7 @@ The steps below follow Coolify's usual flow; menu names can differ between Cooli
 
 1. New resource from your Git repository, build pack **Docker Compose** (uses `compose.yaml`) or **Dockerfile**.
 2. Domain: set the public domain with `https://`. Coolify's proxy routes to container port 3000 and obtains the certificate.
-3. Environment variables: set `DBLOOM_PUBLIC_ORIGIN` to the same URL as the domain and `DBLOOM_TRUST_PROXY` to the Coolify proxy network (find the subnet with `docker network inspect coolify`). Add the others you need.
+3. Environment variables: set `DBLOOM_PUBLIC_ORIGIN` to the same URL as the domain (recommended, required for account mode) and, to narrow trust, `DBLOOM_TRUST_PROXY` to the Coolify proxy network (find the subnet with `docker network inspect coolify`). Add the others you need.
 4. Persistent storage: keep the named volume mounted at `/data`. It holds the store, the setup token and the import spool.
 5. Health check: the image has a Docker `HEALTHCHECK` that works as is. If Coolify runs its own check from the proxy network, set `DBLOOM_PROBE_ALLOW` to that network and `DBLOOM_PROBE_HOSTS` to the container address; other peers get an empty 404 from `/api/health` and `/api/ready`.
 6. One replica. Two instances on one store are detected: the second exits with `Another DBLoom instance uses this store`.
@@ -163,11 +163,11 @@ The **Need** column: **required** means startup is refused without it (under the
 | Variable | Need | Type | Default | Description |
 |---|---|---|---|---|
 | **Listener** | | | | |
-| `DBLOOM_HOST` | optional | string | `127.0.0.1` | Bind address. A non-loopback value needs DBLOOM_PUBLIC_ORIGIN and DBLOOM_TRUST_PROXY. The image sets 0.0.0.0. |
+| `DBLOOM_HOST` | optional | string | `127.0.0.1` | Bind address. The image sets 0.0.0.0. On a non-loopback bind without DBLOOM_PUBLIC_ORIGIN and DBLOOM_TRUST_PROXY the app derives the origin from the proxy and trusts private-range peers (exposure warnings). |
 | `PORT` | optional | int (1 to 65535) | `3000` | Listen port. |
-| `DBLOOM_PUBLIC_ORIGIN` | **required** (always in the Docker image, which binds 0.0.0.0; optional on a loopback bind) | string |  | Public origin scheme://host[:port], no path. https unless the host is loopback. Required for account mode and non-loopback bind. |
+| `DBLOOM_PUBLIC_ORIGIN` | conditional (account mode, where passkeys and links need a fixed origin; recommended everywhere) | string |  | Public origin scheme://host[:port], no path. https unless the host is loopback. Without it (direct mode) the origin, scheme and Host come from each request through the trusted proxy. |
 | `DBLOOM_ALLOWED_HOSTS` | optional | list |  | Comma separated Host values answered (default: host of the origin). Wildcards only on a loopback bind. |
-| `DBLOOM_TRUST_PROXY` | **required** (always in the Docker image, which binds 0.0.0.0; optional on a loopback bind) | list |  | Trusted reverse proxies as CIDR list, e.g. 10.0.0.0/8,172.16.0.0/12. Legacy `true` is accepted with a warning. |
+| `DBLOOM_TRUST_PROXY` | optional | list |  | Trusted reverse proxies as CIDR list, e.g. 10.0.0.0/8,172.16.0.0/12. Default on a non-loopback bind: any private-range peer (exposure warning). Legacy `true` is accepted with a warning. |
 | `DBLOOM_PROXY_HOPS` | optional | int (0 to 16) | `0` | Optional number of trusted proxy hops in X-Forwarded-For (0 = rightmost untrusted entry). |
 | `DBLOOM_TLS` | optional | enum (proxy, own) | `proxy` | TLS is terminated by a `proxy`. `own` is reserved and refused. |
 | `DBLOOM_HSTS` | optional | enum (on, off) | `on` | Strict-Transport-Security on https origins. `off` is allowed with a warning. |

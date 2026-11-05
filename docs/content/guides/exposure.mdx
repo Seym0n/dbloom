@@ -1,0 +1,40 @@
+# Exposure page
+
+This page describes the exposure report, the warnings about how DBLoom is reachable, and how to acknowledge them, for administrators who check the network exposure of an instance.
+
+## The exposure report
+
+Run this in the container to print the report:
+
+```sh
+docker exec <container> node .output/cli/dbloom.mjs exposure
+```
+
+It prints the bind, origin, hosts, proxies, HSTS, probe lists, login mode, store mode and the warnings that apply. The same report is logged at startup. Inside the container the command is written `dbloom exposure`.
+
+## Exposure page in the app
+
+`/admin/exposure` (administrators, account mode) lists the exposure report of the running process. It shows the same lines and warnings as the command for the same environment, marked "as at start".
+
+It adds warnings that depend on the running state:
+
+- no second factor enforced
+- first-run setup still open
+- a failing external audit sink
+- "administration pages are reachable from any address" (until the administration plane ships)
+
+It also shows a status block with readiness, login mode, store state, schema version, version and audit sink status. No secret and no key value is shown.
+
+## Banner
+
+On a non-loopback bind, administrators see a banner on the connection home page and on the admin pages while any warning is unacknowledged. The banner never blocks use, and ordinary users never see it. On a loopback-only bind the warnings are listed, but no banner is raised.
+
+## Acknowledging warnings
+
+An administrator can acknowledge a warning on the page. The acknowledgement is recorded as `exposure.ack` in the audit log. It is refused when the audit log cannot be written.
+
+The acknowledgement lasts until the next restart, after which the warning shows again. It never hides the warning from the page.
+
+## Readiness detail
+
+`/api/ready` returns its detail body (state, mode, store, version) to loopback peers and to a request carrying a valid administrator session cookie. Every other caller gets the fixed `{"ready":...}` body.

@@ -1,0 +1,83 @@
+# Security model
+
+DBLoom trusts forwarded headers only from your proxy, so the proxy must be set up correctly.
+
+import { Callout } from 'nextra/components'
+
+## Trusted proxy and forwarded headers
+
+- DBLoom reads forwarded headers only from peers listed in `DBLOOM_TRUST_PROXY`, a CIDR list.
+- Unset (default) on a non-loopback bind, as in the Docker image: any private-range peer (10/8, 172.16/12, 192.168/16, fc00::/7, loopback) is trusted as the proxy. The exposure report warns until a CIDR list is set.
+- Setting a CIDR list of your proxy network is recommended. It is the safe choice if the container port could ever be reached by something other than the proxy.
+- The client address is the rightmost `X-Forwarded-For` entry that is not a trusted proxy.
+- `DBLOOM_PROXY_HOPS` (0 to 16, default `0`) sets a hop count if you need one.
+- The legacy value `DBLOOM_TRUST_PROXY=true` still works for one release. It warns, and means any private-range peer.
+- A peer that is not trusted has its forwarded headers ignored.
+- Without `DBLOOM_PUBLIC_ORIGIN` (direct mode only), origin, scheme and `Host` come from each request through the trusted proxy (`Host` and `X-Forwarded-Proto`). Any `Host` reaching the proxy is answered, and the app does not send HSTS. The exposure report warns. Setting `DBLOOM_PUBLIC_ORIGIN` pins the domain, restores the `Host` allow-list and HSTS, and is recommended everywhere.
+
+Wrong trust settings make every user look like they come from the proxy. Then no new-location notice is ever raised.
+
+## What your proxy must do
+
+1. Forward the original `Host`, with the port when it is not the default. A `Host` not in `DBLOOM_ALLOWED_HOSTS` (default: the origin host) gets `421`.
+2. Set `X-Forwarded-For` from the real peer, replacing any value the client sent. In nginx: `proxy_set_header X-Forwarded-For $remote_addr;`
+3. Set `X-Forwarded-Proto` to the scheme the client used. If a trusted proxy reports `http` while the origin is `https`, credential pages and functions get `403`.
+4. Do not publish the app port. Reach DBLoom only through the proxy.
+5. Cap request bodies. The app caps its own endpoints at 1 MiB for server functions and 64 KiB for other routes. Uploads have their own limit.
+6. Raise the read timeout for large imports. Set `readTimeout` (Traefik) or `proxy_read_timeout` and `client_max_body_size` (nginx).
+7. Redirect `http` to `https`. Leave HSTS to the app.
+
+Tested reference configs live in `deploy/proxy/` for Traefik 3, Caddy 2 and nginx 1. Apache is not tested.
+
+## Origin rule
+
+Every `POST` needs a matching `Origin` header or `Sec-Fetch-Site: same-origin`. Scripts and `curl` against the API must send `Origin`.
+
+## Cookies and headers
+
+- Cookies are always `Secure`.
+- HSTS applies on `https` origins only. It lasts one year and has no preload. `DBLOOM_HSTS*` variables tune it.
+- CORS is off. `OPTIONS` answers `405`.
+- Sub-path deployment (for example `/dbloom`) is not supported.
+
+## Four topologies
+
+| # | Setup | TLS ends at | Bind | Trusted proxy | Warnings |
+|---|---|---|---|---|---|
+| 1 | Loopback plus SSH tunnel or VPN (preferred) | The tunnel, or not at all | `127.0.0.1` (default) | None | None |
+| 2 | Private network behind a TLS proxy with an IP allow-list | Proxy | `0.0.0.0` in the container | Proxy CIDR (recommended; unset trusts private ranges) | None when configured correctly |
+| 3 | Internet-facing behind a TLS proxy with mTLS or an identity-aware proxy and enforced 2FA | Proxy | `0.0.0.0` in the container | Proxy CIDR (recommended; unset trusts private ranges) | Free-form targets, target TLS off, private targets allowed, wildcards |
+| 4 | Direct TLS on the internet | Not supported | n/a | n/a | `DBLOOM_TLS=own` is refused |
+
+With no `DBLOOM_TRUST_PROXY` set, the default trusts any private-range peer. Narrowing it to your proxy CIDR is recommended in topologies 2 and 3.
+
+Edge and serverless hosting are not supported.
+
+## The exposure report
+
+- Run `docker exec <container> node .output/cli/dbloom.mjs exposure` to print it. DBLoom also logs it at startup.
+- In account mode, administrators see the same report at `/admin/exposure`. That page adds warnings about the running state. No secret or key value is shown.
+- On a non-loopback bind, administrators see a banner until each warning is acknowledged. The banner never blocks use. Ordinary users do not see it.
+- On a loopback-only bind, warnings are listed but no banner is shown.
+- Acknowledging a warning is logged as `exposure.ack`. It lasts until the next restart, then the warning shows again. It never hides the warning from the page.
+
+## What the warnings mean
+
+| Warning | Meaning | What to do |
+|---|---|---|
+| Free-form targets | Users can type any database server address | List servers in `DBLOOM_DIRECT_TARGETS`, or add other protections |
+| Target TLS off | Connections to databases are not encrypted | Use `DBLOOM_TARGET_TLS=verify` |
+| Private targets allowed | `DBLOOM_ALLOW_PRIVATE=true` lets users reach private addresses | Keep it off unless you need it |
+| Wildcards | A wildcard entry is in use | Replace it with exact entries |
+| No second factor enforced | Account sign-in does not require 2FA | Require a second factor on the settings page or with `DBLOOM_MFA_SCOPE` |
+| First-run setup still open | The setup wizard has not finished | Finish setup. You can limit it with `DBLOOM_SETUP_NETWORKS` |
+| External audit sink failing | The file in `DBLOOM_AUDIT_SINK` cannot be written | Fix the path and permissions. Events wait in memory meanwhile |
+| Administration pages reachable from any address | No network limit on admin pages | Restrict them with your proxy's access rules |
+| Legacy `DBLOOM_TRUST_PROXY=true`, or unset on a non-loopback bind | Trust is broader than needed: any private-range peer | Replace it with your proxy's CIDR |
+| Public origin unset (direct mode) | Origin, scheme and `Host` come from each request | Set `DBLOOM_PUBLIC_ORIGIN` |
+
+<Callout type="warning">
+
+A warning is a prompt to check your setup. It does not stop DBLoom from running.
+
+</Callout>

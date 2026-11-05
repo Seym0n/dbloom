@@ -1,0 +1,30 @@
+{
+  "name": "dbloom-docs",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev --port 3400",
+    "build": "next build",
+    "postbuild": "pagefind --site out --output-path out/_pagefind",
+    "preview": "npx --yes serve out -l 3400",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "next": "16.4.5",
+    "nextra": "4.6.1",
+    "nextra-theme-docs": "4.6.1",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "24.0.0",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "pagefind": "1.6.0",
+    "typescript": "5.9.3"
+  },
+  "overrides": {
+    "zod": "4.1.13"
+  }
+}

@@ -1,0 +1,64 @@
+# Quickstart
+
+Run DBLoom on your computer in a few commands.
+
+import { Callout, Steps } from 'nextra/components'
+
+<Steps>
+
+### Copy the example environment file
+
+```sh
+cp .env.example .env
+```
+
+### Set the public origin
+
+Open `.env` and set the minimum for a local trial:
+
+```sh
+DBLOOM_PUBLIC_ORIGIN=http://localhost:3000
+```
+
+- `DBLOOM_PUBLIC_ORIGIN`: scheme and host, no path. `http` is allowed only for a loopback host such as `localhost`. Optional in direct mode, required in account mode (this page uses account mode). Recommended everywhere.
+- `DBLOOM_TRUST_PROXY`: optional. A CIDR list of proxy networks. A local trial has no proxy, so leave it unset. Set it to your proxy network when you deploy behind one.
+
+### Start the stack
+
+```sh
+docker compose -f compose.yaml -f compose.local.yaml up --build
+```
+
+`compose.local.yaml` publishes the app on `127.0.0.1:3000` only. Nothing else on your network can reach it.
+
+### Open DBLoom
+
+Go to `http://localhost:3000`.
+
+<Callout type="info">
+
+Use Chrome or Firefox for a local trial. Safari does not accept `http://localhost` for cookies.
+
+</Callout>
+
+### Get the setup token
+
+In account mode, the first visit starts the setup wizard. The wizard needs a setup token. Find the container name with `docker ps`, then print the token:
+
+```sh
+docker exec <container> node .output/cli/dbloom.mjs setup-token
+```
+
+Replace `<container>` with the name from `docker ps`. Paste the token into the wizard.
+
+</Steps>
+
+## Prefer a guided start
+
+The [Setup](/docs/setup) page asks a few questions and creates the `.env` file for you.
+
+## Next steps
+
+- [Login modes](/docs/concepts/login-modes): pick account mode or direct mode.
+- [Storage](/docs/concepts/storage): what lives in `/data` and what to back up.
+- [Docker Compose deploy](/docs/deploy/docker-compose): run it behind a TLS proxy for real use.

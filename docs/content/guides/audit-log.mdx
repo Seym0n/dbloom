@@ -1,0 +1,67 @@
+import { Callout } from 'nextra/components'
+
+# Audit log
+
+This page explains where DBLoom writes audit events, how long they are kept and how to export them, for administrators and operators who must review or retain a record of activity.
+
+## Where events go
+
+Every audit event is written as one JSON line on stdout (`"audit":"<event>"`). This always happens.
+
+Installs with a store also write each event to the `audit_log` table in the store. This covers account mode, and direct mode when `DBLOOM_STORE` is not `none`. Stateless installs (`DBLOOM_STORE=none`) write to stdout only.
+
+Administrators read the table at `/admin/audit` (account mode). Direct mode has no viewer.
+
+## Retention
+
+`DBLOOM_AUDIT_RETENTION_DAYS` sets how many days rows are kept. Range 90 to 1095, default 365. A value outside the range stops startup.
+
+The purge runs at start and then every 24 hours. It deletes older rows in batches and writes one `audit.purge` row with the count. A changed value applies at the next run or restart.
+
+## External copy
+
+`DBLOOM_AUDIT_SINK=file:/absolute/path` appends one JSON line per event to that file. The file is written with mode 0600 and synced once per second.
+
+- The app user must be able to write the path. With `read_only: true`, mount a volume at that path.
+- If the file cannot be written, events wait in memory. At most 10 000 are kept; when full, the oldest are dropped and counted. The write is retried every 5 seconds. `/admin/audit` shows a banner, and an `audit.sink` row records each change of state.
+- Rotate with `copytruncate`. A renamed file keeps being written until the next restart.
+
+This copy, kept on storage the app cannot rewrite, is the tamper-resistant record.
+
+<Callout type="warning">
+
+The table's append-only rule is a database rule, not a seal. Triggers refuse `UPDATE`, and refuse `DELETE` of rows younger than the retention cutoff. Anyone who holds the store file can drop the triggers. There is no hash chain.
+
+</Callout>
+
+## Addresses
+
+`DBLOOM_AUDIT_ANONYMISE_IP` takes `off`, `truncate` or `hash`. It applies to the table, the exports and the file copy. It does not apply to the stdout line, which always keeps the address.
+
+- `off` (default): no change.
+- `truncate`: IPv4 /24, IPv6 /48.
+- `hash`: HMAC under a subkey of the server key. Without a server key (direct mode), a key is made at each start, so values do not match across restarts.
+
+## Size
+
+About 150 to 200 bytes of payload per statement-level row. `fields` is capped at 8 KiB. Rows live in the store volume: size the volume for your traffic and retention, and back it up as described in [Backup, upgrade, rollback](/docs/guides/backup-upgrade).
+
+## Export
+
+Administrators export CSV or NDJSON from the viewer. This needs a recent second factor. The limit is 1 000 000 rows, and rows are never older than the retention window.
+
+On the host, use the CLI:
+
+```sh
+docker exec <container> node .output/cli/dbloom.mjs audit export --since 2026-10-01 --format csv > audit.csv
+```
+
+Both the viewer export and the CLI export write an `audit.export` row before the first line.
+
+## Admin pages reachable from any address
+
+Restricting the administration pages (users, audit log) to named networks is not built yet. Until it ships, keep them behind your proxy's own access rules if you need that.
+
+## Downgrade
+
+The audit table is schema version 6 and the notice memory is schema version 7. An older program refuses to open a store of a newer version. To go back, restore the pre-upgrade backup.

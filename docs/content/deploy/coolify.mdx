@@ -1,0 +1,67 @@
+import { Callout, Steps } from 'nextra/components'
+
+# Coolify
+
+Deploy DBLoom on Coolify with Docker Compose, a domain, one volume and one replica.
+
+<Callout type="warning">
+
+The Coolify steps were not run during development. Menu names can differ between Coolify versions, so check them against yours.
+
+</Callout>
+
+<Steps>
+
+### Create the resource
+
+New resource from your Git repository. Set build pack to **Docker Compose** (uses `compose.yaml`) or **Dockerfile**.
+
+### Set the domain
+
+Enter the public domain with `https://`, for example `https://dbloom.example.com`. Coolify's proxy routes it to container port 3000 and obtains the certificate.
+
+### Set the environment variables
+
+Paste this block, with your domain. `DBLOOM_PUBLIC_ORIGIN` is recommended. `DBLOOM_TRUST_PROXY` is optional: unset, any private-range peer is trusted as the proxy and the exposure report warns. To narrow it, replace the proxy line with the subnet from `docker network inspect coolify`.
+
+```ini
+DBLOOM_PUBLIC_ORIGIN=https://dbloom.example.com
+DBLOOM_TRUST_PROXY=<subnet of the coolify network>
+```
+
+`DBLOOM_PUBLIC_ORIGIN` must equal the domain. Add other variables only when you need them. The full list is in the [variable reference](/docs/reference/environment).
+
+### Keep the persistent storage
+
+Keep the named volume mounted at `/data`. It holds the store, the setup token and the import spool.
+
+### Check the health check
+
+The image has a Docker `HEALTHCHECK` that works as is. If Coolify runs its own check from the proxy network, set:
+
+- `DBLOOM_PROBE_ALLOW` to that network
+- `DBLOOM_PROBE_HOSTS` to the container address
+
+Other peers get an empty 404 from `/api/health` and `/api/ready`.
+
+### Run one replica
+
+Keep replicas at 1. A second instance on the same store is detected and exits with `Another DBLoom instance uses this store`.
+
+### Deploy and run the first-time setup
+
+Deploy, then open the domain. In account mode the first visit runs the setup wizard. Print the setup token from the container:
+
+```sh
+docker exec <container> node .output/cli/dbloom.mjs setup-token
+```
+
+</Steps>
+
+## Check the exposure report
+
+```sh
+docker exec <container> node .output/cli/dbloom.mjs exposure
+```
+
+It prints the bind, origin, hosts, proxies and any warnings. Fix every warning that applies to your setup.
