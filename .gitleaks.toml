@@ -1,0 +1,14 @@
+title = "dbloom"
+
+[extend]
+useDefault = true
+
+# Every hit so far is a dummy value: test fixtures, e2e keys, WebAuthn vectors, mock vault key, landing-page demo token.
+[allowlist]
+description = "dummy values"
+paths = [
+  '''^tests/''',
+  '''^e2e/''',
+  '''^src/lib/auth/mock-connections\.ts$''',
+  '''^docs/app/\(home\)/page\.tsx$''',
+]
