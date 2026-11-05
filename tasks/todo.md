@@ -8,4 +8,4 @@
 - [x] 7 Shell + sidebar tree
 - [x] 8 Table grid
 - [x] 9 Session-ended + logout
-- [ ] 10 A11y/motion pass (no axe run yet; manual screenshots reviewed light/dark at 1440, 768, 390)
+- [x] 10 A11y/motion pass (done 2026-11-05; e2e/shell-a11y.spec.ts 14 tests: axe on the direct login page (also with its error), the shell (empty state, tree open, assistant panel) and the session-ended dialog in light and dark, tablet and phone widths with no sideways scroll, the mobile drawer, focus visible on every tab stop, reduced motion; the only finding was the mobile drawer: it now has a backdrop, closes on a tap and on Escape with the focus back on the button, and the button says aria-expanded and aria-controls; not done: the design inspector, the compose restart test, the first CI run)

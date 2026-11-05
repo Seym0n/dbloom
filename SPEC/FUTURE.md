@@ -154,6 +154,8 @@ Ideas that were discussed and deliberately postponed. They are **not requirement
 
 **Why deferred:** Owner decision, 2026-11-03: not in the first admin release. Admin pages are protected by the admin role and step-up only; `docs/deploy.md` must say that administrators reach them from any address until this ships.
 
+**Owner decision, 2026-11-05:** the administrator role (with step-up where a spec says so) is protection enough; the admin plane is not planned. It stays here only as an option for a deployment that wants a network fence for administrators.
+
 **Related:** `28-admin-capability-map.md`, `29-module-admin-audit.md` assumption 6.
 
 ## FU-user-notices: new-location notice to the affected user

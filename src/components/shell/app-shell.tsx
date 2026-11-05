@@ -131,7 +131,20 @@ export function AppShell({
   const [reveal, setReveal] = useState<string | undefined>()
   const [assistantOpen, setAssistantOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const menuButton = useRef<HTMLButtonElement>(null)
   const newTabs = useRef(0)
+
+  // The sidebar is a drawer on a narrow screen: Escape closes it and the focus goes back to the button that opened it.
+  useEffect(() => {
+    if (!menuOpen) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return
+      setMenuOpen(false)
+      menuButton.current?.focus()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [menuOpen])
   const sqlSeq = useRef(0)
   const [sqlMeta, setSqlMeta] = useState<Record<string, SqlTabMeta>>({})
   const [closing, setClosing] = useState<ShellTab | null>(null)
@@ -365,7 +378,9 @@ export function AppShell({
         onOpenDatabase={setReveal}
       />
 
+      {menuOpen && <div data-testid="drawer-backdrop" aria-hidden className="fixed inset-0 z-10 bg-black/40 md:hidden" onClick={() => setMenuOpen(false)} />}
       <aside
+        id="shell-sidebar"
         className={cn(
           'row-span-2 flex-col gap-4 bg-ground px-3 pb-3',
           'fixed inset-y-0 left-0 z-20 w-[280px] border-r border-border',
@@ -431,8 +446,11 @@ export function AppShell({
         <Button
           variant="ghost"
           size="icon"
+          ref={menuButton}
           className="md:hidden"
           aria-label={t('nav.databases')}
+          aria-expanded={menuOpen}
+          aria-controls="shell-sidebar"
           onClick={() => setMenuOpen((v) => !v)}
         >
           <Menu size={16} aria-hidden />
