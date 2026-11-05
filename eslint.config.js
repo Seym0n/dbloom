@@ -1,7 +1,7 @@
 import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
-  { ignores: ['.output/**', 'node_modules/**', 'legacy-release/**', 'src/routeTree.gen.ts', 'SPEC/**', '.claude/**', '.agents/**', 'test-results/**'] },
+  { ignores: ['.output/**', 'node_modules/**', 'src/routeTree.gen.ts', 'SPEC/**', '.claude/**', '.agents/**', 'test-results/**'] },
   ...tseslint.configs.recommended,
   {
     // FR-SVR-005: one module decides client address, scheme and host. Nothing else reads forwarded headers.

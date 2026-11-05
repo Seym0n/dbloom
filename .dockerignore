@@ -4,7 +4,6 @@ node_modules
 .claude
 .agents
 SPEC
-legacy-release
 data
 test-results
 .env
