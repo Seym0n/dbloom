@@ -74,6 +74,11 @@ services:
         apk add --no-cache openssl >/dev/null &&
         openssl req -x509 -newkey rsa:2048 -nodes -keyout /tmp/test.key -out /tmp/test.crt -days 2 -subj /CN=dbloom.test &&
         exec nginx -g 'daemon off;'
+    # The entrypoint installs openssl first (network), so "started" is not "listening": the suite waits for this.
+    healthcheck:
+      test: ['CMD-SHELL', 'nc -z 127.0.0.1 443']
+      interval: 2s
+      retries: 60
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
     ports:

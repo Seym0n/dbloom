@@ -24,6 +24,8 @@ const env = {
 
 export default defineConfig<StructureOptions>({
   testDir: 'e2e',
+  // Playwright's default also matches `*.test.ts`, which would load the Vitest files of e2e/proxy/ (run by `test:e2e:proxy`).
+  testMatch: /.*\.spec\.ts/,
   // Seeds the shop database, then removes scratch databases and users left by an aborted run.
   globalSetup: ['./e2e/global-setup.ts', './e2e/fixtures/scratch-db.ts'],
   fullyParallel: false,

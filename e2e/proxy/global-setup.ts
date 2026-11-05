@@ -7,7 +7,7 @@ const compose = (...args: string[]) => execFileSync('docker', ['compose', '-f', 
 /** Builds the image and starts app + Traefik + Caddy + nginx; tears everything down afterwards (set KEEP_PROXY=1 to keep). */
 export default function setup() {
   compose('up', '--build', '-d', '--wait', 'app')
-  compose('up', '-d', 'traefik', 'caddy', 'nginx')
+  compose('up', '-d', '--wait', 'traefik', 'caddy', 'nginx')
   return () => {
     if (!process.env.KEEP_PROXY) compose('down', '-v', '--remove-orphans')
   }
