@@ -1,0 +1,66 @@
+import { Callout, Steps } from 'nextra/components'
+
+# Behind Cloudflare
+
+Put DBLoom behind Cloudflare's proxy (the orange cloud) to get https without managing certificates at the edge, and keep real visitor addresses in the audit log.
+
+<Callout type="warning">
+
+The Coolify and Cloudflare steps below were not run during development. Menu names and defaults can differ between versions, so check them against yours. The Cloudflare address ranges change rarely; confirm them at `cloudflare.com/ips`.
+
+</Callout>
+
+## What you see without extra setup
+
+Requests go visitor, then Cloudflare, then your proxy (Traefik on Coolify), then DBLoom. By default Traefik trusts nobody, so it replaces the forwarded address with the address of the peer that called it, which is a Cloudflare edge server. DBLoom then records that Cloudflare address for every visitor. You can see it in the setup wizard under the server environment, in the "Your address" row (for example `172.71.160.147`).
+
+That breaks anything that depends on the visitor address: the audit log, sign-in rate limits, the "new location" notice and the administration-network check in the setup wizard.
+
+DBLoom does not read `CF-Connecting-IP`. A header like that can be forged by anyone who reaches the proxy directly, so DBLoom takes the address only from the forwarded chain that your trusted proxies build.
+
+## Setup
+
+<Steps>
+
+### Use https end to end
+
+In Cloudflare, set **SSL/TLS** to **Full** or **Full (strict)**. Flexible also works, but the hop from Cloudflare to your server is then plain http. In Coolify, set the domain with `https://`, for example `https://db.example.com`, and redeploy.
+
+### Pin the origin
+
+Set the public URL so DBLoom does not depend on forwarded headers for it. Account mode needs this anyway.
+
+```ini
+DBLOOM_PUBLIC_ORIGIN=https://db.example.com
+```
+
+### Let Traefik trust Cloudflare
+
+Traefik must keep the forwarded address that Cloudflare sends. Add Cloudflare's ranges as trusted addresses on both entry points of the proxy. In Coolify this is in the server's proxy configuration, as extra Traefik arguments. Entry point names can differ; the Coolify defaults are `http` and `https`.
+
+```yaml
+- '--entrypoints.http.forwardedHeaders.trustedIPs=173.245.48.0/20,103.21.244.0/22,103.22.200.0/22,103.31.4.0/22,141.101.64.0/18,108.162.192.0/18,190.93.240.0/20,188.114.96.0/20,197.234.240.0/22,198.41.128.0/17,162.158.0.0/15,104.16.0.0/13,104.24.0.0/14,172.64.0.0/13,131.0.72.0/22,2400:cb00::/32,2606:4700::/32,2803:f800::/32,2405:b500::/32,2405:8100::/32,2a06:98c0::/29,2c0f:f248::/32'
+- '--entrypoints.https.forwardedHeaders.trustedIPs=173.245.48.0/20,103.21.244.0/22,103.22.200.0/22,103.31.4.0/22,141.101.64.0/18,108.162.192.0/18,190.93.240.0/20,188.114.96.0/20,197.234.240.0/22,198.41.128.0/17,162.158.0.0/15,104.16.0.0/13,104.24.0.0/14,172.64.0.0/13,131.0.72.0/22,2400:cb00::/32,2606:4700::/32,2803:f800::/32,2405:b500::/32,2405:8100::/32,2a06:98c0::/29,2c0f:f248::/32'
+```
+
+Restart the proxy afterwards.
+
+### Let DBLoom trust Cloudflare too
+
+Traefik now passes on a chain of the form `visitor, Cloudflare edge`. DBLoom takes the rightmost address that is not a trusted proxy, so it must know that the Cloudflare edge is a proxy. Setting `DBLOOM_TRUST_PROXY` replaces the private-range default, so list the private ranges again next to the Cloudflare ranges.
+
+```ini
+DBLOOM_TRUST_PROXY=10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,fc00::/7,173.245.48.0/20,103.21.244.0/22,103.22.200.0/22,103.31.4.0/22,141.101.64.0/18,108.162.192.0/18,190.93.240.0/20,188.114.96.0/20,197.234.240.0/22,198.41.128.0/17,162.158.0.0/15,104.16.0.0/13,104.24.0.0/14,172.64.0.0/13,131.0.72.0/22,2400:cb00::/32,2606:4700::/32,2803:f800::/32,2405:b500::/32,2405:8100::/32,2a06:98c0::/29,2c0f:f248::/32
+```
+
+An alternative that needs no list is `DBLOOM_PROXY_HOPS=2`, which takes the second entry from the right. It breaks if the chain length ever changes, so the list is the safer choice.
+
+### Check it
+
+Redeploy, open the setup wizard or sign in, and look at "Your address": it should now be your own address. `docker exec CONTAINER node .output/cli/dbloom.mjs exposure` shows the trusted proxies as DBLoom sees them.
+
+</Steps>
+
+## Keep the origin closed to everyone but Cloudflare
+
+Trusting Cloudflare's ranges only helps if nobody else can reach your proxy with a forged header. Traefik already ignores forwarded headers from addresses outside the trusted list, so a direct request gets its own address recorded, not a forged one. For defence in depth, also restrict ports 80 and 443 on the server's firewall to Cloudflare's ranges, or use Cloudflare's authenticated origin pulls.

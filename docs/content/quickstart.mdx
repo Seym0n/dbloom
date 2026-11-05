@@ -1,27 +1,10 @@
-# Quickstart
-
-Run DBLoom on your computer in a few commands.
-
 import { Callout, Steps } from 'nextra/components'
 
+# Quickstart
+
+Run DBLoom on your computer in a few commands. Nothing is required to start it.
+
 <Steps>
-
-### Copy the example environment file
-
-```sh
-cp .env.example .env
-```
-
-### Set the public origin
-
-Open `.env` and set the minimum for a local trial:
-
-```sh
-DBLOOM_PUBLIC_ORIGIN=http://localhost:3000
-```
-
-- `DBLOOM_PUBLIC_ORIGIN`: scheme and host, no path. `http` is allowed only for a loopback host such as `localhost`. Optional in direct mode, required in account mode (this page uses account mode). Recommended everywhere.
-- `DBLOOM_TRUST_PROXY`: optional. A CIDR list of proxy networks. A local trial has no proxy, so leave it unset. Set it to your proxy network when you deploy behind one.
 
 ### Start the stack
 
@@ -29,7 +12,7 @@ DBLOOM_PUBLIC_ORIGIN=http://localhost:3000
 docker compose -f compose.yaml -f compose.local.yaml up --build
 ```
 
-`compose.local.yaml` publishes the app on `127.0.0.1:3000` only. Nothing else on your network can reach it.
+`compose.local.yaml` publishes the app on `127.0.0.1:3000` only. Nothing else on your network can reach it. You do not need a `.env` file to start.
 
 ### Open DBLoom
 
@@ -41,24 +24,47 @@ Use Chrome or Firefox for a local trial. Safari does not accept `http://localhos
 
 </Callout>
 
-### Get the setup token
+### Run the first-time setup
 
-In account mode, the first visit starts the setup wizard. The wizard needs a setup token. Find the container name with `docker ps`, then print the token:
+The first visit starts a setup wizard. It needs a setup token, which the container prints at start. Find the container name with `docker ps`, then print the token:
 
 ```sh
-docker exec <container> node .output/cli/dbloom.mjs setup-token
+docker exec CONTAINER node .output/cli/dbloom.mjs setup-token
 ```
 
-Replace `<container>` with the name from `docker ps`. Paste the token into the wizard.
+Replace `CONTAINER` with the name from `docker ps`. Paste the token into the wizard and choose how people sign in.
 
 </Steps>
 
+## What the two login modes need
+
+| Mode | What it needs in `.env` |
+|---|---|
+| **Account mode** (DBLoom users, second factors) | `DBLOOM_PUBLIC_ORIGIN` and `DBLOOM_SECRET_KEY` |
+| **Direct mode** (sign in with a database account) | `DBLOOM_DIRECT_FREE_FORM_ACK=true` or `DBLOOM_DIRECT_TARGETS` |
+
+For account mode on your computer:
+
+```sh
+cp .env.example .env
+```
+
+```ini
+DBLOOM_PUBLIC_ORIGIN=http://localhost:3000
+DBLOOM_SECRET_KEY=PASTE_A_KEY_HERE
+```
+
+Make the key with `openssl rand -base64 32`, and keep a copy outside the server. `http` is allowed for the origin only on a loopback host such as `localhost`.
+
+`DBLOOM_TRUST_PROXY` is not needed: a local trial has no proxy. When you deploy behind one, it is optional and narrows which proxy addresses DBLoom trusts. See [Security model](/docs/concepts/security-model).
+
 ## Prefer a guided start
 
-The [Setup](/docs/setup) page asks a few questions and creates the `.env` file for you.
+The [Setup guide](/docs/setup) asks a few questions and creates the `.env` file for you, including a server key.
 
 ## Next steps
 
 - [Login modes](/docs/concepts/login-modes): pick account mode or direct mode.
 - [Storage](/docs/concepts/storage): what lives in `/data` and what to back up.
 - [Docker Compose deploy](/docs/deploy/docker-compose): run it behind a TLS proxy for real use.
+- [Behind Cloudflare](/docs/deploy/cloudflare): https and real visitor addresses.
