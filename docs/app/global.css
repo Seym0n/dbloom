@@ -1,11 +1,11 @@
 /* Landing page (.lp) and setup wizard (.wiz). The docs pages use the Nextra theme. */
 .lp {
   --bg: #ffffff;
-  --surface: #f3f3f3;
-  --ink: #232323;
+  --surface: #ecebf8;
+  --ink: #07051f;
   --muted: #5f5f5f;
-  --accent: #a1ffcb;
-  --accent-ink: #232323;
+  --accent: #3fb59b;
+  --accent-ink: #07051f;
   --m: clamp(16px, 2.2vw, 32px);
   --small: 1rem;
   --body: clamp(1.0625rem, 1rem + 0.25vw, 1.1875rem);
@@ -94,9 +94,23 @@
 
 /* hero */
 .hero {
-  background: var(--ink);
+  position: relative;
+  isolation: isolate;
+  background-color: #04021a;
+  background-image: radial-gradient(60vw 60vw at -8% 62%, rgba(58, 24, 140, 0.55), transparent 62%),
+    radial-gradient(52vw 52vw at 108% 30%, rgba(52, 22, 128, 0.5), transparent 62%);
+  background-repeat: no-repeat;
   color: #fff;
   padding: 0 var(--m) 96px;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: -24px;
+  z-index: -1;
+  background: var(--hero-bg) 62% 40% / cover no-repeat;
+  filter: blur(7px);
+  opacity: 0.8;
 }
 .bar {
   display: flex;
@@ -204,7 +218,7 @@
   min-height: 52px;
   padding: 8px 16px;
   border-radius: 10px;
-  background: #3a3a3a;
+  background: #1b1840;
   color: #fff;
 }
 .chip-label {
@@ -218,7 +232,7 @@
   display: inline-flex;
   padding: 3px;
   border-radius: 8px;
-  background: #232323;
+  background: #07051f;
 }
 .seg button {
   border: 0;
@@ -232,12 +246,12 @@
 }
 .seg button[aria-checked='true'] {
   background: var(--accent);
-  color: #232323;
+  color: #07051f;
   font-weight: 600;
 }
 .chip input[type='range'] {
   width: 120px;
-  accent-color: #a1ffcb;
+  accent-color: #3fb59b;
 }
 .switch {
   position: relative;
@@ -246,7 +260,7 @@
   padding: 0;
   border: 0;
   border-radius: 999px;
-  background: #232323;
+  background: #07051f;
   cursor: pointer;
   transition: background 160ms;
 }
@@ -276,7 +290,7 @@
 .browser {
   border-radius: 12px;
   background: #fff;
-  color: #232323;
+  color: #07051f;
   overflow: hidden;
 }
 .browser-bar {
@@ -470,7 +484,7 @@
   max-width: 85%;
   padding: 10px 14px;
   border-radius: 12px;
-  background: #232323;
+  background: #07051f;
   color: #fff;
 }
 .call {
@@ -512,7 +526,7 @@
   border: 0;
   border-radius: 8px;
   background: var(--accent);
-  color: #232323;
+  color: #07051f;
   font: inherit;
   font-weight: 600;
   cursor: pointer;
@@ -579,20 +593,20 @@
   min-height: 84svh;
 }
 .field-1 {
-  background: #a1ffcb;
-  color: #232323;
+  background: #3fb59b;
+  color: #07051f;
 }
 .field-2 {
-  background: #232323;
+  background: #07051f;
   color: #fff;
 }
 .field-3 {
-  background: #f3f3f3;
-  color: #232323;
+  background: #ecebf8;
+  color: #07051f;
 }
 .field-4 {
-  background: #cfd8d3;
-  color: #232323;
+  background: #d9d6f3;
+  color: #07051f;
 }
 .s-clause {
   order: 3;
@@ -616,7 +630,7 @@
 .field .card {
   border-radius: 12px;
   background: #fff;
-  color: #232323;
+  color: #07051f;
   overflow: hidden;
   transition: transform 220ms var(--ease);
 }
@@ -706,6 +720,13 @@
 /* closing sentence */
 .close {
   padding: 30svh var(--m) 20svh;
+  background-color: #04021a;
+  background-image: radial-gradient(50vw 50vw at 100% 100%, rgba(58, 24, 140, 0.5), transparent 62%),
+    radial-gradient(40vw 40vw at 0% 0%, rgba(30, 40, 150, 0.35), transparent 62%);
+  color: #fff;
+}
+.close .link:hover {
+  text-decoration-color: var(--accent);
 }
 .close-in {
   max-width: 34ch;
@@ -830,7 +851,7 @@
     position: static;
     max-width: none;
     padding: 28px var(--m) 0;
-    background: #a1ffcb;
+    background: #3fb59b;
     font-size: 1.5rem;
   }
   .field {
@@ -938,9 +959,9 @@
   cursor: pointer;
 }
 .wiz-choices label.on {
-  background: #a1ffcb;
-  color: #232323;
-  border-color: #a1ffcb;
+  background: #3fb59b;
+  color: #07051f;
+  border-color: #3fb59b;
   font-weight: 600;
 }
 .wiz-choices input {
@@ -970,8 +991,8 @@
   margin-left: 0;
 }
 .wiz-btn:hover:not(:disabled) {
-  background: #a1ffcb;
-  color: #232323;
+  background: #3fb59b;
+  color: #07051f;
 }
 .wiz-btn:disabled {
   opacity: 0.45;

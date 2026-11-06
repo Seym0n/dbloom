@@ -35,7 +35,10 @@ const STEPS = [
 export default function Home() {
   return (
     <main className="lp">
-      <section className="hero">
+      <section
+        className="hero"
+        style={{ ['--hero-bg' as string]: `url(${BASE}/hero-bg.webp)` }}
+      >
         <header className="bar">
           <Link href="/" className="word">
             DBLoom
