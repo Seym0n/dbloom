@@ -96,6 +96,7 @@
 .hero {
   position: relative;
   isolation: isolate;
+  overflow: clip;
   background-color: #04021a;
   background-image: radial-gradient(60vw 60vw at -8% 62%, rgba(58, 24, 140, 0.55), transparent 62%),
     radial-gradient(52vw 52vw at 108% 30%, rgba(52, 22, 128, 0.5), transparent 62%);
