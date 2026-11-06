@@ -56,6 +56,10 @@ export type EngineDeps = {
   now?: () => number
 }
 
+/** After this many results in a row whose rows the model could not see, further queries of the message are refused. */
+const MAX_WITHHELD_RUN = 2
+const WITHHELD_LIMIT_TEXT = 'Several results in a row could not be shown to you. Stop querying: answer from what you know and tell the user to read the result tables above, or ask them for a different question.'
+
 export type EngineState = {
   id: string
   userId: string
@@ -72,6 +76,8 @@ export type EngineState = {
   stopped: boolean
   steps: number
   tokensUsed: number
+  /** Consecutive results of this message whose rows were withheld from the model. */
+  withheldRun: number
 }
 
 export function createEngineState(init: {
@@ -100,6 +106,7 @@ export function createEngineState(init: {
     stopped: false,
     steps: 0,
     tokensUsed: 0,
+    withheldRun: 0,
   }
 }
 
@@ -173,7 +180,7 @@ const auditOf = (state: EngineState, p: Prepared, extra: Record<string, unknown>
 })
 
 function refuse(state: EngineState, deps: EngineDeps, out: Out, call: ToolCall, code: RefusalCode, detail?: string, p?: { sqlReal?: string; db?: string; sqlModel?: string }): void {
-  const text = code === 'token' && detail ? detail : REFUSAL_TEXT[code]
+  const text = (code === 'token' || code === 'limit') && detail ? detail : REFUSAL_TEXT[code]
   toolMsg(state, call.id, { status: 'refused', reason: text })
   out.push({ type: 'refused', callId: call.id, code, message: text, ...(code === 'user-only' && p?.sqlReal ? { sql: p.sqlReal } : {}), ...(p?.db ? { db: p.db } : {}) })
   bestEffort(deps, 'assistant.refuse', { conversationId: state.id, userId: state.userId, callId: call.id, reason: code, ...(p?.sqlModel ? { sql: p.sqlModel } : {}) })
@@ -181,6 +188,10 @@ function refuse(state: EngineState, deps: EngineDeps, out: Out, call: ToolCall, 
 
 async function prepareQuery(state: EngineState, deps: EngineDeps, call: ToolCall, args: { db?: string; sql: string; purpose?: string }, out: Out): Promise<Prepared | undefined> {
   const sqlModel = deps.hideNames() ? state.hider.restoreSql(args.sql) : args.sql
+  if (state.withheldRun >= MAX_WITHHELD_RUN) {
+    refuse(state, deps, out, call, 'limit', WITHHELD_LIMIT_TEXT, { sqlModel })
+    return undefined
+  }
   const parsed = parseStatement(sqlModel, deps.product)
   const refs = parsed.ok ? parsed.facts.tables : []
   const schema = await deps.loadSchema(args.db, refs)
@@ -264,11 +275,12 @@ async function execute(state: EngineState, deps: EngineDeps, call: ToolCall, p: 
     rows = r.rowCount
     const taints = p.analysis.kind === 'query' && !p.metadataOnly ? p.analysis.outputs : undefined
     const shaped = shapeForModel(taints, r.columns, r.rows, state.tokens, { maxRows: deps.maxRows, truncated: r.truncated !== undefined })
+    state.withheldRun = shaped.mode === 'rows' ? 0 : state.withheldRun + 1
     const hide = (n: string) => (deps.hideNames() ? state.hider.hideResultName(n) : n)
     modelPayload =
       shaped.mode === 'rows'
         ? { status: 'ok', columns: shaped.columns.map((c) => ({ name: hide(c.name), type: c.type, anonymized: c.anonymized })), rows: shaped.rows, row_count: shaped.rowCount, truncated: shaped.truncated }
-        : { status: 'ok', columns: shaped.columns.map((c) => ({ name: hide(c.name), type: c.type })), row_count: shaped.rowCount, rows_withheld: true, note: 'Only column names and the row count are shown: the origin of some columns could not be checked against the privacy rules.' }
+        : { status: 'ok', columns: shaped.columns.map((c) => ({ name: hide(c.name), type: c.type })), row_count: shaped.rowCount, rows_withheld: true, note: 'Only column names and the row count are shown to you, because the origin of some columns could not be checked against the privacy rules. The user sees the full result in the app. Do not run more queries to see these rows; answer from the statement and tell the user to read the result, or ask for a query that returns only aggregates.' }
     userEvent = {
       type: 'result',
       callId: call.id,
@@ -444,6 +456,7 @@ export async function sendMessage(state: EngineState, deps: EngineDeps, text: st
     state.stopped = false
     state.steps = 0
     state.tokensUsed = 0
+    state.withheldRun = 0
     state.messages.push({ role: 'user', content: text })
     return loop(state, deps, out, signal)
   })

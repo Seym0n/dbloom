@@ -45,7 +45,7 @@ export function RichText({ text }: { text: string }) {
       {blocks.map((b, i) => {
         if (b.t === 'code')
           return (
-            <pre key={i} className="overflow-x-auto rounded-[var(--radius-control)] bg-raised p-2 font-mono text-xs" tabIndex={0}>
+            <pre key={i} className="overflow-x-auto overscroll-contain rounded-[var(--radius-control)] bg-raised p-2 font-mono text-xs" tabIndex={0}>
               {b.v}
             </pre>
           )

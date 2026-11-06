@@ -38,12 +38,12 @@ export function AssistantHost({ onClose, onOpenSql }: { onClose: () => void; onO
   if (expanded) {
     return (
       <Dialog open onClose={() => toggle()} labelledBy="asst-modal-title" className="h-[min(780px,calc(100dvh-32px))] w-[min(960px,calc(100vw-32px))]">
-        <div className="h-[min(780px,calc(100dvh-32px))]">{view('modal', 'asst-modal-title')}</div>
+        <div className="h-full">{view('modal', 'asst-modal-title')}</div>
       </Dialog>
     )
   }
   return (
-    <aside aria-labelledby="asst-side-title" className="fixed inset-0 z-30 flex flex-col bg-surface md:static md:z-auto md:w-[var(--assistant-width)] md:shrink-0 md:border-l md:border-border">
+    <aside aria-labelledby="asst-side-title" className="fixed inset-0 z-30 flex min-h-0 flex-col overflow-hidden bg-surface md:static md:z-auto md:w-[var(--assistant-width)] md:min-w-0 md:max-w-full md:shrink-0 md:overflow-hidden md:border-l md:border-border">
       {view('side', 'asst-side-title')}
     </aside>
   )

@@ -13,7 +13,7 @@ const card = 'rounded-[var(--radius-card)] border border-border bg-surface p-3 t
 
 function SqlBlock({ sql }: { sql: string }) {
   return (
-    <pre className="max-h-48 overflow-auto whitespace-pre-wrap break-words rounded-[var(--radius-control)] bg-raised p-2 font-mono text-xs" tabIndex={0}>
+    <pre className="max-h-48 overflow-auto overscroll-contain whitespace-pre-wrap break-words rounded-[var(--radius-control)] bg-raised p-2 font-mono text-xs" tabIndex={0}>
       {sql}
     </pre>
   )
@@ -23,7 +23,7 @@ function SqlBlock({ sql }: { sql: string }) {
 export function ResultTable({ result }: { result: ResultEvent['result'] }) {
   if (result.columns.length === 0) return null
   return (
-    <div role="region" aria-label={t('asst.result.table')} tabIndex={0} className="max-h-56 overflow-auto rounded-[var(--radius-control)] border border-border">
+    <div role="region" aria-label={t('asst.result.table')} tabIndex={0} className="max-h-56 overflow-auto overscroll-contain rounded-[var(--radius-control)] border border-border">
       <table className="w-full border-collapse text-left text-xs">
         <thead className="sticky top-0 bg-raised">
           <tr>

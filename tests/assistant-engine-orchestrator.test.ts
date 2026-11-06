@@ -179,6 +179,22 @@ describe('auto mode', () => {
   })
 })
 
+describe('withheld results', () => {
+  it('refuses a third query in a row once two results were withheld from the model', async () => {
+    const weird = 'SELECT id FROM customers PROCEDURE ANALYSE()'
+    const acceptWeird = async (sql: string) => ({ ok: true as const, access: 'read' as const, sql, facts: { kind: 'select' as const, class: 'none' as const, readOnlySafe: true, reasons: [] } })
+    const h = makeHarness({ inspect: acceptWeird })
+    h.replies.push(query(weird, {}, 'c1'), query(weird, {}, 'c2'), query(weird, {}, 'c3'), text('Read the result above.'))
+    h.results.push(rowsResult(CUSTOMERS.slice(0, 1), [['1']]), rowsResult(CUSTOMERS.slice(0, 1), [['1']]))
+    expect((await ask(h)).status).toBe('awaiting_approval')
+    expect((await approve(h, 'c1')).status).toBe('awaiting_approval')
+    const last = await approve(h, 'c2')
+    expect(eventsOf(last.events, 'refused')[0]).toMatchObject({ code: 'limit' })
+    expect(h.runs).toHaveLength(2)
+    expect(last.status).toBe('done')
+  })
+})
+
 describe('privacy rules in the loop', () => {
   it('a token the model got can be used in a WHERE: the statement shown and run has the real value, the audit and the history keep the token', async () => {
     const h = makeHarness({ mode: 'auto' })

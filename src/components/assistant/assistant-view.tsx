@@ -190,7 +190,7 @@ export function AssistantView(p: ViewProps) {
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col">
+    <div className="flex h-full min-h-0 min-w-0 flex-col">
       <Header p={p} />
       {!state.status && !state.loadFailed && <p className="px-4 py-3 text-sm text-muted">{t('asst.loading')}</p>}
       {state.loadFailed && <p role="alert" className="px-4 py-3 text-sm text-[var(--pill-negative-ink)]">{t('asst.api.unexpected')}</p>}
@@ -214,9 +214,9 @@ export function AssistantView(p: ViewProps) {
               p.scrollTop.current = el.scrollTop
               stick.current = el.scrollHeight - el.scrollTop - el.clientHeight < 40
             }}
-            className="mt-3 min-h-0 flex-1 overflow-y-auto px-4 pb-3"
+            className="mt-3 min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-3"
           >
-            <ol className="flex flex-col gap-3">
+            <ol className="flex min-w-0 flex-col gap-3 [&>li]:min-w-0">
             {state.items.length === 0 && <li className="text-sm text-muted">{t('asst.empty')}</li>}
             {state.items.map((item, i) => (
               <ItemView key={i} item={item} index={i} h={handlers} />
@@ -233,7 +233,7 @@ export function AssistantView(p: ViewProps) {
             </div>
           )}
           <form
-            className="flex items-end gap-2 border-t border-border p-3"
+            className="flex items-stretch gap-2 border-t border-border p-3"
             onSubmit={(e) => {
               e.preventDefault()
               submit()
@@ -258,12 +258,12 @@ export function AssistantView(p: ViewProps) {
               className="min-h-10 flex-1 resize-none rounded-[var(--radius-control)] border border-control bg-surface px-3 py-2 text-sm placeholder:text-faint"
             />
             {state.run === 'running' ? (
-              <Button type="button" onClick={() => void state.stop()}>
+              <Button type="button" className="h-auto self-stretch" onClick={() => void state.stop()}>
                 <Square size={14} aria-hidden />
                 {t('asst.stop')}
               </Button>
             ) : (
-              <Button type="submit" variant="primary" disabled={!canSend}>
+              <Button type="submit" variant="primary" className="h-auto self-stretch" disabled={!canSend}>
                 <Send size={14} aria-hidden />
                 {t('asst.send')}
               </Button>
