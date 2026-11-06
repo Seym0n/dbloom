@@ -2,7 +2,8 @@ import { createServerFn } from '@tanstack/react-start'
 import { createMiddleware } from '@tanstack/react-start'
 import { getCookie, getRequestHeader } from '@tanstack/react-start/server'
 import { CSRF_HEADER, SESSION_ENDED } from '~/lib/csrf'
-import { csrfClientMiddleware, sameOriginMiddleware, setupGateMiddleware, SESSION_COOKIE } from './middleware'
+import { csrfClientMiddleware, sameOriginMiddleware, setupGateMiddleware } from './middleware'
+import { sessionCookie } from './session-cookie-request'
 import { assertNotInMaintenance } from './maintenance'
 import { getRuntime } from './runtime'
 import { isStateless, ownerKeyOf } from './sql/state'
@@ -28,7 +29,7 @@ const prefsMiddleware = createMiddleware({ type: 'function' })
   .middleware([sameOriginMiddleware, csrfClientMiddleware, setupGateMiddleware])
   .server(({ next }) => {
     const { sessions } = getRuntime()
-    const token = getCookie(SESSION_COOKIE)
+    const token = getCookie(sessionCookie())
     const presented = getRequestHeader(CSRF_HEADER)
     const stateless = isStateless()
     const account = sessions.resolveAccount(token, { background: false })

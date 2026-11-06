@@ -22,6 +22,7 @@ import { createVaultService, peekVaultKey, requireFullUser, type VaultServiceImp
 import { vaultCryptoService } from './vault-crypto'
 import {
   AuthError,
+  type TargetTlsReason,
   CONNECTION_ID_BYTES,
   MAX_CONNECTIONS_PER_SESSION,
   SCOPE_KEY_SEPARATOR,
@@ -227,9 +228,31 @@ const asContext = (s: AccountLiveSession): AccountContext => ({
   idHash: s.idHash, csrf: s.csrf, kind: s.kind, state: 'full', user: s.user, ownerKey: s.user ? `u:${s.user.id}` : s.idHash, mfaAt: null, stepupAt: null,
 })
 
-/** Policy and throttle refusals keep their code; every other failure is the one generic message (SEC-TGT-018). */
+const TLS_CODES: Record<string, TargetTlsReason> = {
+  SELF_SIGNED_CERT_IN_CHAIN: 'untrusted_ca', DEPTH_ZERO_SELF_SIGNED_CERT: 'untrusted_ca', UNABLE_TO_VERIFY_LEAF_SIGNATURE: 'untrusted_ca',
+  UNABLE_TO_GET_ISSUER_CERT: 'untrusted_ca', UNABLE_TO_GET_ISSUER_CERT_LOCALLY: 'untrusted_ca', CERT_UNTRUSTED: 'untrusted_ca',
+  ERR_TLS_CERT_ALTNAME_INVALID: 'hostname_mismatch', CERT_HAS_EXPIRED: 'cert_expired', CERT_NOT_YET_VALID: 'cert_not_yet_valid',
+  EPROTO: 'handshake_failed', ERR_TLS_HANDSHAKE_TIMEOUT: 'handshake_failed', ERR_SSL_WRONG_VERSION_NUMBER: 'handshake_failed',
+  ERR_SSL_SSLV3_ALERT_HANDSHAKE_FAILURE: 'handshake_failed', ERR_SSL_TLSV1_ALERT_PROTOCOL_VERSION: 'handshake_failed',
+}
+
+/** Fixed TLS reason category of a failed connect (SEC-ISS-001); undefined for every other failure. Reads only the error code, never the text. */
+export function tlsReasonOf(error: unknown): TargetTlsReason | undefined {
+  for (let e: unknown = error, depth = 0; e && typeof e === 'object' && depth < 3; e = (e as { cause?: unknown }).cause, depth++) {
+    const code = (e as { code?: unknown }).code
+    if (typeof code === 'string' && Object.hasOwn(TLS_CODES, code)) return TLS_CODES[code]
+  }
+  return undefined
+}
+
+/**
+ * Account mode: policy and throttle refusals keep their code, a TLS failure names a fixed reason category (`target_tls`), every
+ * other failure is the one generic message (SEC-TGT-018). Direct mode (`DirectAuth.login`) stays uniform and never calls this.
+ */
 const generic = (error: unknown): never => {
   if (error instanceof AuthError) throw error
+  const reason = tlsReasonOf(error)
+  if (reason) throw new AuthError('target_tls', { reason })
   throw new LoginFailedError()
 }
 
@@ -296,7 +319,7 @@ export function createConnectionService(deps: ConnectionDeps): ConnectionService
       try {
         opened = await connector.connect(req)
       } catch (error) {
-        audit('connection.failed', { actor: user.id, outcome: error instanceof AuthError ? 'refused' : 'failed', host: req.target.host, port: req.target.port, targetUser: req.target.username, reason: error instanceof AuthError ? error.code : 'connect' })
+        audit('connection.failed', { actor: user.id, outcome: error instanceof AuthError ? 'refused' : 'failed', host: req.target.host, port: req.target.port, targetUser: req.target.username, reason: error instanceof AuthError ? error.code : tlsReasonOf(error) ? `tls_${tlsReasonOf(error)}` : 'connect' })
         return generic(error)
       }
       // The limit is checked again: two parallel opens must not pass the first check together.

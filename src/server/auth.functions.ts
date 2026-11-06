@@ -2,7 +2,8 @@ import { z } from 'zod'
 import { createServerFn } from '@tanstack/react-start'
 import { deleteCookie, getCookie, getRequestHeader, setCookie, setResponseStatus } from '@tanstack/react-start/server'
 import { currentClientAddress } from './net/current'
-import { SESSION_COOKIE, accountMiddleware, accountStateMiddleware, publicMiddleware } from './middleware'
+import { accountMiddleware, accountStateMiddleware, publicMiddleware } from './middleware'
+import { sessionCookie } from './session-cookie-request'
 import { getRuntime } from './runtime'
 import { clientHintOf, PRE_AUTH_MAX_AGE_SECONDS } from './auth/signin'
 import { throwAuthError } from './auth/error-transport'
@@ -55,7 +56,7 @@ const requestMeta = () => {
 
 const setSessionCookie = (token: string) => {
   const { config } = getRuntime()
-  setCookie(SESSION_COOKIE, token, { httpOnly: true, secure: true, sameSite: 'strict', path: '/', maxAge: Math.floor(config.sessionAbsoluteMs / 1000) })
+  setCookie(sessionCookie(), token, { httpOnly: true, secure: true, sameSite: 'strict', path: '/', maxAge: Math.floor(config.sessionAbsoluteMs / 1000) })
 }
 
 /** Account mode only: the stored login mode decides; direct and stateless installs answer like a failed sign-in. */
@@ -105,7 +106,7 @@ export const passwordSignIn = createServerFn({ method: 'POST' })
       const { sessions } = getRuntime()
       const { signIn } = getSignInServices()
       // A new token on every sign-in; an old cookie is never reused (SEC-TGT-040).
-      await sessions.destroy(getCookie(SESSION_COOKIE))
+      await sessions.destroy(getCookie(sessionCookie()))
       const result = await signIn.passwordSignIn(data, requestMeta())
       setSessionCookie(result.token)
       return { csrf: result.csrf, state: result.state }
@@ -130,13 +131,13 @@ export const mfaVerify = createServerFn({ method: 'POST' })
   .validator(mfaVerifyInput)
   .handler(async ({ context, data }) => {
     try {
-      const token = getCookie(SESSION_COOKIE) ?? ''
+      const token = getCookie(sessionCookie()) ?? ''
       const result = await getSignInServices().signIn.mfaVerify(context.account, token, data)
       setSessionCookie(result.token)
       return { csrf: result.csrf, state: result.state }
     } catch (error) {
       // `mfa_expired` ends the session (five wrong tries or the 5 minute window): the browser goes back to sign-in.
-      if (error instanceof AuthError && error.code === 'mfa_expired') deleteCookie(SESSION_COOKIE, { path: '/', secure: true })
+      if (error instanceof AuthError && error.code === 'mfa_expired') deleteCookie(sessionCookie(), { path: '/', secure: true })
       return boundary(error, 'mfa_failed')
     }
   })
@@ -165,7 +166,7 @@ export const passkeyFinish = createServerFn({ method: 'POST' })
       deleteCookie(PRE_AUTH_COOKIE, { path: '/', secure: true })
       if (!pre) throw new AuthError('mfa_failed')
       const { sessions } = getRuntime()
-      await sessions.destroy(getCookie(SESSION_COOKIE))
+      await sessions.destroy(getCookie(sessionCookie()))
       const result = await getSignInServices().signIn.passkeyFinish(pre, data.response, requestMeta())
       setSessionCookie(result.token)
       return { csrf: result.csrf, state: result.state }
@@ -179,8 +180,8 @@ export const signOut = createServerFn({ method: 'POST' })
   .middleware([publicMiddleware])
   .validator(signOutInput)
   .handler(async () => {
-    await getSignInServices().signIn.signOut(getCookie(SESSION_COOKIE))
-    deleteCookie(SESSION_COOKIE, { path: '/', secure: true })
+    await getSignInServices().signIn.signOut(getCookie(sessionCookie()))
+    deleteCookie(sessionCookie(), { path: '/', secure: true })
     return { ok: true }
   })
 
@@ -200,7 +201,7 @@ export const stepUpVerify = createServerFn({ method: 'POST' })
   .validator(stepUpVerifyInput)
   .handler(async ({ context, data }) => {
     try {
-      const result = await getSignInServices().stepUp.verify(context.account, getCookie(SESSION_COOKIE) ?? '', data)
+      const result = await getSignInServices().stepUp.verify(context.account, getCookie(sessionCookie()) ?? '', data)
       setSessionCookie(result.token)
       return { stepUpUntil: result.stepUpUntil }
     } catch (error) {
@@ -212,7 +213,7 @@ export const stepUpVerify = createServerFn({ method: 'POST' })
 // Handlers read the cookie, call the service and write the regenerated cookie; policy lives in `auth/account-security.ts`
 // and `auth/admin-users.ts`. Functions named in STATE_ALLOWED_FUNCTIONS use `accountStateMiddleware(name)`.
 
-const sessionToken = () => getCookie(SESSION_COOKIE) ?? ''
+const sessionToken = () => getCookie(sessionCookie()) ?? ''
 const none = z.object({}).strict()
 
 export const changePassword = createServerFn({ method: 'POST' })

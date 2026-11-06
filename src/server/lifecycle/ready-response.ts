@@ -1,4 +1,4 @@
-import { SESSION_COOKIE } from '../middleware'
+import { sessionCookieOf } from '../session-cookie'
 import { getRuntime } from '../runtime'
 import { CidrList } from '../net/cidr'
 import { peerAddress } from '../net/peer'
@@ -25,7 +25,7 @@ export function readyResponse(request: Request): Response {
   const status = result.ready ? 200 : 503
   const detail =
     LOOPBACK.contains(peerAddress(request)) ||
-    isAdministratorRequest(request, SESSION_COOKIE, {
+    isAdministratorRequest(request, sessionCookieOf(request), {
       resolve: (cookie) => getRuntime().sessions.resolveAccount(cookie, { background: true }),
       getUser: (id) => getRuntime().store.accounts.getUser(id),
     })

@@ -3,7 +3,7 @@
  * `{code, reason?, retryAfterSeconds?, targetMessage?}`, or (older functions) the bare code, `auth_throttled:<seconds>`,
  * or a bare `Response` (setup functions: 404 gone, 401 no setup session, 409 wrong step). Parsing never throws.
  */
-import { AUTH_ERROR_CODES, PASSWORD_REJECT_REASONS, TARGET_POLICY_REASONS, type AuthErrorCode } from '~/server/auth/types'
+import { AUTH_ERROR_CODES, PASSWORD_REJECT_REASONS, TARGET_POLICY_REASONS, TARGET_TLS_REASONS, type AuthErrorCode } from '~/server/auth/types'
 import { SESSION_ENDED } from '~/lib/csrf'
 
 export type ParsedAuthError = {
@@ -15,7 +15,7 @@ export type ParsedAuthError = {
 }
 
 const CODES = new Set<string>(AUTH_ERROR_CODES)
-const REASONS = new Set<string>([...PASSWORD_REJECT_REASONS, ...TARGET_POLICY_REASONS])
+const REASONS = new Set<string>([...PASSWORD_REJECT_REASONS, ...TARGET_POLICY_REASONS, ...TARGET_TLS_REASONS])
 
 const positive = (value: unknown) =>
   typeof value === 'number' && Number.isFinite(value) && value > 0 ? Math.ceil(value) : undefined
@@ -73,5 +73,6 @@ export class AuthApiUnavailable extends Error {
 export function authErrorKey(error: ParsedAuthError): string {
   if (error.code === 'password_rejected' && error.reason) return `auth.error.password_rejected.${error.reason}`
   if (error.code === 'target_policy' && error.reason) return `auth.error.target_policy.${error.reason}`
+  if (error.code === 'target_tls' && error.reason) return `auth.error.target_tls.${error.reason}`
   return `auth.error.${error.code}`
 }

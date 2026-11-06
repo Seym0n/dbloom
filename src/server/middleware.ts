@@ -5,9 +5,8 @@ import { throwAuthError } from './auth/error-transport'
 import { BACKGROUND_HEADER } from './auth/types'
 import { assertNotInMaintenance } from './maintenance'
 import { getRuntime } from './runtime'
+import { sessionCookie } from './session-cookie-request'
 import { assertSetupDone, resolveTargetSession, stateGate } from './session-context'
-
-export const SESSION_COOKIE = '__Host-dbloom-session'
 
 /** Browsers announce cross-site requests; refuse them (SEC-TGT-042). Non-browser clients send no header. */
 export const sameOriginMiddleware = createMiddleware({ type: 'function' }).server(({ next }) => {
@@ -46,7 +45,7 @@ export const accountStateMiddleware = (fn?: string) =>
       // of one connection to another tab (found by e2e/auth-live-connections.spec.ts).
       setResponseHeader('Cache-Control', 'no-store')
       const { sessions } = getRuntime()
-      const context = sessions.resolveAccount(getCookie(SESSION_COOKIE), { background: getRequestHeader(BACKGROUND_HEADER) === '1' })
+      const context = sessions.resolveAccount(getCookie(sessionCookie()), { background: getRequestHeader(BACKGROUND_HEADER) === '1' })
       if (!context || !sessions.verifyCsrf(context, getRequestHeader(CSRF_HEADER))) throw new Error(SESSION_ENDED)
       try {
         stateGate(context.state, fn)
@@ -71,7 +70,7 @@ export const sessionMiddleware = createMiddleware({ type: 'function' })
   .server(async ({ next }) => {
     setResponseHeader('Cache-Control', 'no-store')
     const session = await resolveTargetSession(getRuntime(), {
-      token: getCookie(SESSION_COOKIE),
+      token: getCookie(sessionCookie()),
       connectionId: getRequestHeader(CONNECTION_HEADER),
       csrf: getRequestHeader(CSRF_HEADER),
       background: getRequestHeader(BACKGROUND_HEADER) === '1',

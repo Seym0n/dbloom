@@ -1,7 +1,8 @@
 import { expect, test, type Page } from '@playwright/test'
 
 const LOGIN_FAILED = 'Sign-in failed. Check the server, user name and password.'
-const COOKIE = '__Host-dbloom-session'
+// Port-scoped name (SEC-ISS-001): the test server runs on a non-default port.
+const COOKIE_NAME = /^__Host-dbloom-session(-[0-9]+)?$/
 
 async function signIn(page: Page, server = '127.0.0.1:33064', password = 'root') {
   await page.goto('/')
@@ -30,7 +31,7 @@ test.describe('SCN-004 log in directly to a target', () => {
     await signIn(page)
     await expect(page.getByRole('navigation', { name: 'Databases' })).toBeVisible()
     await expect(page.getByRole('button', { name: 'e2e_shop', exact: true })).toBeVisible()
-    const session = (await page.context().cookies()).find((c) => c.name === COOKIE)
+    const session = (await page.context().cookies()).find((c) => COOKIE_NAME.test(c.name))
     expect(session).toMatchObject({ httpOnly: true, secure: true, sameSite: 'Strict', path: '/' })
   })
 })
@@ -112,7 +113,7 @@ test.describe('requests and logout (SEC-TGT-042, SCN-010)', () => {
     })
     expect(await forged.text()).toContain('session_ended')
 
-    const cookie = (await page.context().cookies()).find((c) => c.name === COOKIE)!
+    const cookie = (await page.context().cookies()).find((c) => COOKIE_NAME.test(c.name))!
     await page.getByRole('button', { name: 'Log out' }).click()
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Sign in to a database server')
 

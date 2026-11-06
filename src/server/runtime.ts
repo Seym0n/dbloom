@@ -23,6 +23,7 @@ import { createThrottle } from './auth/throttle'
 import { AUTH_SETTINGS, type ResolvedAuthSettings, type Throttle } from './auth/types'
 import type { SetupApi } from './auth/setup'
 import { buildExposure, type ExposureReport } from './exposure'
+import { configureSessionCookie } from './session-cookie'
 import { assertDirectTargets, loadConfigWithWarnings, type Config } from './config'
 import type { IoPrefsStore } from './io/store'
 import type { PrefsStore } from './rows/prefs'
@@ -70,6 +71,7 @@ export function getRuntime(): Runtime {
     // no .env file (containers pass real variables)
   }
   const { config, warnings: configWarnings } = loadConfigWithWarnings()
+  configureSessionCookie(config.publicOrigin)
   const exposure = buildExposure(config, process.env, configWarnings)
   log.info('exposure', Object.fromEntries(exposure.lines.map(([k, v]) => [k.replace(/ /g, '_'), v])))
   for (const w of exposure.warnings) log.warn('DBLoom config warning', { warning: w })

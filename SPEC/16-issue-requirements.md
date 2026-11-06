@@ -68,7 +68,7 @@
 
 | ID | Requirement | Upstream issues |
 |---|---|---|
-| SEC-ISS-001 | **PROPOSED.** Logout shall end all authentication state, including a sign-on cookie. Two DBLoom instances on the same host with different ports shall not share a session cookie. File names shown by the import page shall be output-encoded (regression test for SEC-TGT-112). A failed TLS connection to a target shall say why (for example an untrusted certificate authority). | #17457, #16459, #15541, #16069 |
+| SEC-ISS-001 | **PROPOSED.** Logout shall end all authentication state, including a sign-on cookie. Two DBLoom instances on the same host with different ports shall not share a session cookie: the cookie keeps the name `__Host-dbloom-session` on the default public port (443 or none in the public origin) and is named `__Host-dbloom-session-<port>` on any other public port, the port taken from `DBLOOM_PUBLIC_ORIGIN` (without it, from the request `Host`). File names shown by the import page shall be output-encoded (regression test for SEC-TGT-112). In account mode a failed TLS connection to a target shall say why, as a fixed reason category (untrusted certificate authority, host name mismatch, expired, not yet valid, handshake failed) without driver text, host or probing detail; in direct mode the failure stays the one uniform message (SEC-TGT-018). **Owner-instructed assistant decision (2026-11-06).** | #17457, #16459, #15541, #16069 |
 
 ### Non-functional
 

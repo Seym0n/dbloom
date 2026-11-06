@@ -439,6 +439,7 @@ export const AUTH_ERROR_CODES = [
   'profile_name_taken',
   'profile_limit',
   'target_policy',
+  'target_tls',
   'setup_pending',
   'maintenance',
 ] as const
@@ -452,10 +453,14 @@ export type PasswordRejectReason = (typeof PASSWORD_REJECT_REASONS)[number]
 export const TARGET_POLICY_REASONS = ['root_denied', 'empty_password'] as const
 export type TargetPolicyReason = (typeof TARGET_POLICY_REASONS)[number]
 
+/** Reasons of `target_tls` (SEC-ISS-001): fixed categories of a failed TLS connect, account mode only; never driver text, host or probing detail. */
+export const TARGET_TLS_REASONS = ['untrusted_ca', 'hostname_mismatch', 'cert_expired', 'cert_not_yet_valid', 'handshake_failed'] as const
+export type TargetTlsReason = (typeof TARGET_TLS_REASONS)[number]
+
 /** What crosses the boundary: a stable code, one localised message (`t('auth.error.<code>')`), no library text. */
 export type AuthErrorBody = {
   code: AuthErrorCode
-  reason?: PasswordRejectReason | TargetPolicyReason
+  reason?: PasswordRejectReason | TargetPolicyReason | TargetTlsReason
   /** `auth_throttled`: seconds for the `Retry-After` header. */
   retryAfterSeconds?: number
   /** `profile_test_failed`: the generic target message of the skeleton (SEC-TGT-018). */

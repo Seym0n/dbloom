@@ -1,5 +1,5 @@
 import { CONNECTION_HEADER, CONNECTION_PARAM, CSRF_HEADER } from '../../lib/csrf'
-import { SESSION_COOKIE } from '../middleware'
+import { sessionCookieOf } from '../session-cookie'
 import { AuthError } from '../auth/types'
 import { resolveTargetSession } from '../session-context'
 import type { Runtime } from '../runtime'
@@ -54,7 +54,7 @@ async function sessionOf(
   const csrf = request.headers.get(CSRF_HEADER) ?? undefined
   try {
     return await resolveTargetSession(runtime, {
-      token: cookieOf(request, SESSION_COOKIE),
+      token: cookieOf(request, sessionCookieOf(request)),
       connectionId,
       csrf,
       requireCsrf,

@@ -7,7 +7,8 @@ import { throwAuthError } from './auth/error-transport'
 import { getPrefsService } from './auth/prefs/runtime'
 import { AuthError } from './auth/types'
 import { currentClientAddress } from './net/current'
-import { SESSION_COOKIE, publicMiddleware, sessionMiddleware } from './middleware'
+import { publicMiddleware, sessionMiddleware } from './middleware'
+import { sessionCookie } from './session-cookie-request'
 import { getRuntime } from './runtime'
 import { buildSessionInfo } from './session-info'
 import { isStateless } from './sql/state'
@@ -30,7 +31,7 @@ export const login = createServerFn({ method: 'POST' })
     if (state.kind === 'ready' && state.mode === 'account') throwAuthError(new AuthError('auth_failed'))
     const address = currentClientAddress()
     // A new token on every login; an old cookie is never reused (SEC-TGT-040).
-    await sessions.destroy(getCookie(SESSION_COOKIE))
+    await sessions.destroy(getCookie(sessionCookie()))
     let result: { token: string; csrf: string }
     try {
       result = await auth.login(data, address)
@@ -40,7 +41,7 @@ export const login = createServerFn({ method: 'POST' })
       throw error
     }
     const { token, csrf } = result
-    setCookie(SESSION_COOKIE, token, {
+    setCookie(sessionCookie(), token, {
       httpOnly: true,
       secure: true,
       sameSite: 'strict',
@@ -61,7 +62,7 @@ export const getSessionInfo = createServerFn({ method: 'GET' })
     const runtime = getRuntime()
     const info = buildSessionInfo({
       runtime,
-      token: getCookie(SESSION_COOKIE),
+      token: getCookie(sessionCookie()),
       stateless: isStateless(),
       settings: runtime.settings,
       prefs: getPrefsService,
@@ -76,7 +77,7 @@ export const logout = createServerFn({ method: 'POST' })
   .handler(async ({ context }) => {
     const { sessions } = getRuntime()
     audit('logout', { user: context.session.target.username })
-    await sessions.destroy(getCookie(SESSION_COOKIE))
-    deleteCookie(SESSION_COOKIE, { path: '/', secure: true })
+    await sessions.destroy(getCookie(sessionCookie()))
+    deleteCookie(sessionCookie(), { path: '/', secure: true })
     return { ok: true }
   })

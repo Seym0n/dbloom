@@ -1,4 +1,4 @@
-import { SESSION_COOKIE } from '../middleware'
+import { sessionCookieOf } from '../session-cookie'
 import type { AccountContext } from '../auth/types'
 import type { AuditService } from './service'
 
@@ -22,7 +22,7 @@ export function handleAuditExportWith(
   resolve: (cookie: string | undefined) => AccountContext | undefined,
   service: () => AuditService,
 ): Response {
-  const ctx = resolve(cookieOf(request, SESSION_COOKIE))
+  const ctx = resolve(cookieOf(request, sessionCookieOf(request)))
   if (!ctx) return neutral()
   try {
     const out = service().openExport(ctx, token)
