@@ -2,7 +2,9 @@ name: docs
 # Builds the Nextra site in docs/ as a static export and publishes it to GitHub Pages.
 # Manual, like ci. To publish on every change to main, add:
 #   push: { branches: [main], paths: ['docs/**', '.github/workflows/docs.yml'] }
-on: workflow_dispatch
+on:
+  - workflow_dispatch
+  - push
 permissions:
   contents: read
   pages: write
