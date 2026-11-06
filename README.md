@@ -21,19 +21,55 @@
 
 </div>
 
-DBLoom is a modern web-based database management system (DBMS), built on TanStack in TypeScript. It offers the same set of functionalities of a DBMS, such as phpMyAdmin or Adminer, in a refreshed layout with extensive security features.
+DBLoom is a modern, web-based database management system (DBMS) built with TanStack and TypeScript. It offers the same functionality as tools such as phpMyAdmin or Adminer, in a refreshed layout with extensive security features.
 
-## Motivation of DBLoom
+## Highlights
 
-I'm truly a long-term user of phpMyAdmin, but the recent CVE and the ever-growing concerns around PHP and phpMyAdmin motivated me to create a modern alternative, based on TanStack. 
-Why TanStack? It provides end-to-end type safety from server functions to routes, and a client-first model with an explicit server boundary, without Next.js's RSC and caching complexity.
-Finally, AI plays a greater role in our every day life, and DBLoom features an integrated AI assistant, capable of translating user requests into SQL commands, without the need of exposing the database to the public network.
+- **Self-hosted:** one Docker image for MySQL 8.4 and MariaDB 10.11, running on infrastructure you control.
+- **Two login modes:** [account mode](https://seym0n.github.io/dbloom/docs/concepts/login-modes/) with DBLoom's own users, or direct mode with database credentials.
+- **Security first:** runs behind your TLS reverse proxy, with an [audit log](https://seym0n.github.io/dbloom/docs/guides/audit-log/) and [protected settings](https://seym0n.github.io/dbloom/docs/guides/protected-settings/).
+- **AI assistant:** translates requests into SQL without exposing the database to the public network. See [AI assistant](https://seym0n.github.io/dbloom/docs/guides/ai-assistant/).
+- **Type-safe stack:** TanStack, with end-to-end type safety from server functions to routes.
+
+## Quickstart
+
+```sh
+docker compose -f compose.yaml -f compose.local.yaml up --build
+```
+
+Open `http://localhost:3000` and follow the first-time setup wizard. Details are in the [Quickstart](https://seym0n.github.io/dbloom/docs/quickstart/) or the guided [Setup](https://seym0n.github.io/dbloom/docs/setup/).
+
+## Documentation
+
+- [What is DBLoom](https://seym0n.github.io/dbloom/docs/)
+- [Quickstart](https://seym0n.github.io/dbloom/docs/quickstart/) and [Setup](https://seym0n.github.io/dbloom/docs/setup/)
+- [Docker Compose deployment](https://seym0n.github.io/dbloom/docs/deploy/docker-compose/)
+- [Security model](https://seym0n.github.io/dbloom/docs/concepts/security-model/)
+- [Backup, upgrade, rollback](https://seym0n.github.io/dbloom/docs/guides/backup-upgrade/)
+
+## Motivation
+
+I have used phpMyAdmin for a long time. Recent CVEs and growing concerns around PHP and phpMyAdmin motivated me to create a modern alternative based on TanStack.
+
+Why TanStack? It provides end-to-end type safety from server functions to routes, and a client-first model with an explicit server boundary, without the RSC and caching complexity of Next.js.
+
+AI also plays an ever-greater role in everyday life, so DBLoom features an integrated AI assistant that translates user requests into SQL commands without exposing the database to the public network.
 
 ## How DBLoom was built
 
-DBLoom was built in nearly three weeks from scratch using AI-driven development.
-Unlike common practice to just ask an AI to build a DBMS from scratch, DBLoom was built via spec-driven development, where specifications from an existimg legacy system (here: phpMyAdmin) were collected first via subagents.
-Upon collecting these specifications, such specification may typically contain smells, be it a bug that is still unreported or a feature from a deprecated database version.
-To tackle that, any open issues from phpMyAdmin were collected and checked against the specification whether they apply. Any relevant specification has been amended accordingly.
-In the second wave, specifcations linked to older database versions that are deprecated by now were removed. In the other way, newer database versions may have received features that may not be present in the specifications, which has been accordingly considered.
-Upon the specification rework, there were several large modules consisting of smaller tasks which have been developed accompanied each with unit and end-to-end testing.
+DBLoom was built from scratch in nearly three weeks using AI-driven development. Rather than simply asking an AI to build a DBMS, I used spec-driven development:
+
+```mermaid
+flowchart LR
+    A[phpMyAdmin<br/>legacy system] -->|subagents| B[Collect<br/>specifications]
+    C[Open phpMyAdmin<br/>issues] --> D
+    B --> D[Remove smells<br/>bugs, quirks]
+    D --> E[Rework for<br/>current DB versions]
+    E --> F[Split into<br/>modules and tasks]
+    F --> G[Build with unit<br/>and e2e tests]
+```
+
+1. **Collect specifications.** Subagents extracted specifications from an existing legacy system, phpMyAdmin.
+2. **Remove smells.** Such specifications can contain smells, such as a still-unreported bug or a feature of a deprecated database version. All open phpMyAdmin issues were collected and checked against the specification, and relevant findings were amended.
+3. **Rework for current versions.** Specifications tied to deprecated database versions were removed. Features that newer database versions added were considered and added where missing.
+4. **Build in modules.** The reworked specification was split into several large modules of smaller tasks. Each task was developed with unit and end-to-end tests.
