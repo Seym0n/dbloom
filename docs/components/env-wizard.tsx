@@ -99,7 +99,7 @@ export function EnvWizard() {
       <div className="wiz-form">
         <fieldset>
           <legend>Where will it run?</legend>
-          <div className="wiz-choices">
+          <div className="wiz-choices stack">
             {PLATFORMS.map(([id, label]) => (
               <label key={id} className={platform === id ? 'on' : ''}>
                 <input

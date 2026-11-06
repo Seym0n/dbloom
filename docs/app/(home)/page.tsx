@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { AssistantPanel } from '../../components/assistant-panel'
 import { HeroDemo } from '../../components/hero-demo'
+import { SqlDemo } from '../../components/sql-demo'
 import { Reveal } from '../../components/reveal'
 
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? ''
@@ -63,8 +64,8 @@ export default function Home() {
             </span>
           </h1>
           <p className="lead rise">
-            DBLoom is a web admin you host yourself. One Docker image, behind your own proxy, with
-            your data staying where it is.
+            Browse and edit rows, change table structure, run SQL and import or export your data.
+            An optional assistant writes the queries and waits for your approval.
           </p>
           <div className="cta-row rise">
             <Link href="/docs/setup" className="btn">
@@ -103,49 +104,16 @@ export default function Home() {
         </Reveal>
       </section>
 
-      <section className="band" aria-labelledby="b-h">
-        <Reveal className="b-text">
-          <h2 id="b-h">Tables are an old idea.</h2>
+      <section className="sqld" aria-labelledby="b-h">
+        <Reveal className="sqld-text">
+          <h2 id="b-h">SQL in, rows out.</h2>
           <p>
-            Rows and columns lived in card drawers, ledgers and punched-card machines long before
-            MySQL. DBLoom is the same shelf, opened in a browser.
+            Pick a statement and watch it run: a query fills the grid, an update lights up the
+            changed cell, an ALTER adds a column. Try it here, then on your own data.
           </p>
         </Reveal>
-        <Reveal className="b-pic b-1">
-          <img
-            src={`${BASE}/photos/catalogue-drawers.jpg`}
-            width="1024"
-            height="768"
-            alt="Drawers of a library card catalogue"
-            loading="lazy"
-          />
-        </Reveal>
-        <Reveal className="b-pic b-2">
-          <img
-            src={`${BASE}/photos/account-ledger.jpg`}
-            width="1500"
-            height="2000"
-            alt="Closed marbled-cover account book"
-            loading="lazy"
-          />
-        </Reveal>
-        <Reveal className="b-pic b-3">
-          <img
-            src={`${BASE}/photos/powers-samas-module.jpg`}
-            width="1936"
-            height="1283"
-            alt="Valve module of a 1960s punched-card computer"
-            loading="lazy"
-          />
-        </Reveal>
-        <Reveal className="b-pic b-4">
-          <img
-            src={`${BASE}/photos/powers-samas-drum.jpg`}
-            width="1419"
-            height="1504"
-            alt="Memory drum of a 1960s punched-card computer"
-            loading="lazy"
-          />
+        <Reveal className="sqld-demo">
+          <SqlDemo />
         </Reveal>
       </section>
 
@@ -196,21 +164,6 @@ export default function Home() {
         </nav>
         <span className="soft end">2026</span>
       </footer>
-      <p className="credits">
-        Pictures:{' '}
-        <a href="https://commons.wikimedia.org/wiki/File:Catalogue_BGE_2.JPG">“Catalogue BGE 2”</a>,
-        public domain, via Wikimedia Commons;{' '}
-        <a href="https://collections.museumsvictoria.com.au/items/387344">
-          “Electronic Module - Powers-Samas, Punched Card Computer, 1960s”
-        </a>{' '}
-        and{' '}
-        <a href="https://collections.museumsvictoria.com.au/items/387343">
-          “Memory Drum - Powers-Samas, Punch Card Computer, 1960s”
-        </a>
-        , <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>, Museums Victoria;{' '}
-        <a href="https://commons.wikimedia.org/w/index.php?curid=58742647">“Account Book Ledger”</a>
-        , CC0, The Metropolitan Museum of Art.
-      </p>
     </main>
   )
 }

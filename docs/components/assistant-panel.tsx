@@ -1,6 +1,16 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+
+type Phase = 'ask' | 'running' | 'done' | 'denied'
+
+const RESULT = [
+  ['Sofia Reyes', '1 204.50'],
+  ['Ada Lindqvist', '988.00'],
+  ['Lea Fischer', '861.30'],
+  ['Ines Duarte', '640.75'],
+  ['Omar Haddad', '512.10'],
+] as const
 
 const NOTES = [
   { id: 'scope', top: 28, side: 'left', name: 'It knows one connection', text: 'The panel works inside the connection you are using, with your own rights. Anything the server forbids stays forbidden.' },
@@ -13,6 +23,13 @@ const NOTES = [
 
 export function AssistantPanel() {
   const [active, setActive] = useState<string | null>(null)
+  const [phase, setPhase] = useState<Phase>('ask')
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  useEffect(() => () => clearTimeout(timer.current), [])
+  function approve() {
+    setPhase('running')
+    timer.current = setTimeout(() => setPhase('done'), 900)
+  }
   const on = (id: string) => (active === id ? 'hot' : '')
 
   return (
@@ -37,7 +54,7 @@ export function AssistantPanel() {
             <span>describe_tables</span> orders, customers
           </div>
           <div className={`pii ${on('pii')}`}>customers.email is marked personal and stays hidden.</div>
-          <div className={`sql ${on('sql')}`}>
+          <div className={`sql ${on('sql')} ${phase === 'denied' ? 'void' : ''} ${phase === 'running' ? 'run' : ''}`}>
             <code>
               SELECT c.name, SUM(o.total) AS spent
               <br />
@@ -48,14 +65,48 @@ export function AssistantPanel() {
               GROUP BY c.id ORDER BY spent DESC LIMIT 5;
             </code>
           </div>
-          <div className={`actions ${on('approve')}`}>
-            <button type="button">Approve</button>
-            <button type="button" className="ghost">Deny</button>
-          </div>
+          {phase === 'ask' && (
+            <div className={`actions ${on('approve')}`}>
+              <button type="button" onClick={approve}>Approve</button>
+              <button type="button" className="ghost" onClick={() => setPhase('denied')}>Deny</button>
+            </div>
+          )}
+          {phase === 'running' && (
+            <div className="status pop" role="status">
+              <i className="spin" aria-hidden="true" /> Running as you…
+            </div>
+          )}
+          {phase === 'done' && (
+            <div className="result pop" role="status">
+              <div className="ok">Approved. 5 rows in 12 ms.</div>
+              <table>
+                <tbody>
+                  {RESULT.map(([n, v], i) => (
+                    <tr key={n} style={{ animationDelay: `${i * 70}ms` }}>
+                      <td>{n}</td>
+                      <td>{v}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <button type="button" className="again" onClick={() => setPhase('ask')}>Ask again</button>
+            </div>
+          )}
+          {phase === 'denied' && (
+            <div className="result pop" role="status">
+              <div className="no">Denied. Nothing was run, nothing changed.</div>
+              <button type="button" className="again" onClick={() => setPhase('ask')}>Ask again</button>
+            </div>
+          )}
         </div>
         <div className={`p-foot ${on('audit')}`}>
           <span>Mode: manual</span>
-          <span>assistant.call logged</span>
+          <span key={phase} className={phase === 'ask' ? '' : 'pop'}>
+            {phase === 'ask' && 'assistant.call logged'}
+            {phase === 'running' && 'assistant.call approved'}
+            {phase === 'done' && 'assistant.call ok · logged'}
+            {phase === 'denied' && 'assistant.call denied · logged'}
+          </span>
         </div>
       </div>
 

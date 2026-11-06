@@ -4,7 +4,7 @@ import './global.css'
 
 export const metadata: Metadata = {
   title: { default: 'DBLoom', template: '%s | DBLoom' },
-  description: 'Self-hosted web admin for MySQL and MariaDB. One Docker image, behind your own proxy.',
+  description: 'Web admin for MySQL and MariaDB: browse and edit rows, change structure, run SQL, import and export, with an AI assistant that asks before it acts.',
 }
 
 export default function RootLayout({ children }: { children: ReactNode }) {
