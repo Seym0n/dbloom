@@ -134,3 +134,19 @@ describe('safe Markdown (FR-AST-014)', () => {
     expect(() => parseInline(deep)).not.toThrow()
   })
 })
+
+describe('markdown tables', () => {
+  it('parses a pipe table with alignment, escaped pipes and ragged rows', () => {
+    const blocks = parseMarkdown('Top:\n\n| Name | Total |\n|:--|--:|\n| Ada | 10 |\n| a\\|b |\n\nAfter')
+    expect(blocks[1]).toMatchObject({ t: 'table', align: ['left', 'right'] })
+    const table = blocks[1] as Extract<ReturnType<typeof parseMarkdown>[number], { t: 'table' }>
+    expect(table.head).toHaveLength(2)
+    expect(table.rows).toHaveLength(2)
+    expect(table.rows[1]![0]).toEqual([{ t: 'text', v: 'a|b' }])
+    expect(table.rows[1]![1]).toEqual([])
+    expect(blocks[2]).toMatchObject({ t: 'p' })
+  })
+  it('leaves a line with a pipe but no separator row as text', () => {
+    expect(parseMarkdown('a | b\nc | d')[0]).toMatchObject({ t: 'p' })
+  })
+})

@@ -118,7 +118,7 @@ export function AppShell({
   /** Account mode: the connection switcher under the server card. Direct mode passes nothing. */
   connectionSlot?: ReactNode
   /** Account mode: sign-out and session-ended lead to the account sign-in, and the shell links to /account. */
-  account?: { onSignOut: () => void | Promise<void>; /** Shown in the account menu. */ name?: string }
+  account?: { onSignOut: () => void | Promise<void>; /** Shown in the account menu. */ name?: string; /** Extra links (administration) in the account menu, after the account entry. */ adminItems?: { key: string; label: string; icon: ReactNode; to: string }[] }
 }) {
   // The CSRF token lives in memory only; set while rendering so the first requests already carry it.
   if (typeof window !== 'undefined') setCsrfToken(session.csrf)
@@ -490,7 +490,7 @@ export function AppShell({
         {account && (
           <ActionsMenu
             label={t('nav.accountMenu')}
-            className="h-8 w-auto max-w-[200px] gap-2 px-2 text-sm text-muted pointer-coarse:h-9 pointer-coarse:w-auto"
+            className="flex h-8 w-auto max-w-[200px] items-center justify-center gap-2 px-2 text-sm text-muted pointer-coarse:h-9 pointer-coarse:w-auto"
             trigger={
               <>
                 <UserRound size={14} strokeWidth={1.5} aria-hidden />
@@ -505,6 +505,12 @@ export function AppShell({
                 icon: <UserRound size={14} strokeWidth={1.5} />,
                 onSelect: () => void router.navigate({ to: '/account' }),
               },
+              ...(account.adminItems ?? []).map((i) => ({
+                key: i.key,
+                label: i.label,
+                icon: i.icon,
+                onSelect: () => void router.navigate({ to: i.to as never }),
+              })),
               {
                 key: 'logout',
                 label: t('nav.logout'),

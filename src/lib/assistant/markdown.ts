@@ -1,7 +1,7 @@
 /**
  * A small, safe Markdown for the assistant's text (SPEC/34 FR-AST-014). The result is a tree of plain data; the component
  * renders it with React, which escapes every string, so model output can never become HTML. Supported: paragraphs,
- * bullet and numbered lists, fenced code, `code`, **bold**, *italic*, [label](https://...) links and value tokens.
+ * bullet and numbered lists, pipe tables, fenced code, `code`, **bold**, *italic*, [label](https://...) links and value tokens.
  * Images are never rendered (the alt text stays as text), raw HTML is shown as typed, and a link may only be http, https or
  * mailto. Nothing is ever fetched automatically.
  */
@@ -22,6 +22,7 @@ export type Block =
   | { t: 'ul'; v: Inline[][] }
   | { t: 'ol'; v: Inline[][] }
   | { t: 'code'; v: string }
+  | { t: 'table'; head: Inline[][]; align: ('left' | 'center' | 'right' | null)[]; rows: Inline[][][] }
 
 const SAFE_URL = /^(https?:\/\/|mailto:)[^\s<>"'`]+$/i
 export const isSafeUrl = (u: string): boolean => SAFE_URL.test(u)
@@ -81,6 +82,15 @@ export function parseInline(src: string, depth = 0): Inline[] {
   return out
 }
 
+/** Cells of one table row: the outer pipes are optional, `\|` is a literal pipe. */
+function splitRow(line: string): string[] {
+  let t = line.trim()
+  if (t.startsWith('|')) t = t.slice(1)
+  if (t.endsWith('|') && !t.endsWith('\\|')) t = t.slice(0, -1)
+  return t.split(/(?<!\\)\|/).map((c) => c.replace(/\\\|/g, '|').trim())
+}
+const SEPARATOR = /^\s*\|?\s*:?-{1,}:?\s*(\|\s*:?-{1,}:?\s*)*\|?\s*$/
+
 export function parseMarkdown(src: string): Block[] {
   const lines = src.replace(/\r\n?/g, '\n').split('\n')
   const blocks: Block[] = []
@@ -98,6 +108,24 @@ export function parseMarkdown(src: string): Block[] {
       while (i < lines.length && !/^```/.test(lines[i]!)) code.push(lines[i++]!)
       blocks.push({ t: 'code', v: code.join('\n') })
       continue
+    }
+    if (line.includes('|') && i + 1 < lines.length && lines[i + 1]!.includes('-') && SEPARATOR.test(lines[i + 1]!)) {
+      const head = splitRow(line)
+      const sep = splitRow(lines[i + 1]!)
+      if (head.length === sep.length && head.length > 0) {
+        endPara()
+        const align = sep.map((c) => (c.startsWith(':') && c.endsWith(':') ? 'center' : c.endsWith(':') ? 'right' : c.startsWith(':') ? 'left' : null)) as ('left' | 'center' | 'right' | null)[]
+        const rows: Inline[][][] = []
+        i += 2
+        while (i < lines.length && lines[i]!.includes('|') && lines[i]!.trim() !== '') {
+          const cells = splitRow(lines[i]!)
+          rows.push(head.map((_, c) => parseInline(cells[c] ?? '')))
+          i++
+        }
+        i--
+        blocks.push({ t: 'table', head: head.map((c) => parseInline(c)), align, rows })
+        continue
+      }
     }
     const ul = /^\s*[-*] +(.*)$/.exec(line)
     const ol = /^\s*\d+[.)] +(.*)$/.exec(line)

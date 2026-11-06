@@ -27,6 +27,8 @@
   "auth.conn.manageShort": "Profiles and vault",
   "auth.conn.back": "Back to connecting",
   "auth.conn.switcherGroup": "Database connections",
+  "auth.conn.menu": "Connections",
+  "auth.conn.menuLabel": "Connection actions",
   "auth.conn.switcherLabel": "Connection",
   "auth.conn.add": "Add connection",
   "auth.conn.closeThis": "Close this one",

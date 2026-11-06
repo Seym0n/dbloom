@@ -42,7 +42,7 @@ export default function Home() {
       >
         <header className="bar">
           <Link href="/" className="word">
-            DBLoom
+            <img src={`${BASE}/logo.svg`} alt="DBLoom" height="26" width="118" />
           </Link>
           <nav aria-label="Main">
             <Link href="/docs">Docs</Link>

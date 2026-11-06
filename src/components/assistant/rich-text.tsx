@@ -49,6 +49,35 @@ export function RichText({ text }: { text: string }) {
               {b.v}
             </pre>
           )
+        if (b.t === 'table') {
+          const al = (c: number) => (b.align[c] === 'right' ? 'text-right' : b.align[c] === 'center' ? 'text-center' : 'text-left')
+          return (
+            <div key={i} role="region" aria-label={t('asst.md.table')} tabIndex={0} className="max-h-72 overflow-auto overscroll-contain rounded-[var(--radius-control)] border border-border">
+              <table className="w-full border-collapse text-xs">
+                <thead className="sticky top-0 bg-raised">
+                  <tr>
+                    {b.head.map((h, c) => (
+                      <th key={c} scope="col" className={`px-2 py-1.5 font-medium ${al(c)}`}>
+                        <InlineView nodes={h} />
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {b.rows.map((r, j) => (
+                    <tr key={j} className="border-t border-border">
+                      {r.map((cell, c) => (
+                        <td key={c} className={`px-2 py-1.5 align-top ${al(c)}`}>
+                          <InlineView nodes={cell} />
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )
+        }
         if (b.t === 'ul')
           return (
             <ul key={i} className="list-disc pl-5">

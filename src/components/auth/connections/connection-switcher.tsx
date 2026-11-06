@@ -1,8 +1,7 @@
 import { useId, useState } from 'react'
-import { Link } from '@tanstack/react-router'
-import { Plus, Settings2, SlidersHorizontal, Users, X, ScrollText, ShieldAlert } from 'lucide-react'
+import { ChevronDown, Plus, Settings2, X } from 'lucide-react'
 import { t } from '~/i18n'
-import { Button } from '~/components/ui/button'
+import { ActionsMenu } from '~/components/ui/menu'
 import { Select } from '~/components/ui/select'
 import { ErrorNote } from '~/components/auth/auth-frame'
 import { authApi } from '~/lib/auth/api'
@@ -12,20 +11,17 @@ import type { ConnectionInfo } from '~/server/auth/types'
 import { ConnectionsDialog } from './connection-home'
 
 /**
- * Per-connection switching in the shell's sidebar (FR-AUT-018): the open connections, add, close and the profile and vault
- * dialog. Only rendered for account sessions; direct mode never sees it.
+ * Per-connection switching in the shell's sidebar (FR-AUT-018): the open connections and one menu (add, profiles and vault, close). Only rendered for account sessions; direct mode never sees it.
  */
 export function ConnectionSwitcher({
   connections,
   activeId,
-  isAdmin,
   onSwitch,
   onOpened,
   onClosed,
 }: {
   connections: ConnectionInfo[]
   activeId: string
-  isAdmin: boolean
   onSwitch: (id: string) => void
   onOpened: (info: ConnectionInfo) => void
   onClosed: (id: string) => void
@@ -50,51 +46,30 @@ export function ConnectionSwitcher({
           </Select>
         </div>
       )}
-      <div className="flex flex-wrap gap-1">
-        <Button variant="ghost" onClick={() => setDialog('open')}>
-          <Plus size={14} aria-hidden />
-          {t('auth.conn.add')}
-        </Button>
-        <Button
-          variant="ghost"
-          disabled={close.busy}
-          onClick={async () => {
-            const r = await close.run(() => authApi().closeConnection(activeId))
-            if (r.ok) onClosed(activeId)
-          }}
-        >
-          <X size={14} aria-hidden />
-          {t('auth.conn.closeThis')}
-        </Button>
-        <Button variant="ghost" onClick={() => setDialog('manage')}>
-          <Settings2 size={14} aria-hidden />
-          {t('auth.conn.manageShort')}
-        </Button>
-        {isAdmin && (
-          <Link to="/admin/users" className="press inline-flex h-8 items-center gap-2 rounded-[var(--radius-control)] px-3 text-sm font-medium text-muted hover:bg-active hover:text-ink">
-            <Users size={14} aria-hidden />
-            {t('auth.users.link')}
-          </Link>
-        )}
-        {isAdmin && (
-          <Link to="/admin/audit" className="press inline-flex h-8 items-center gap-2 rounded-[var(--radius-control)] px-3 text-sm font-medium text-muted hover:bg-active hover:text-ink">
-            <ScrollText size={14} aria-hidden />
-            {t('audit.nav')}
-          </Link>
-        )}
-        {isAdmin && (
-          <Link to="/admin/exposure" className="press inline-flex h-8 items-center gap-2 rounded-[var(--radius-control)] px-3 text-sm font-medium text-muted hover:bg-active hover:text-ink">
-            <ShieldAlert size={14} aria-hidden />
-            {t('exposure.nav')}
-          </Link>
-        )}
-        {isAdmin && (
-          <Link to="/admin/settings" className="press inline-flex h-8 items-center gap-2 rounded-[var(--radius-control)] px-3 text-sm font-medium text-muted hover:bg-active hover:text-ink">
-            <SlidersHorizontal size={14} aria-hidden />
-            {t('settings.nav')}
-          </Link>
-        )}
-      </div>
+      <ActionsMenu
+        label={t('auth.conn.menuLabel')}
+        className="flex h-8 w-full items-center justify-between gap-2 px-2 text-sm text-muted pointer-coarse:h-9 pointer-coarse:w-full"
+        trigger={
+          <>
+            <span>{t('auth.conn.menu')}</span>
+            <ChevronDown size={14} aria-hidden />
+          </>
+        }
+        items={[
+          { key: 'add', label: t('auth.conn.add'), icon: <Plus size={14} aria-hidden />, onSelect: () => setDialog('open') },
+          { key: 'manage', label: t('auth.conn.manageShort'), icon: <Settings2 size={14} aria-hidden />, onSelect: () => setDialog('manage') },
+          {
+            key: 'close',
+            label: t('auth.conn.closeThis'),
+            icon: <X size={14} aria-hidden />,
+            disabled: close.busy,
+            onSelect: async () => {
+              const r = await close.run(() => authApi().closeConnection(activeId))
+              if (r.ok) onClosed(activeId)
+            },
+          },
+        ]}
+      />
       <ErrorNote message={close.error?.message} />
       {dialog && (
         <ConnectionsDialog

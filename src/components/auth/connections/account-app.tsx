@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react'
 import { QueryClientProvider, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
+import { ScrollText, ShieldAlert, SlidersHorizontal, Users } from 'lucide-react'
+import { t } from '~/i18n'
 import { StepUpProvider } from '~/components/auth/account/step-up'
 import { IdleWarning } from '~/components/auth/idle-warning'
 import { SessionEndedDialog } from '~/components/session-ended-dialog'
@@ -98,12 +100,24 @@ function AccountAppInner({
           target: { host: active.host, port: active.port, username: active.targetUser },
         }}
         open={open}
-        account={{ onSignOut, name: session.user?.displayName || session.user?.username || '' }}
+        account={{
+          onSignOut,
+          name: session.user?.displayName || session.user?.username || '',
+          ...(isAdmin
+            ? {
+                adminItems: [
+                  { key: 'users', label: t('auth.users.link'), icon: <Users size={14} strokeWidth={1.5} />, to: '/admin/users' },
+                  { key: 'audit', label: t('audit.nav'), icon: <ScrollText size={14} strokeWidth={1.5} />, to: '/admin/audit' },
+                  { key: 'exposure', label: t('exposure.nav'), icon: <ShieldAlert size={14} strokeWidth={1.5} />, to: '/admin/exposure' },
+                  { key: 'settings', label: t('settings.nav'), icon: <SlidersHorizontal size={14} strokeWidth={1.5} />, to: '/admin/settings' },
+                ],
+              }
+            : {}),
+        }}
         connectionSlot={
           <ConnectionSwitcher
             connections={session.connections}
             activeId={active.connectionId}
-            isAdmin={isAdmin}
             onSwitch={(id) => select(id)}
             onOpened={(info) => {
               select(info.connectionId)

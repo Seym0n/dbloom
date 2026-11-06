@@ -58,6 +58,7 @@
   "asst.result.metadata": "Only column names and the row count went to the assistant.",
   "asst.result.failed": "The statement failed",
   "asst.result.table": "Result of the statement",
+  "asst.md.table": "Table in the assistant message",
   "asst.settled.approved": "Approved",
   "asst.settled.declined": "Declined",
   "asst.refused.title": "Not run",
