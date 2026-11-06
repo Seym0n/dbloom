@@ -1,7 +1,25 @@
-<div style="text-align: center;"> <img width="2560" height="1105" alt="banner" src="https://github.com/user-attachments/assets/0db52b38-235f-4445-957c-ba127b65c9c1" /></div>
+<div align="center">
 
-<div style="text-align: center;"> <a href="https://seym0n.github.io/dbloom/docs/">Docs</a> </div>
+<img width="2560" height="1105" alt="DBLoom banner" src="https://github.com/user-attachments/assets/0db52b38-235f-4445-957c-ba127b65c9c1" />
 
+<p>
+  <a href="https://seym0n.github.io/dbloom/"><b>Website</b></a> ·
+  <a href="https://seym0n.github.io/dbloom/docs/"><b>Docs</b></a> ·
+  <a href="https://seym0n.github.io/dbloom/docs/quickstart/">Quickstart</a> ·
+  <a href="https://seym0n.github.io/dbloom/docs/deploy/docker-compose/">Deploy</a> ·
+  <a href="https://seym0n.github.io/dbloom/docs/guides/ai-assistant/">AI assistant</a> ·
+  <a href="https://seym0n.github.io/dbloom/docs/concepts/security-model/">Security</a>
+</p>
+
+<p>
+  <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white" />
+  <img alt="TanStack" src="https://img.shields.io/badge/TanStack-Start-FF4154" />
+  <img alt="Docker" src="https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white" />
+  <img alt="Spec-driven" src="https://img.shields.io/badge/built-spec--driven-8A2BE2" />
+  <img alt="phpMyAdmin alternative" src="https://img.shields.io/badge/phpMyAdmin-alternative-F89C0E?logo=phpmyadmin&logoColor=white" />
+</p>
+
+</div>
 
 DBLoom is a modern web-based database management system (DBMS), built on TanStack in TypeScript. It offers the same set of functionalities of a DBMS, such as phpMyAdmin or Adminer, in a refreshed layout with extensive security features.
 
