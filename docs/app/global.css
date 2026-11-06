@@ -536,6 +536,7 @@
   transform: scale(0.96);
 }
 .actions .ghost {
+  color: #07051f;
   background: #fff;
   border: 1px solid #c9c9c9;
 }
