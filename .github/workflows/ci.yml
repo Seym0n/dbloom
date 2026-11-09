@@ -2,7 +2,7 @@ name: ci
 on: workflow_dispatch
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: akash-runner-01
     strategy:
       matrix:
         node: ['24.7', '24']
