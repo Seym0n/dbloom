@@ -35,12 +35,20 @@ DBLoom is a modern, web-based database management system (DBMS) built with TanSt
 
 <table>
   <tr>
-    <td width="50%"><img alt="Screenshot 1" src="<placeholder>" /></td>
-    <td width="50%"><img alt="Screenshot 2" src="<placeholder>" /></td>
+    <td width="50%">
+      <img width="896" height="832" alt="Screenshot 2026-11-09 114541" src="https://github.com/user-attachments/assets/f54e3056-510e-43db-8c2f-9819a5a6ec78" />
+    </td>
+    <td width="50%">
+      <img width="1913" height="940" alt="Screenshot 2026-11-09 114634" src="https://github.com/user-attachments/assets/7744659f-f7df-4735-b7e2-5fd31e7ef480" />
+    </td>
   </tr>
   <tr>
-    <td width="50%"><img alt="Screenshot 3" src="<placeholder>" /></td>
-    <td width="50%"><img alt="Screenshot 4" src="<placeholder>" /></td>
+    <td width="50%">
+      <img width="1913" height="940" alt="Screenshot 2026-11-09 114726" src="https://github.com/user-attachments/assets/aa4fb70b-39ee-4c39-81fd-c7f495c73e62" />
+    </td>
+    <td width="50%">
+      <img width="1914" height="941" alt="Screenshot 2026-11-09 114857" src="https://github.com/user-attachments/assets/ca815a74-6900-4f11-ad3e-b2496f9886df" />
+    </td>
   </tr>
 </table>
 
