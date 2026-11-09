@@ -31,6 +31,19 @@ DBLoom is a modern, web-based database management system (DBMS) built with TanSt
 - **AI assistant:** translates requests into SQL without exposing the database to the public network. See [AI assistant](https://seym0n.github.io/dbloom/docs/guides/ai-assistant/).
 - **Type-safe stack:** TanStack, with end-to-end type safety from server functions to routes.
 
+## Screenshots
+
+<table>
+  <tr>
+    <td width="50%"><img alt="Screenshot 1" src="<placeholder>" /></td>
+    <td width="50%"><img alt="Screenshot 2" src="<placeholder>" /></td>
+  </tr>
+  <tr>
+    <td width="50%"><img alt="Screenshot 3" src="<placeholder>" /></td>
+    <td width="50%"><img alt="Screenshot 4" src="<placeholder>" /></td>
+  </tr>
+</table>
+
 ## Quickstart
 
 ```sh
