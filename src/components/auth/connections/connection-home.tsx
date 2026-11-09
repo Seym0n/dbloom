@@ -57,6 +57,9 @@ export function ConnectionHome({ onOpened, onSignOut, isAdmin, banner, maintenan
         </>
       )}
       <div className="mt-8 flex flex-wrap gap-2">
+        <Link to="/account" className="press inline-flex h-8 items-center rounded-[var(--radius-control)] px-3 text-sm font-medium text-muted hover:bg-active hover:text-ink">
+          {t('nav.account')}
+        </Link>
         {isAdmin && (
           <Link to="/admin/users" className="press inline-flex h-8 items-center rounded-[var(--radius-control)] px-3 text-sm font-medium text-muted hover:bg-active hover:text-ink">
             {t('auth.users.link')}

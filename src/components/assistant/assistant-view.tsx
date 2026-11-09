@@ -5,7 +5,6 @@ import { ActionsMenu, type MenuItem } from '~/components/ui/menu'
 import { t, tDynamic } from '~/i18n'
 import { openApproval } from '~/lib/assistant/logic'
 import type { AssistantState } from '~/lib/assistant/use-assistant'
-import { cn } from '~/lib/utils'
 import { ItemView, type ItemHandlers } from './assistant-items'
 
 export type ViewProps = {
@@ -21,40 +20,28 @@ export type ViewProps = {
   onOpenSql: (db: string, sql: string) => void
 }
 
-function ModeSwitch({ state }: { state: AssistantState }) {
+function modeHint(state: AssistantState): string {
   const autoOk = state.status?.autoAllowed ?? false
-  const hintId = useId()
-  const modes = [
-    { id: 'manual' as const, label: t('asst.mode.manual') },
-    { id: 'auto' as const, label: t('asst.mode.auto') },
-  ]
+  if (state.mode === 'auto') return t('asst.mode.autoHint')
+  return autoOk ? t('asst.mode.manualHint') : `${t('asst.mode.manualHint')} ${t('asst.mode.autoOff')}`
+}
+
+function ModeSelect({ state, hintId }: { state: AssistantState; hintId: string }) {
+  const autoOk = state.status?.autoAllowed ?? false
   return (
-    <div className="flex flex-col gap-1">
-      <div role="group" aria-label={t('asst.mode')} aria-describedby={hintId} className="grid grid-cols-2 gap-1 rounded-[var(--radius-control)] bg-raised p-1">
-        {modes.map((m) => {
-          const disabled = !state.currentId || state.run === 'running' || (m.id === 'auto' && !autoOk)
-          return (
-            <button
-              key={m.id}
-              type="button"
-              aria-pressed={state.mode === m.id}
-              disabled={disabled}
-              title={m.id === 'auto' && !autoOk ? t('asst.mode.autoOff') : undefined}
-              onClick={() => void state.setMode(m.id)}
-              className={cn(
-                'press h-7 rounded-[5px] px-2 text-xs font-medium disabled:cursor-not-allowed disabled:opacity-50',
-                state.mode === m.id ? 'bg-surface text-ink shadow-sm' : 'text-muted hover:text-ink',
-              )}
-            >
-              {m.label}
-            </button>
-          )
-        })}
-      </div>
-      <p id={hintId} className="text-xs text-muted">
-        {!autoOk && state.mode === 'manual' ? `${t('asst.mode.manualHint')} ${t('asst.mode.autoOff')}` : state.mode === 'auto' ? t('asst.mode.autoHint') : t('asst.mode.manualHint')}
-      </p>
-    </div>
+    <select
+      aria-label={t('asst.mode')}
+      aria-describedby={hintId}
+      value={state.mode}
+      disabled={!state.currentId || state.run === 'running'}
+      onChange={(e) => void state.setMode(e.target.value as 'manual' | 'auto')}
+      className="h-8 rounded-[var(--radius-control)] bg-transparent px-2 text-xs font-medium text-muted hover:text-ink disabled:cursor-not-allowed disabled:opacity-50"
+    >
+      <option value="manual">{t('asst.mode.manual')}</option>
+      <option value="auto" disabled={!autoOk} title={!autoOk ? t('asst.mode.autoOff') : undefined}>
+        {t('asst.mode.auto')}
+      </option>
+    </select>
   )
 }
 
@@ -154,6 +141,7 @@ function Header({ p }: { p: ViewProps }) {
 
 export function AssistantView(p: ViewProps) {
   const { state } = p
+  const hintId = useId()
   const list = useRef<HTMLDivElement>(null)
   const stick = useRef(true)
   const approval = openApproval(state.items, state.run)
@@ -199,7 +187,6 @@ export function AssistantView(p: ViewProps) {
         <>
           <div className="flex flex-col gap-3 px-4 pt-3">
             {state.status.piiUnconfigured && <p className="rounded-[var(--radius-card)] bg-[var(--pill-warning-bg)] px-3 py-2 text-xs text-[var(--pill-warning-ink)]">{t('asst.unconfigured')}</p>}
-            <ModeSwitch state={state} />
           </div>
           <div role="status" className="sr-only">
             {approval ? t('asst.approval.live') : ''}
@@ -233,12 +220,13 @@ export function AssistantView(p: ViewProps) {
             </div>
           )}
           <form
-            className="flex items-stretch gap-2 border-t border-border p-3"
+            className="border-t border-border p-3"
             onSubmit={(e) => {
               e.preventDefault()
               submit()
             }}
           >
+            <div className="rounded-[var(--radius-control)] border border-control bg-surface focus-within:ring-2 focus-within:ring-[var(--focus-ring,currentColor)]">
             <label htmlFor={`${p.titleId}-input`} className="sr-only">
               {t('asst.inputLabel')}
             </label>
@@ -255,19 +243,26 @@ export function AssistantView(p: ViewProps) {
                   submit()
                 }
               }}
-              className="min-h-10 flex-1 resize-none rounded-[var(--radius-control)] border border-control bg-surface px-3 py-2 text-sm placeholder:text-faint"
+              className="block min-h-10 w-full resize-none rounded-t-[var(--radius-control)] bg-transparent px-3 py-2 text-sm outline-none placeholder:text-faint"
             />
-            {state.run === 'running' ? (
-              <Button type="button" className="h-auto self-stretch" onClick={() => void state.stop()}>
-                <Square size={14} aria-hidden />
-                {t('asst.stop')}
-              </Button>
-            ) : (
-              <Button type="submit" variant="primary" className="h-auto self-stretch" disabled={!canSend}>
-                <Send size={14} aria-hidden />
-                {t('asst.send')}
-              </Button>
-            )}
+            <div className="flex items-center justify-between gap-2 p-1.5">
+              <ModeSelect state={state} hintId={hintId} />
+              {state.run === 'running' ? (
+                <Button type="button" onClick={() => void state.stop()}>
+                  <Square size={14} aria-hidden />
+                  {t('asst.stop')}
+                </Button>
+              ) : (
+                <Button type="submit" variant="primary" disabled={!canSend}>
+                  <Send size={14} aria-hidden />
+                  {t('asst.send')}
+                </Button>
+              )}
+            </div>
+            </div>
+            <p id={hintId} className="mt-1.5 text-xs text-muted">
+              {modeHint(state)}
+            </p>
           </form>
         </>
       )}
